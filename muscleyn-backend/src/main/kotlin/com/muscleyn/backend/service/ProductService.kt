@@ -1,0 +1,82 @@
+package com.muscleyn.backend.service
+
+import com.muscleyn.backend.dto.CreateProductRequest
+import com.muscleyn.backend.dto.ProductRequest
+import com.muscleyn.backend.entity.Product
+import com.muscleyn.backend.response.ProductResponse
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.web.multipart.MultipartFile
+
+interface ProductService {
+
+    fun createProduct(
+        request: ProductRequest
+    ): ProductResponse
+
+    fun getAllProducts():
+            List<ProductResponse>
+
+    fun getAllProducts(
+        page: Int,
+        size: Int
+    ): Page<ProductResponse>;
+
+    fun searchProducts(
+
+        search: String?,
+
+        category: String?,
+
+        brand: String?,
+
+        page: Int,
+
+        size: Int,
+
+        sortBy: String,
+
+        direction: String,
+
+        ): Page<ProductResponse>
+
+    fun getProductById(
+        productId: Long
+    ): ProductResponse
+
+    fun updateProduct(
+
+        productId: Long,
+
+        request: ProductRequest
+
+    ): ProductResponse
+
+    fun deleteProduct(
+        productId: Long
+    )
+
+    fun createProduct(
+
+        request:
+        CreateProductRequest,
+
+        image:
+        MultipartFile?,
+
+        images: List<MultipartFile>?
+
+    ): Product
+
+    fun updateProduct(
+
+        productId: Long,
+
+        request: CreateProductRequest,
+
+        image: MultipartFile?,
+
+        images: List<MultipartFile>?
+
+    ): Product
+}

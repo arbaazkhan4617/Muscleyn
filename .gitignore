@@ -1,0 +1,6 @@
+cloudflared
+cloudflared.log
+__MACOSX/
+.DS_Store
+.idea/
+.vscode/

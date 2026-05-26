@@ -1,0 +1,81 @@
+package com.muscleyn.backend.util
+
+
+import com.muscleyn.backend.entity.Product
+import com.muscleyn.backend.entity.ProductVariant
+import com.muscleyn.backend.response.ProductResponse
+import com.muscleyn.backend.response.ProductVariantResponse
+
+fun ProductVariant.toResponse():
+        ProductVariantResponse {
+
+    return ProductVariantResponse(
+
+        id = id,
+
+        variantName = variantName,
+
+        sku = sku,
+
+        imageUrl = imageUrl,
+
+        price = price,
+
+        oldPrice = oldPrice,
+
+        discountPercent =
+            discountPercent,
+
+        stock = stock,
+
+        size = size,
+
+        color = color,
+
+        weight = weight,
+
+        flavor = flavor,
+
+        isActive=isActive
+    )
+}
+
+fun Product.toResponse():
+        ProductResponse {
+
+    return ProductResponse(
+
+        id = id,
+
+        name = name,
+
+        description = description,
+
+        imageUrl = imageUrl,
+        categoryId = subCategory
+            ?.category
+            ?.id,
+        categoryName =
+            subCategory
+                ?.category
+                ?.name,
+        subCategoryId = subCategory
+            ?.id,
+        subCategoryName =
+            subCategory
+                ?.name,
+        brandId =
+            brand
+                ?.id,
+        brandName =
+            brand
+                ?.name,
+
+        variants =
+            variants.map {
+
+                it.toResponse()
+            },
+                    isActive = isActive
+    )
+}

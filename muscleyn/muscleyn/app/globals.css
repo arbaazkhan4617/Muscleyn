@@ -1,0 +1,277 @@
+@import "tailwindcss";
+
+@theme {
+  --color-zinc-950: #09090b;
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-outfit);
+}
+
+:root {
+  --background: #09090b;
+  --foreground: #fafafa;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+img {
+  max-width: 100%;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Animations & Admin styles */
+@keyframes adminFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes adminFloat {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(18px, -18px, 0) scale(1.06);
+  }
+}
+
+@keyframes adminPulse {
+  0%, 100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.admin-shell {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 15%, rgba(220, 38, 38, 0.15), transparent 40%),
+    radial-gradient(circle at 90% 5%, rgba(244, 63, 94, 0.1), transparent 40%),
+    linear-gradient(135deg, #050505 0%, #0a0a0a 42%, #111113 100%);
+}
+
+.admin-shell::before,
+.admin-shell::after,
+.admin-login-scene::before,
+.admin-login-scene::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 9999px;
+  filter: blur(40px);
+  animation: adminFloat 12s ease-in-out infinite;
+}
+
+.admin-shell::before,
+.admin-login-scene::before {
+  width: 400px;
+  height: 400px;
+  top: 5%;
+  right: 5%;
+  background: rgba(220, 38, 38, 0.15);
+}
+
+.admin-shell::after,
+.admin-login-scene::after {
+  width: 300px;
+  height: 300px;
+  bottom: 10%;
+  left: 20%;
+  background: rgba(255, 255, 255, 0.05);
+  animation-delay: -5s;
+}
+
+.admin-sidebar {
+  position: sticky;
+  top: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(9, 9, 11, 0.6);
+  backdrop-filter: blur(24px);
+}
+
+.admin-sidebar-brand {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(220, 38, 38, 0.1));
+}
+
+.admin-nav-link {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.admin-nav-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-main {
+  color: #fafafa;
+}
+
+.admin-main > div {
+  animation: adminFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.admin-main h1 {
+  color: #fff;
+  letter-spacing: -0.04em;
+}
+
+.admin-main p {
+  color: #a1a1aa;
+}
+
+/* Redesigning the previously white cards to dark glassmorphism */
+.admin-main .bg-white.rounded-3xl,
+.admin-main form,
+.admin-card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(24, 24, 27, 0.6) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(16px);
+  color: #fff;
+}
+
+.admin-main .bg-white.rounded-3xl {
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.admin-main .bg-white.rounded-3xl:hover {
+  transform: translateY(-2px);
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+.admin-main input:not([type="checkbox"]):not([type="file"]),
+.admin-main textarea,
+.admin-main select {
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background: rgba(0, 0, 0, 0.3) !important;
+  color: #fff !important;
+  transition: all 0.2s ease;
+}
+
+.admin-main input:not([type="checkbox"]):not([type="file"]):focus,
+.admin-main textarea:focus,
+.admin-main select:focus {
+  border-color: rgba(220, 38, 38, 0.8) !important;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+  outline: none;
+}
+
+.admin-main table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.admin-main thead {
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
+.admin-main tbody tr {
+  transition: background 0.2s ease;
+}
+
+.admin-main tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-loading,
+.admin-login-scene {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #09090b;
+}
+
+.admin-login-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(24, 24, 27, 0.8) !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+  animation: adminFadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  color: #fff;
+}
+
+/* Custom scrollbar for webkit */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .admin-shell {
+    display: block;
+  }
+  .admin-sidebar {
+    position: relative;
+    width: auto !important;
+    min-height: auto !important;
+  }
+}
+
