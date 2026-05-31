@@ -355,6 +355,12 @@ class ProductServiceImpl(
         product.isActive =
             request.active
 
+        product.nutrition =
+            request.nutrition
+
+        product.benefits =
+            request.benefits
+
         // IMAGE
         if (image != null) {
 
@@ -505,6 +511,12 @@ class ProductServiceImpl(
         product.isActive =
             request.active
 
+        product.nutrition =
+            request.nutrition
+
+        product.benefits =
+            request.benefits
+
         // IMAGE UPDATE
         if (image != null) {
 
@@ -585,5 +597,9 @@ class ProductServiceImpl(
         }
 
         return product1
+    }
+
+    override fun deleteProductImage(imageId: Long) {
+        productImagesRepository.deleteById(imageId)
     }
 }

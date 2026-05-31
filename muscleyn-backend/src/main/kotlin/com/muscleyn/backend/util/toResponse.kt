@@ -5,6 +5,7 @@ import com.muscleyn.backend.entity.Product
 import com.muscleyn.backend.entity.ProductVariant
 import com.muscleyn.backend.response.ProductResponse
 import com.muscleyn.backend.response.ProductVariantResponse
+import com.muscleyn.backend.response.ProductImageResponse
 
 fun ProductVariant.toResponse():
         ProductVariantResponse {
@@ -76,6 +77,9 @@ fun Product.toResponse():
 
                 it.toResponse()
             },
-                    isActive = isActive
+                    isActive = isActive,
+        productImages = productImages.map { ProductImageResponse(it.id, it.imageUrl, it.sequenceNumber) },
+        nutrition = nutrition,
+        benefits = benefits
     )
 }

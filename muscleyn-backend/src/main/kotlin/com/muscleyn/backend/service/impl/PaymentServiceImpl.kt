@@ -8,6 +8,7 @@ import com.muscleyn.backend.enums.PaymentGateway
 import com.muscleyn.backend.enums.PaymentMethod
 import com.muscleyn.backend.enums.PaymentStatus
 import com.muscleyn.backend.repository.CustomerOrdersRepository
+import com.muscleyn.backend.repository.OrdersRepository
 import com.muscleyn.backend.response.PaymentOrderResponse
 import com.muscleyn.backend.service.PaymentService
 import com.razorpay.Order
@@ -17,6 +18,7 @@ import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 @Service
 class PaymentServiceImpl(
@@ -26,6 +28,9 @@ class PaymentServiceImpl(
 
     private val customerOrdersRepository:
     CustomerOrdersRepository,
+
+    private val ordersRepository:
+    OrdersRepository,
 
     @Value("\${razorpay.key.id}")
     private val razorpayKey: String,
@@ -250,6 +255,8 @@ class PaymentServiceImpl(
             customerOrdersRepository
                 .save(order)
 
+            syncOrderStatusToDb(order)
+
             return "COD_CONFIRMED"
         }
 
@@ -296,6 +303,8 @@ class PaymentServiceImpl(
                 customerOrdersRepository
                     .save(order)
 
+                syncOrderStatusToDb(order)
+
                 throw RuntimeException(
                     "Invalid payment signature"
                 )
@@ -313,6 +322,8 @@ class PaymentServiceImpl(
 
             customerOrdersRepository
                 .save(order)
+
+            syncOrderStatusToDb(order)
 
             return "PAYMENT_SUCCESS"
         }
@@ -335,11 +346,22 @@ class PaymentServiceImpl(
             customerOrdersRepository
                 .save(order)
 
+            syncOrderStatusToDb(order)
+
             return "PAYMENT_SUCCESS"
         }
 
         throw RuntimeException(
             "Invalid payment gateway"
         )
+    }
+
+    private fun syncOrderStatusToDb(order: CustomerOrders) {
+        ordersRepository.findById(order.id!!).ifPresent { dbOrder ->
+            dbOrder.paymentStatus = order.paymentStatus
+            dbOrder.orderStatus = order.orderStatus
+            dbOrder.updatedAt = java.time.LocalDateTime.now()
+            ordersRepository.save(dbOrder)
+        }
     }
 }

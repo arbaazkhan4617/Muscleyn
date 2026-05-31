@@ -11,4 +11,8 @@ interface AuthService {
     fun login(
         request: LoginRequest
     ): AuthResponse
+
+    fun googleLogin(
+        request: GoogleAuthRequest
+    ): AuthResponse
 }

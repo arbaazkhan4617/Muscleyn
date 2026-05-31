@@ -61,4 +61,27 @@ class AuthController(
             data = response
         )
     }
+
+    @PostMapping("/google")
+    fun googleLogin(
+
+        @RequestBody
+        request: GoogleAuthRequest
+
+    ): ResponseDto<AuthResponse> {
+
+        val response =
+            authService
+                .googleLogin(request)
+
+        return ResponseDto(
+
+            status = true,
+
+            message =
+                "Google login successful",
+
+            data = response
+        )
+    }
 }

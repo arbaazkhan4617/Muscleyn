@@ -15,5 +15,9 @@ data class CreateProductRequest(
     Long?,
 
     val active:
-    Boolean
+    Boolean,
+
+    val nutrition: String? = null,
+
+    val benefits: String? = null
 )

@@ -79,4 +79,6 @@ interface ProductService {
         images: List<MultipartFile>?
 
     ): Product
+
+    fun deleteProductImage(imageId: Long)
 }

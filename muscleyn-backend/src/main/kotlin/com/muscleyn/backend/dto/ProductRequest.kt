@@ -54,4 +54,8 @@ data class ProductRequest(
     val brandId: Long?,
 
     val imageUrl: String?,
+
+    val nutrition: String?,
+
+    val benefits: String?,
 )

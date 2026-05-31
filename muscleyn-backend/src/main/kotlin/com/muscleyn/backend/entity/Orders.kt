@@ -13,10 +13,6 @@ import java.time.LocalDateTime
 class Orders(
 
     @Id
-    @GeneratedValue(
-        strategy =
-        GenerationType.IDENTITY
-    )
     var id: Long? = null,
 
     var userId: Long? = null,

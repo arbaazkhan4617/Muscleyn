@@ -66,5 +66,9 @@ class Product(
 
     var updatedAt: LocalDateTime? = LocalDateTime.now(),
 
+    @Column(columnDefinition = "TEXT")
+    var nutrition: String? = null,
 
+    @Column(columnDefinition = "TEXT")
+    var benefits: String? = null,
 )

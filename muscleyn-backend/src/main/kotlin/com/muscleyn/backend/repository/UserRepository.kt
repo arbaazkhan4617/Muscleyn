@@ -14,6 +14,10 @@ interface UserRepository :
         mobileNumber: String
     ): Boolean
 
+    fun findByEmail(
+        email: String
+    ): User?
+
     fun findByEmailOrMobileNumber(
 
         email: String,

@@ -24,5 +24,14 @@ data class ProductResponse(
 
     val variants:
     List<ProductVariantResponse>?,
-    val isActive : Boolean?
+    val isActive : Boolean?,
+    val productImages: List<ProductImageResponse>?,
+    val nutrition: String?,
+    val benefits: String?
+)
+
+data class ProductImageResponse(
+    val id: Long?,
+    val imageUrl: String?,
+    val sequenceNumber: Int?
 )

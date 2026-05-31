@@ -245,7 +245,17 @@ class ProductController(
         @RequestPart(
             required = false
         )
-        images: List<MultipartFile>?
+        images: List<MultipartFile>?,
+
+        @RequestParam(
+            required = false
+        )
+        nutrition: String?,
+
+        @RequestParam(
+            required = false
+        )
+        benefits: String?
 
     ): ResponseDto<Product>{
 
@@ -265,7 +275,13 @@ class ProductController(
                     subCategoryId,
 
                 active =
-                    active
+                    active,
+
+                nutrition =
+                    nutrition,
+
+                benefits =
+                    benefits
             )
 
         val response =
@@ -330,7 +346,17 @@ class ProductController(
         @RequestPart(
             required = false
         )
-        images: List<MultipartFile>?
+        images: List<MultipartFile>?,
+
+        @RequestParam(
+            required = false
+        )
+        nutrition: String?,
+
+        @RequestParam(
+            required = false
+        )
+        benefits: String?
 
     ): ResponseDto<Product> {
 
@@ -350,7 +376,13 @@ class ProductController(
                     subCategoryId,
 
                 active =
-                    active
+                    active,
+
+                nutrition =
+                    nutrition,
+
+                benefits =
+                    benefits
             )
 
         val response =
@@ -375,6 +407,18 @@ class ProductController(
                 "Product updated successfully",
 
             data = response
+        )
+    }
+
+    @DeleteMapping("/images/{imageId}")
+    fun deleteProductImage(
+        @PathVariable imageId: Long
+    ): ResponseDto<Nothing> {
+        productService.deleteProductImage(imageId)
+        return ResponseDto(
+            status = true,
+            message = "Product image deleted successfully",
+            data = null
         )
     }
 }
