@@ -1,1099 +1,501 @@
 "use client";
 
-import {
-
-  useEffect,
-
-  useMemo,
-
-  useState,
-
-} from "react";
-
-import {
-
-  useRouter,
-
-} from "next/navigation";
-
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-
-import Navbar from "@/components/layout/Navbar";
-
-import Footer from "@/components/layout/Footer";
-
+import { motion, AnimatePresence } from "framer-motion";
 import {
-
-  useAuth,
-
-} from "@/context/AuthContext";
-
-import {
-
-  getGuestCart,
-
-  clearGuestCart,
-
-} from "@/utils/cartStorage";
-
-import {
-
-  placeOrder,
-
-} from "@/services/orderService";
-
-import {
-
-  createPayment,
-
-} from "@/services/paymentService";
-import type {
-  CreatePaymentRequest,
-} from "@/services/paymentService";
-
-import {
-
-  getUserAddresses,
-
-} from "@/services/addressService";
-
-import {
-
-  ShoppingBag,
-
-  CreditCard,
-
-  Truck,
-
+  MapPin,
+  Plus,
+  Pencil,
+  Trash2,
+  Star,
+  Home,
+  Building2,
+  X,
+  CheckCircle2,
+  RefreshCw,
+  ArrowLeft,
 } from "lucide-react";
 
-export default function CheckoutPage() {
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import { useAuth } from "@/context/AuthContext";
+import {
+  getUserAddresses,
+  saveAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
+  SaveAddressRequest,
+} from "@/services/addressService";
 
-  const router =
-    useRouter();
+const INDIAN_STATES = [
+  "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh",
+  "Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka",
+  "Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram",
+  "Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana",
+  "Tripura","Uttar Pradesh","Uttarakhand","West Bengal",
+  "Andaman and Nicobar Islands","Chandigarh","Dadra and Nagar Haveli",
+  "Daman and Diu","Delhi","Jammu and Kashmir","Ladakh","Lakshadweep","Puducherry",
+];
 
-  const {
+const emptyForm: Omit<SaveAddressRequest, "userId"> = {
+  fullName: "",
+  mobileNumber: "",
+  addressLine1: "",
+  addressLine2: "",
+  landmark: "",
+  city: "",
+  state: "",
+  country: "India",
+  pincode: "",
+  addressType: "HOME",
+  isDefault: false,
+};
 
-    isLoggedIn,
+export default function AddressPage() {
+  const router = useRouter();
+  const { isLoggedIn, user } = useAuth();
 
-    user,
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  } = useAuth();
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState(emptyForm);
 
-  // CART
-  const [cartItems, setCartItems] =
-    useState<any[]>([]);
-
-  // ADDRESS
-  const [
-
-    addresses,
-
-    setAddresses
-
-  ] = useState<any[]>([]);
-
-  const [
-
-    selectedAddress,
-
-    setSelectedAddress
-
-  ] = useState<any>(null);
-
-  // LOADING
-  const [loading, setLoading] =
-    useState(false);
-
-  // PAYMENT
-  const [paymentMethod, setPaymentMethod] =
-    useState("COD");
-
-  const [paymentGateway, setPaymentGateway] =
-    useState<CreatePaymentRequest["paymentGateway"]>(
-      "RAZORPAY"
-    );
-
-  // GUEST USER
-  const [
-
-    guestMobile,
-
-    setGuestMobile
-
-  ] = useState("");
-
-  const [
-
-    guestName,
-
-    setGuestName
-
-  ] = useState("");
-
-  // LOAD DATA
+  // REDIRECT IF NOT LOGGED IN
   useEffect(() => {
-
-    // GUEST CART
-    const guestCart =
-      getGuestCart();
-
-    setCartItems(
-      guestCart
-    );
-
-    // USER ADDRESSES
-    const loadAddresses =
-      async () => {
-
-        try {
-
-          const response =
-
-            await getUserAddresses(
-              user?.id
-            );
-
-          const addressData =
-
-            response?.data || [];
-
-          setAddresses(
-            addressData
-          );
-
-          // DEFAULT ADDRESS
-          const defaultAddress =
-
-            addressData.find(
-              (item: any) =>
-                item.isDefault
-            );
-
-          if (defaultAddress) {
-
-            setSelectedAddress(
-              defaultAddress
-            );
-          }
-
-        } catch (error) {
-
-          console.log(error);
-        }
-      };
-
-    if (
-      isLoggedIn &&
-      user?.id
-    ) {
-
-      loadAddresses();
+    if (!isLoggedIn) {
+      router.push("/login?returnUrl=/address");
     }
+  }, [isLoggedIn, router]);
 
+  // LOAD ADDRESSES
+  const loadAddresses = async () => {
+    if (!user?.id) return;
+    try {
+      setLoading(true);
+      const res = await getUserAddresses(user.id);
+      setAddresses(res?.data || []);
+    } catch {
+      toast.error("Failed to load addresses");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoggedIn && user?.id) loadAddresses();
   }, [isLoggedIn, user]);
 
-  // TOTAL
-  const cartTotal =
-    useMemo(() => {
+  const openAddForm = () => {
+    setForm(emptyForm);
+    setEditingId(null);
+    setShowForm(true);
+  };
 
-      return cartItems.reduce(
+  const openEditForm = (address: any) => {
+    setForm({
+      fullName: address.fullName || "",
+      mobileNumber: address.mobileNumber || "",
+      addressLine1: address.addressLine1 || "",
+      addressLine2: address.addressLine2 || "",
+      landmark: address.landmark || "",
+      city: address.city || "",
+      state: address.state || "",
+      country: address.country || "India",
+      pincode: address.pincode || "",
+      addressType: address.addressType || "HOME",
+      isDefault: address.isDefault || false,
+    });
+    setEditingId(address.id);
+    setShowForm(true);
+  };
 
-        (
-
-          total,
-
-          item
-
-        ) =>
-
-          total +
-
-          (
-            (
-              item.variant?.price || 0
-            )
-
-            *
-
-            item.quantity
-          ),
-
-        0
-      );
-
-    }, [cartItems]);
-
-  // PLACE ORDER
-  const handlePlaceOrder =
-    async () => {
-
-      // CART VALIDATION
-      if (
-        cartItems.length === 0
-      ) {
-
-        toast.error(
-          "Cart is empty"
-        );
-
-        return;
+  const handleSave = async () => {
+    if (!form.fullName || !form.mobileNumber || !form.addressLine1 || !form.city || !form.state || !form.pincode) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+    try {
+      setSaving(true);
+      const payload: SaveAddressRequest = { ...form, userId: user?.id };
+      if (editingId) {
+        await updateAddress(editingId, payload);
+        toast.success("Address updated");
+      } else {
+        await saveAddress(payload);
+        toast.success("Address added");
       }
+      setShowForm(false);
+      loadAddresses();
+    } catch {
+      toast.error("Failed to save address");
+    } finally {
+      setSaving(false);
+    }
+  };
 
-      // ADDRESS VALIDATION
-      if (
-        isLoggedIn &&
-        !selectedAddress
-      ) {
+  const handleDelete = async (id: number) => {
+    if (!confirm("Delete this address?")) return;
+    try {
+      await deleteAddress(id, user?.id);
+      toast.success("Address deleted");
+      loadAddresses();
+    } catch {
+      toast.error("Failed to delete");
+    }
+  };
 
-        toast.error(
-          "Please select address"
-        );
+  const handleSetDefault = async (id: number) => {
+    try {
+      await setDefaultAddress(id, user?.id);
+      toast.success("Default address updated");
+      loadAddresses();
+    } catch {
+      toast.error("Failed to set default");
+    }
+  };
 
-        return;
-      }
-
-      // GUEST VALIDATION
-      if (
-        !isLoggedIn
-      ) {
-
-        if (
-          !guestName ||
-          !guestMobile
-        ) {
-
-          toast.error(
-            "Please enter guest details"
-          );
-
-          return;
-        }
-      }
-
-      try {
-
-        setLoading(true);
-
-        let finalUserId =
-          user?.id;
-
-        // GUEST USER
-        if (
-          !isLoggedIn
-        ) {
-
-          // FUTURE:
-          // MOBILE OTP LOGIN
-          finalUserId = 1;
-        }
-
-        const items =
-          cartItems.map((item) => ({
-            productId:
-              item.product?.id ||
-              item.variant?.product?.id ||
-              item.productId ||
-              0,
-            variantId:
-              item.variantId ||
-              item.variant?.id,
-            quantity:
-              item.quantity,
-          }));
-
-        // ORDER API
-        const orderResponse =
-
-          await placeOrder({
-
-            userId:
-              finalUserId,
-
-            addressId:
-              selectedAddress?.id,
-
-            paymentMethod,
-
-            paymentGateway,
-
-            items,
-          });
-
-        const orderId =
-
-          orderResponse?.data?.id;
-
-        // ONLINE PAYMENT
-        if (
-          paymentMethod ===
-          "ONLINE"
-        ) {
-
-          await createPayment({
-
-            orderId,
-
-            amount:
-              cartTotal,
-
-            paymentGateway,
-          });
-
-          toast.success(
-            "Redirecting payment..."
-          );
-
-          // FUTURE:
-          // Razorpay / PhonePe SDK
-
-          router.push(
-            "/payment-success"
-          );
-
-          return;
-        }
-
-        // COD SUCCESS
-        clearGuestCart();
-
-        toast.success(
-          "Order placed successfully"
-        );
-
-        router.push(
-          "/order-success"
-        );
-
-      } catch (error) {
-
-        console.log(error);
-
-        toast.error(
-          "Failed to place order"
-        );
-
-      } finally {
-
-        setLoading(false);
-      }
-    };
+  const updateField = (field: keyof typeof form, value: any) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
 
   return (
     <>
       <Navbar />
 
-      <main className="
-        min-h-screen
-        bg-gray-50
-        py-12
-      ">
+      <main className="min-h-screen bg-zinc-950 py-16 text-white">
+        <div className="max-w-3xl mx-auto px-4">
 
-        <div className="
-          max-w-7xl
-          mx-auto
-          px-4
-        ">
-
-          {/* TITLE */}
-          <div className="
-            flex
-            items-center
-            gap-4
-            mb-10
-          ">
-
-            <ShoppingBag
-              className="
-                w-10
-                h-10
-                text-red-500
-              "
-            />
-
-            <h1 className="
-              text-4xl
-              font-extrabold
-            ">
-              Checkout
-            </h1>
-
+          {/* HEADER */}
+          <div className="flex items-center gap-4 mb-10 pb-6 border-b border-white/10">
+            <button
+              onClick={() => router.back()}
+              className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-zinc-400" />
+            </button>
+            <div className="p-3 bg-red-500/10 rounded-2xl border border-red-500/20">
+              <MapPin className="w-7 h-7 text-red-500" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black tracking-tight text-white">My Addresses</h1>
+              <p className="text-zinc-400 font-medium mt-0.5">Manage your delivery addresses</p>
+            </div>
+            <button
+              onClick={openAddForm}
+              className="ml-auto flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-5 py-3 rounded-xl font-bold text-sm transition-all shadow-[0_0_20px_rgba(220,38,38,0.2)]"
+            >
+              <Plus className="w-4 h-4" />
+              Add New
+            </button>
           </div>
 
-          <div className="
-            grid
-            grid-cols-1
-            lg:grid-cols-3
-            gap-10
-          ">
-
-            {/* LEFT */}
-            <div className="
-              lg:col-span-2
-              space-y-8
-            ">
-
-              {/* GUEST DETAILS */}
-              {!isLoggedIn && (
-
-                <div className="
-                  bg-white
-                  rounded-3xl
-                  p-8
-                  shadow-sm
-                ">
-
-                  <h2 className="
-                    text-2xl
-                    font-bold
-                    mb-6
-                  ">
-                    Guest Details
-                  </h2>
-
-                  <div className="
-                    grid
-                    grid-cols-1
-                    md:grid-cols-2
-                    gap-6
-                  ">
-
-                    <input
-                      type="text"
-                      placeholder="Full Name"
-                      value={guestName}
-                      onChange={(e) =>
-                        setGuestName(
-                          e.target.value
-                        )
-                      }
-                      className="
-                        border
-                        rounded-2xl
-                        p-4
-                        outline-none
-                      "
-                    />
-
-                    <input
-                      type="text"
-                      placeholder="Mobile Number"
-                      value={guestMobile}
-                      onChange={(e) =>
-                        setGuestMobile(
-                          e.target.value
-                        )
-                      }
-                      className="
-                        border
-                        rounded-2xl
-                        p-4
-                        outline-none
-                      "
-                    />
-
-                  </div>
-
-                </div>
-
-              )}
-
-              {/* ADDRESS */}
-              {isLoggedIn && (
-
-                <div className="
-                  bg-white
-                  rounded-3xl
-                  p-8
-                  shadow-sm
-                ">
-
-                  <div className="
-                    flex
-                    justify-between
-                    items-center
-                    mb-8
-                  ">
-
-                    <h2 className="
-                      text-2xl
-                      font-bold
-                    ">
-                      Select Address
-                    </h2>
-
-                    <button
-
-                      onClick={() =>
-                        router.push(
-                          "/address"
-                        )
-                      }
-
-                      className="
-                        px-5
-                        py-3
-                        rounded-full
-                        bg-black
-                        text-white
-                      "
-                    >
-
-                      Add Address
-
-                    </button>
-
-                  </div>
-
-                  <div className="
-                    space-y-5
-                  ">
-
-                    {addresses.map(
-                      (address) => (
-
-                        <button
-
-                          key={address.id}
-
-                          onClick={() =>
-                            setSelectedAddress(
-                              address
-                            )
-                          }
-
-                          className={`
-                            w-full
-                            text-left
-                            border-2
-                            rounded-3xl
-                            p-6
-                            transition-all
-
-                            ${
-                              selectedAddress?.id ===
-                              address.id
-
-                                ? "border-black"
-
-                                : "border-gray-200"
-                            }
-                          `}
-                        >
-
-                          <div className="
-                            flex
-                            items-center
-                            gap-3
-                            mb-4
-                          ">
-
-                            <h3 className="
-                              font-bold
-                              text-lg
-                            ">
-                              {
-                                address.fullName
-                              }
-                            </h3>
-
-                            {address.isDefault && (
-
-                              <span className="
-                                px-3
-                                py-1
-                                rounded-full
-                                bg-green-100
-                                text-green-700
-                                text-xs
-                                font-bold
-                              ">
-                                DEFAULT
-                              </span>
-
-                            )}
-
-                          </div>
-
-                          <p className="
-                            text-gray-600
-                            leading-relaxed
-                          ">
-
-                            {
-                              address.addressLine1
-                            }
-
-                            {" "}
-
-                            {
-                              address.city
-                            }
-
-                            {" "}
-
-                            {
-                              address.state
-                            }
-
-                            {" - "}
-
-                            {
-                              address.pincode
-                            }
-
-                          </p>
-
-                          <p className="
-                            mt-3
-                            font-semibold
-                          ">
-                            {
-                              address.mobileNumber
-                            }
-                          </p>
-
-                        </button>
-                      )
-                    )}
-
-                  </div>
-
-                </div>
-
-              )}
-
-              {/* PAYMENT */}
-              <div className="
-                bg-white
-                rounded-3xl
-                p-8
-                shadow-sm
-              ">
-
-                <h2 className="
-                  text-2xl
-                  font-bold
-                  mb-6
-                ">
-                  Payment Method
-                </h2>
-
-                <div className="
-                  space-y-5
-                ">
-
-                  {/* COD */}
-                  <button
-
-                    onClick={() =>
-                      setPaymentMethod(
-                        "COD"
-                      )
-                    }
-
-                    className={`
-                      w-full
-                      border-2
-                      rounded-2xl
-                      p-5
-                      flex
-                      items-center
-                      gap-4
-                      transition-all
-
-                      ${
-                        paymentMethod ===
-                        "COD"
-
-                          ? "border-black"
-
-                          : "border-gray-200"
-                      }
-                    `}
-                  >
-
-                    <Truck
-                      className="
-                        w-6
-                        h-6
-                      "
-                    />
-
-                    <div className="
-                      text-left
-                    ">
-
-                      <p className="
-                        font-bold
-                      ">
-                        Cash On Delivery
-                      </p>
-
-                      <p className="
-                        text-sm
-                        text-gray-500
-                      ">
-                        Pay when product arrives
-                      </p>
-
-                    </div>
-
-                  </button>
-
-                  {/* ONLINE */}
-                  <button
-
-                    onClick={() =>
-                      setPaymentMethod(
-                        "ONLINE"
-                      )
-                    }
-
-                    className={`
-                      w-full
-                      border-2
-                      rounded-2xl
-                      p-5
-                      flex
-                      items-center
-                      gap-4
-                      transition-all
-
-                      ${
-                        paymentMethod ===
-                        "ONLINE"
-
-                          ? "border-black"
-
-                          : "border-gray-200"
-                      }
-                    `}
-                  >
-
-                    <CreditCard
-                      className="
-                        w-6
-                        h-6
-                      "
-                    />
-
-                    <div className="
-                      text-left
-                    ">
-
-                      <p className="
-                        font-bold
-                      ">
-                        Online Payment
-                      </p>
-
-                      <p className="
-                        text-sm
-                        text-gray-500
-                      ">
-                        Razorpay / PhonePe
-                      </p>
-
-                    </div>
-
-                  </button>
-
-                </div>
-
-                {/* PAYMENT GATEWAY */}
-                {paymentMethod ===
-                  "ONLINE" && (
-
-                  <div className="
-                    mt-6
-                    flex
-                    gap-4
-                  ">
-
-                    <button
-
-                      onClick={() =>
-                        setPaymentGateway(
-                          "RAZORPAY"
-                        )
-                      }
-
-                      className={`
-                        px-6
-                        py-3
-                        rounded-full
-                        border
-
-                        ${
-                          paymentGateway ===
-                          "RAZORPAY"
-
-                            ? "bg-black text-white"
-
-                            : ""
-                        }
-                      `}
-                    >
-
-                      Razorpay
-
-                    </button>
-
-                    <button
-
-                      onClick={() =>
-                        setPaymentGateway(
-                          "PHONEPE"
-                        )
-                      }
-
-                      className={`
-                        px-6
-                        py-3
-                        rounded-full
-                        border
-
-                        ${
-                          paymentGateway ===
-                          "PHONEPE"
-
-                            ? "bg-black text-white"
-
-                            : ""
-                        }
-                      `}
-                    >
-
-                      PhonePe
-
-                    </button>
-
-                  </div>
-
-                )}
-
-              </div>
-
+          {/* LOADING */}
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-24 gap-4">
+              <div className="w-10 h-10 border-4 border-white/10 border-t-red-500 rounded-full animate-spin" />
+              <p className="text-zinc-500 font-semibold">Loading addresses...</p>
             </div>
+          )}
 
-            {/* RIGHT */}
-            <div>
+          {/* EMPTY STATE */}
+          {!loading && addresses.length === 0 && !showForm && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-24 flex flex-col items-center gap-6"
+            >
+              <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                <MapPin className="w-9 h-9 text-zinc-600" />
+              </div>
+              <div>
+                <p className="text-xl font-black text-white">No addresses yet</p>
+                <p className="text-zinc-500 mt-2">Add a delivery address to place orders easily.</p>
+              </div>
+              <button
+                onClick={openAddForm}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-8 py-4 rounded-2xl font-bold transition-all"
+              >
+                <Plus className="w-5 h-5" />
+                Add Your First Address
+              </button>
+            </motion.div>
+          )}
 
-              <div className="
-                bg-white
-                rounded-3xl
-                p-8
-                shadow-sm
-                sticky
-                top-28
-              ">
-
-                <h2 className="
-                  text-2xl
-                  font-bold
-                  mb-8
-                ">
-                  Order Summary
-                </h2>
-
-                {/* ITEMS */}
-                <div className="
-                  space-y-5
-                  max-h-[400px]
-                  overflow-y-auto
-                ">
-
-                  {cartItems.map(
-                    (item, index) => (
-
-                      <div
-
-                        key={index}
-
-                        className="
-                          flex
-                          gap-4
-                        "
-                      >
-
-                        <img
-                          src={
-                            item.variant?.image
-                            || item.product?.image
-                          }
-                          alt={
-                            item.product?.name
-                          }
-                          className="
-                            w-20
-                            h-20
-                            rounded-2xl
-                            object-cover
-                          "
-                        />
-
-                        <div className="
-                          flex-1
-                        ">
-
-                          <h3 className="
-                            font-bold
-                          ">
-                            {
-                              item.product?.name
-                            }
-                          </h3>
-
-                          <p className="
-                            text-sm
-                            text-gray-500
-                          ">
-                            {
-                              item.variant?.flavor
-                            }
-                            {" "}
-                            {
-                              item.variant?.weight
-                            }
-                          </p>
-
-                          <p className="
-                            text-sm
-                            mt-2
-                          ">
-                            Qty:
-                            {" "}
-                            {item.quantity}
-                          </p>
-
-                        </div>
-
-                        <div className="
-                          font-bold
-                        ">
-
-                          ₹
-                          {
-                            (
-                              item.variant?.price || 0
-                            )
-
-                            *
-
-                            item.quantity
-                          }
-
-                        </div>
-
-                      </div>
-                    )
+          {/* ADDRESS CARDS */}
+          <div className="space-y-4 mb-8">
+            <AnimatePresence>
+              {addresses.map((address) => (
+                <motion.div
+                  key={address.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className={`relative rounded-2xl border p-6 transition-all ${
+                    address.isDefault
+                      ? "border-red-500/50 bg-red-500/5"
+                      : "border-white/10 bg-zinc-900/50"
+                  }`}
+                >
+                  {/* DEFAULT BADGE */}
+                  {address.isDefault && (
+                    <span className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 bg-red-600/20 text-red-400 border border-red-500/30 rounded-full text-[10px] font-black uppercase tracking-widest">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Default
+                    </span>
                   )}
 
-                </div>
+                  <div className="flex items-start gap-4">
+                    <div className={`p-2.5 rounded-xl flex-shrink-0 ${
+                      address.addressType === "WORK"
+                        ? "bg-blue-500/10 border border-blue-500/20"
+                        : "bg-white/5 border border-white/10"
+                    }`}>
+                      {address.addressType === "WORK"
+                        ? <Building2 className="w-5 h-5 text-blue-400" />
+                        : <Home className="w-5 h-5 text-zinc-400" />
+                      }
+                    </div>
 
-                {/* TOTAL */}
-                <div className="
-                  border-t
-                  mt-8
-                  pt-8
-                  space-y-4
-                ">
-
-                  <div className="
-                    flex
-                    justify-between
-                  ">
-
-                    <span>
-                      Subtotal
-                    </span>
-
-                    <span>
-                      ₹{cartTotal}
-                    </span>
-
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1">
+                        <h3 className="font-black text-white text-lg">{address.fullName}</h3>
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest border border-white/10 px-2 py-0.5 rounded-full">
+                          {address.addressType}
+                        </span>
+                      </div>
+                      <p className="text-zinc-400 leading-relaxed">
+                        {address.addressLine1}
+                        {address.addressLine2 && `, ${address.addressLine2}`}
+                        {address.landmark && ` (${address.landmark})`}
+                      </p>
+                      <p className="text-zinc-400">
+                        {address.city}, {address.state} — {address.pincode}
+                      </p>
+                      <p className="text-zinc-300 font-semibold mt-2">{address.mobileNumber}</p>
+                    </div>
                   </div>
 
-                  <div className="
-                    flex
-                    justify-between
-                  ">
-
-                    <span>
-                      Delivery
-                    </span>
-
-                    <span>
-                      FREE
-                    </span>
-
+                  {/* ACTIONS */}
+                  <div className="flex items-center gap-2 mt-5 pt-4 border-t border-white/5">
+                    {!address.isDefault && (
+                      <button
+                        onClick={() => handleSetDefault(address.id)}
+                        className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-yellow-400 transition-colors px-3 py-2 rounded-lg hover:bg-yellow-400/10"
+                      >
+                        <Star className="w-3.5 h-3.5" />
+                        Set Default
+                      </button>
+                    )}
+                    <button
+                      onClick={() => openEditForm(address)}
+                      className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/10"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(address.id)}
+                      className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-red-400 transition-colors px-3 py-2 rounded-lg hover:bg-red-400/10 ml-auto"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Delete
+                    </button>
                   </div>
-
-                  <div className="
-                    flex
-                    justify-between
-                    text-2xl
-                    font-bold
-                    pt-4
-                  ">
-
-                    <span>
-                      Total
-                    </span>
-
-                    <span>
-                      ₹{cartTotal}
-                    </span>
-
-                  </div>
-
-                </div>
-
-                {/* PLACE ORDER */}
-                <button
-
-                  onClick={handlePlaceOrder}
-
-                  disabled={loading}
-
-                  className="
-                    w-full
-                    bg-black
-                    hover:bg-red-500
-                    text-white
-                    py-5
-                    rounded-2xl
-                    font-bold
-                    text-lg
-                    mt-8
-                    transition-all
-                  "
-                >
-
-                  {
-                    loading
-
-                      ? "Processing..."
-
-                      : paymentMethod ===
-                        "ONLINE"
-
-                        ? "Continue Payment"
-
-                        : "Place Order"
-                  }
-
-                </button>
-
-              </div>
-
-            </div>
-
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
 
-        </div>
+          {/* ADD / EDIT FORM */}
+          <AnimatePresence>
+            {showForm && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="bg-zinc-900/80 backdrop-blur-md rounded-3xl border border-white/10 p-8 shadow-2xl"
+              >
+                {/* FORM HEADER */}
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-2xl font-black text-white">
+                    {editingId ? "Edit Address" : "Add New Address"}
+                  </h2>
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+                  >
+                    <X className="w-5 h-5 text-zinc-400" />
+                  </button>
+                </div>
 
+                <div className="space-y-5">
+                  {/* ROW 1 */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Full Name *</label>
+                      <input
+                        type="text"
+                        value={form.fullName}
+                        onChange={(e) => updateField("fullName", e.target.value)}
+                        placeholder="John Doe"
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3.5 outline-none text-white transition-colors placeholder:text-zinc-600"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Mobile Number *</label>
+                      <input
+                        type="text"
+                        value={form.mobileNumber}
+                        onChange={(e) => updateField("mobileNumber", e.target.value)}
+                        placeholder="9876543210"
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3.5 outline-none text-white transition-colors placeholder:text-zinc-600"
+                      />
+                    </div>
+                  </div>
+
+                  {/* ADDRESS LINE 1 */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Address Line 1 *</label>
+                    <input
+                      type="text"
+                      value={form.addressLine1}
+                      onChange={(e) => updateField("addressLine1", e.target.value)}
+                      placeholder="House/Flat no., Street name"
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3.5 outline-none text-white transition-colors placeholder:text-zinc-600"
+                    />
+                  </div>
+
+                  {/* ADDRESS LINE 2 + LANDMARK */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Address Line 2</label>
+                      <input
+                        type="text"
+                        value={form.addressLine2}
+                        onChange={(e) => updateField("addressLine2", e.target.value)}
+                        placeholder="Apartment, Society, Area"
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3.5 outline-none text-white transition-colors placeholder:text-zinc-600"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Landmark</label>
+                      <input
+                        type="text"
+                        value={form.landmark}
+                        onChange={(e) => updateField("landmark", e.target.value)}
+                        placeholder="Near mall, hospital, etc."
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3.5 outline-none text-white transition-colors placeholder:text-zinc-600"
+                      />
+                    </div>
+                  </div>
+
+                  {/* CITY + PINCODE */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">City *</label>
+                      <input
+                        type="text"
+                        value={form.city}
+                        onChange={(e) => updateField("city", e.target.value)}
+                        placeholder="Mumbai"
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3.5 outline-none text-white transition-colors placeholder:text-zinc-600"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Pincode *</label>
+                      <input
+                        type="text"
+                        value={form.pincode}
+                        onChange={(e) => updateField("pincode", e.target.value)}
+                        placeholder="400001"
+                        maxLength={6}
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3.5 outline-none text-white transition-colors placeholder:text-zinc-600"
+                      />
+                    </div>
+                  </div>
+
+                  {/* STATE + TYPE */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">State *</label>
+                      <select
+                        value={form.state}
+                        onChange={(e) => updateField("state", e.target.value)}
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3.5 outline-none text-white transition-colors appearance-none"
+                      >
+                        <option value="" className="text-zinc-500">Select State</option>
+                        {INDIAN_STATES.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Address Type</label>
+                      <div className="flex gap-3">
+                        {["HOME", "WORK", "OTHER"].map((type) => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => updateField("addressType", type)}
+                            className={`flex-1 py-3.5 rounded-xl border text-xs font-black uppercase tracking-widest transition-all ${
+                              form.addressType === type
+                                ? "bg-red-600 border-red-500 text-white"
+                                : "bg-black border-white/10 text-zinc-400 hover:border-white/20"
+                            }`}
+                          >
+                            {type}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SET AS DEFAULT */}
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div
+                      onClick={() => updateField("isDefault", !form.isDefault)}
+                      className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+                        form.isDefault
+                          ? "bg-red-600 border-red-500"
+                          : "bg-black border-white/20 group-hover:border-white/40"
+                      }`}
+                    >
+                      {form.isDefault && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                    </div>
+                    <span className="text-sm font-semibold text-zinc-300">Set as default address</span>
+                  </label>
+
+                  {/* SAVE BUTTON */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={() => setShowForm(false)}
+                      className="flex-1 py-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 font-bold transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="flex-1 py-4 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(220,38,38,0.2)]"
+                    >
+                      {saving ? (
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>{editingId ? "Update Address" : "Save Address"}</>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+        </div>
       </main>
 
       <Footer />

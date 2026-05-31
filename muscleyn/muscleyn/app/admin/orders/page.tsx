@@ -9,7 +9,7 @@ import Link from "next/link";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
-  const [users, setUsers] = useState<Record<number, any>>({});
+  const [users, setUsers] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -26,10 +26,10 @@ export default function AdminOrdersPage() {
       const ordersData = ordersRes.data.data || [];
       const usersData = usersRes.data.data || [];
       
-      // Map users for quick lookup
-      const userMap: Record<number, any> = {};
+      // Map users for quick lookup (use string keys for type safety)
+      const userMap: Record<string, any> = {};
       usersData.forEach((user: any) => {
-          userMap[user.id] = user;
+          userMap[String(user.id)] = user;
       });
       
       setUsers(userMap);
@@ -75,7 +75,7 @@ export default function AdminOrdersPage() {
   const filteredOrders = orders.filter(order => {
       const matchesSearch = 
           order.id.toString().includes(searchTerm) || 
-          (users[order.userId]?.name || "").toLowerCase().includes(searchTerm.toLowerCase());
+          (users[String(order.userId)]?.name || "").toLowerCase().includes(searchTerm.toLowerCase());
           
       const matchesStatus = statusFilter === "ALL" || order.orderStatus === statusFilter;
       
@@ -165,7 +165,7 @@ export default function AdminOrdersPage() {
                  </tr>
               ) : (
                 filteredOrders.map((order) => {
-                  const customer = users[order.userId];
+                  const customer = users[String(order.userId)];
                   return (
                   <tr key={order.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
                     <td className="p-6">
@@ -176,9 +176,9 @@ export default function AdminOrdersPage() {
                     <td className="p-6">
                       <div>
                           <p className="font-bold text-white group-hover:text-red-400 transition-colors">
-                              {customer?.name || `User #${order.userId}`}
+                              {customer?.name || (order.userId ? `User #${order.userId}` : 'Guest')}
                           </p>
-                          <p className="text-sm text-zinc-500 font-medium">{customer?.email || 'No email'}</p>
+                          <p className="text-sm text-zinc-500 font-medium">{customer?.email || customer?.mobileNumber || 'No contact info'}</p>
                       </div>
                     </td>
                     <td className="p-6">

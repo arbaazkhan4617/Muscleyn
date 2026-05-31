@@ -1,26 +1,21 @@
 "use client";
 
 import {
-
   useEffect,
-
   useMemo,
-
   useState,
-
 } from "react";
 
 import {
-
   useParams,
-
   useRouter,
-
 } from "next/navigation";
 
 import toast from "react-hot-toast";
+import { Plus, Trash2, Upload } from "lucide-react";
 
 import api from "@/services/api";
+import { products } from "@/lib/commerce";
 
 export default function EditProductPage() {
 
@@ -68,6 +63,25 @@ export default function EditProductPage() {
   const [preview,
     setPreview] =
     useState("");
+
+  // PRICE & STOCK
+  const [variantId, setVariantId] = useState<number | null>(null);
+  const [price, setPrice] = useState("");
+  const [oldPrice, setOldPrice] = useState("");
+  const [stock, setStock] = useState("");
+
+  // GALLERY IMAGES
+  const [existingImages, setExistingImages] = useState<any[]>([]);
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [newPreviews, setNewPreviews] = useState<string[]>([]);
+
+  // NUTRITION FACTS
+  const [servingSize, setServingSize] = useState("");
+  const [keyIngredients, setKeyIngredients] = useState("");
+  const [nutritionCards, setNutritionCards] = useState<{ label: string; value: string }[]>([]);
+
+  // BENEFITS
+  const [benefitsList, setBenefitsList] = useState<string[]>([]);
 
   // DATA
   const [brands,
@@ -172,6 +186,67 @@ export default function EditProductPage() {
             product.imageUrl || ""
           );
 
+          // PRIMARY VARIANT
+          const primaryVariant = product.variants?.[0];
+          if (primaryVariant) {
+            setVariantId(primaryVariant.id);
+            setPrice(String(primaryVariant.price || ""));
+            setOldPrice(String(primaryVariant.oldPrice || ""));
+            setStock(String(primaryVariant.stock || "0"));
+          } else {
+            setVariantId(null);
+            setPrice("");
+            setOldPrice("");
+            setStock("0");
+          }
+
+          // GALLERY IMAGES
+          setExistingImages(product.productImages || []);
+
+          // NUTRITION FACTS
+          if (product.nutrition) {
+            try {
+              const parsed = JSON.parse(product.nutrition);
+              setServingSize(parsed.servingSize || "");
+              setKeyIngredients(parsed.ingredients || "");
+              setNutritionCards(parsed.facts || []);
+            } catch (e) {
+              console.error("Failed to parse nutrition JSON", e);
+            }
+          } else {
+            const staticProduct = products.find(p => p.name.toLowerCase() === product.name?.toLowerCase());
+            if (staticProduct && staticProduct.nutrition) {
+              setServingSize(staticProduct.nutrition.servingSize || "");
+              setKeyIngredients(staticProduct.nutrition.keyIngredients?.join(", ") || "");
+              setNutritionCards([
+                { label: "protein", value: staticProduct.nutrition.protein },
+                { label: "carbs", value: staticProduct.nutrition.carbs },
+                { label: "calories", value: staticProduct.nutrition.calories }
+              ]);
+            }
+          }
+
+          // BENEFITS
+          if (product.benefits) {
+            try {
+              setBenefitsList(JSON.parse(product.benefits) || []);
+            } catch (e) {
+              console.error("Failed to parse benefits JSON", e);
+            }
+          } else {
+            const staticProduct = products.find(p => p.name.toLowerCase() === product.name?.toLowerCase());
+            if (staticProduct) {
+              setBenefitsList([
+                "Accelerates muscle protein synthesis",
+                "Reduces muscle soreness and fatigue",
+                "Mixes instantly with no clumps",
+                "Zero artificial colors or dyes",
+                "Enhanced with digestive enzymes",
+                "Incredible, award-winning taste"
+              ]);
+            }
+          }
+
           // MASTER DATA
           setBrands(
             brandRes.data.data || []
@@ -267,6 +342,57 @@ export default function EditProductPage() {
       setSubCategoryId("");
     };
 
+  // MULTIPLE IMAGES
+  const handleMultipleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setNewImages(files);
+    const previewUrls = files.map(file => URL.createObjectURL(file));
+    setNewPreviews(previewUrls);
+  };
+
+  const handleDeleteExistingImage = async (imageId: number) => {
+    if (!confirm("Are you sure you want to delete this gallery image?")) return;
+    try {
+      await api.delete(`/products/images/${imageId}`);
+      setExistingImages(prev => prev.filter(img => img.id !== imageId));
+      toast.success("Gallery image deleted");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete gallery image");
+    }
+  };
+
+  // NUTRITION HELPERS
+  const handleAddNutritionCard = () => {
+    setNutritionCards(prev => [...prev, { label: "", value: "" }]);
+  };
+
+  const handleUpdateNutritionCard = (index: number, field: "label" | "value", val: string) => {
+    setNutritionCards(prev => prev.map((card, i) => {
+      if (i === index) {
+        return { ...card, [field]: val };
+      }
+      return card;
+    }));
+  };
+
+  const handleDeleteNutritionCard = (index: number) => {
+    setNutritionCards(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // BENEFITS HELPERS
+  const handleAddBenefit = () => {
+    setBenefitsList(prev => [...prev, ""]);
+  };
+
+  const handleUpdateBenefit = (index: number, val: string) => {
+    setBenefitsList(prev => prev.map((item, i) => i === index ? val : item));
+  };
+
+  const handleDeleteBenefit = (index: number) => {
+    setBenefitsList(prev => prev.filter((_, i) => i !== index));
+  };
+
   // UPDATE PRODUCT
   const handleSubmit =
     async (
@@ -332,6 +458,24 @@ export default function EditProductPage() {
           );
         }
 
+        // Add gallery images
+        if (newImages && newImages.length > 0) {
+          newImages.forEach(file => {
+            formData.append("images", file);
+          });
+        }
+
+        // Add nutrition facts
+        const nutritionObj = {
+          servingSize,
+          ingredients: keyIngredients,
+          facts: nutritionCards.filter(c => c.label.trim() && c.value.trim())
+        };
+        formData.append("nutrition", JSON.stringify(nutritionObj));
+
+        // Add benefits
+        formData.append("benefits", JSON.stringify(benefitsList.filter(b => b.trim())));
+
         await api.put(
 
           `/products/update/${productId}`,
@@ -347,6 +491,27 @@ export default function EditProductPage() {
             },
           }
         );
+
+        // Update or Create default variant with Price details
+        const variantData = new FormData();
+        variantData.append("variantName", "Default");
+        variantData.append("price", price || "0");
+        if (oldPrice) {
+          variantData.append("oldPrice", oldPrice);
+        }
+        variantData.append("stock", String(stock || "0"));
+        variantData.append("active", "true");
+        variantData.append("productId", String(productId));
+
+        if (variantId) {
+          await api.put(`/product-variants/${variantId}`, variantData, {
+            headers: { "Content-Type": "multipart/form-data" }
+          });
+        } else {
+          await api.post(`/product-variants`, variantData, {
+            headers: { "Content-Type": "multipart/form-data" }
+          });
+        }
 
         toast.success(
           "Product updated successfully"
@@ -382,7 +547,7 @@ export default function EditProductPage() {
         justify-center
         text-2xl
         font-bold
-        text-black
+        text-white
       ">
 
         Loading product...
@@ -402,13 +567,13 @@ export default function EditProductPage() {
         <h1 className="
           text-4xl
           font-extrabold
-          text-black
+          text-white
         ">
           Edit Product
         </h1>
 
         <p className="
-          text-gray-500
+          text-zinc-400
           mt-2
         ">
           Update existing product
@@ -424,11 +589,14 @@ export default function EditProductPage() {
         }
 
         className="
-          bg-white
-          text-black
+          bg-zinc-900/50
+          backdrop-blur-md
+          text-white
+          border
+          border-white/10
           rounded-3xl
           p-10
-          shadow-sm
+          shadow-xl
           space-y-8
         "
       >
@@ -440,17 +608,23 @@ export default function EditProductPage() {
             block
             mb-4
             font-bold
+            text-white
           ">
             Product Image
           </label>
 
-          <input
-            type="file"
-            accept="image/*"
-            onChange={
-              handleImageChange
-            }
-          />
+          <label className="inline-flex items-center gap-2 px-6 py-3.5 bg-white/5 border border-white/10 hover:bg-white hover:text-zinc-950 text-white rounded-xl font-bold cursor-pointer transition-all shadow-md group">
+            <Upload className="w-5 h-5 text-zinc-400 group-hover:text-zinc-950 transition-colors" />
+            <span>Choose Image</span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={
+                handleImageChange
+              }
+              className="hidden"
+            />
+          </label>
 
           {preview && (
 
@@ -471,6 +645,55 @@ export default function EditProductPage() {
 
           )}
 
+        </div>
+
+        {/* GALLERY IMAGES */}
+        <div className="border-t border-white/10 pt-8">
+          <label className="block mb-4 font-bold text-lg">Product Gallery Images</label>
+          
+          {/* Existing Gallery Images */}
+          {existingImages.length > 0 && (
+            <div className="mb-6">
+              <span className="text-sm font-semibold text-zinc-400 block mb-3">Existing Gallery Images (Click trash icon to delete)</span>
+              <div className="flex flex-wrap gap-4">
+                {existingImages.map((img) => (
+                  <div key={img.id} className="relative group w-32 h-32 rounded-2xl overflow-hidden border border-white/10">
+                    <img src={img.imageUrl} alt="Gallery" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteExistingImage(img.id)}
+                      className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity duration-200"
+                    >
+                      <Trash2 className="w-6 h-6 hover:text-red-500 transition-colors" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Upload New Gallery Images */}
+          <div>
+            <span className="text-sm font-semibold text-zinc-400 block mb-3">Upload New Gallery Images</span>
+            <label className="inline-flex items-center gap-2 px-6 py-3.5 bg-white/5 border border-white/10 hover:bg-white hover:text-zinc-950 text-white rounded-xl font-bold cursor-pointer transition-all shadow-md group">
+              <Upload className="w-5 h-5 text-zinc-400 group-hover:text-zinc-950 transition-colors" />
+              <span>Choose Files</span>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleMultipleImages}
+                className="hidden"
+              />
+            </label>
+            {newPreviews.length > 0 && (
+              <div className="flex flex-wrap gap-4 mt-5">
+                {newPreviews.map((preview, idx) => (
+                  <img key={idx} src={preview} alt="New Preview" className="w-32 h-32 rounded-2xl object-cover border border-gray-200" />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* NAME */}
@@ -494,12 +717,16 @@ export default function EditProductPage() {
             }
             className="
               w-full
+              bg-black
               border
+              border-white/10
+              focus:border-red-500
               rounded-2xl
               px-5
               py-4
               outline-none
-              text-black
+              text-white
+              transition-colors
             "
           />
 
@@ -526,15 +753,57 @@ export default function EditProductPage() {
             rows={6}
             className="
               w-full
+              bg-black
               border
+              border-white/10
+              focus:border-red-500
               rounded-2xl
               px-5
               py-4
               outline-none
-              text-black
+              text-white
+              transition-colors
             "
           />
 
+        </div>
+
+        {/* PRICING & STOCK */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t border-white/10 pt-8">
+          <div>
+            <label className="block mb-3 font-bold">Price (₹)</label>
+            <input
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="e.g. 2499"
+              className="w-full bg-black border border-white/10 focus:border-red-500 rounded-2xl px-5 py-4 outline-none text-white transition-colors"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block mb-3 font-bold">Old Price (₹)</label>
+            <input
+              type="number"
+              value={oldPrice}
+              onChange={(e) => setOldPrice(e.target.value)}
+              placeholder="e.g. 3499"
+              className="w-full bg-black border border-white/10 focus:border-red-500 rounded-2xl px-5 py-4 outline-none text-white transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-3 font-bold">Stock Quantity</label>
+            <input
+              type="number"
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+              placeholder="e.g. 15"
+              className="w-full bg-black border border-white/10 focus:border-red-500 rounded-2xl px-5 py-4 outline-none text-white transition-colors"
+              required
+            />
+          </div>
         </div>
 
         {/* DROPDOWNS */}
@@ -568,16 +837,20 @@ export default function EditProductPage() {
 
               className="
                 w-full
+                bg-black
                 border
+                border-white/10
+                focus:border-red-500
                 rounded-2xl
                 px-5
                 py-4
                 outline-none
-                text-black
+                text-white
+                transition-colors
               "
             >
 
-              <option value="">
+              <option value="" className="bg-zinc-900 text-white">
                 Select Brand
               </option>
 
@@ -589,6 +862,7 @@ export default function EditProductPage() {
                     key={brand.id}
 
                     value={brand.id}
+                    className="bg-zinc-900 text-white"
                   >
 
                     {brand.name}
@@ -624,16 +898,20 @@ export default function EditProductPage() {
 
               className="
                 w-full
+                bg-black
                 border
+                border-white/10
+                focus:border-red-500
                 rounded-2xl
                 px-5
                 py-4
                 outline-none
-                text-black
+                text-white
+                transition-colors
               "
             >
 
-              <option value="">
+              <option value="" className="bg-zinc-900 text-white">
                 Select Category
               </option>
 
@@ -645,6 +923,7 @@ export default function EditProductPage() {
                     key={category.id}
 
                     value={category.id}
+                    className="bg-zinc-900 text-white"
                   >
 
                     {category.name}
@@ -682,16 +961,20 @@ export default function EditProductPage() {
 
               className="
                 w-full
+                bg-black
                 border
+                border-white/10
+                focus:border-red-500
                 rounded-2xl
                 px-5
                 py-4
                 outline-none
-                text-black
+                text-white
+                transition-colors
               "
             >
 
-              <option value="">
+              <option value="" className="bg-zinc-900 text-white">
                 Select Sub Category
               </option>
 
@@ -703,6 +986,7 @@ export default function EditProductPage() {
                     key={subCategory.id}
 
                     value={subCategory.id}
+                    className="bg-zinc-900 text-white"
                   >
 
                     {subCategory.name}
@@ -746,6 +1030,111 @@ export default function EditProductPage() {
 
         </div>
 
+        {/* NUTRITION FACTS EDITOR */}
+        <div className="border-t border-white/10 pt-8 space-y-6">
+          <h3 className="text-xl font-bold text-white">Supplement & Nutrition Facts</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block mb-3 font-bold text-zinc-300">Serving Size</label>
+              <input
+                type="text"
+                value={servingSize}
+                onChange={(e) => setServingSize(e.target.value)}
+                placeholder="e.g. 1 Scoop (32g)"
+                className="w-full bg-black border border-white/10 focus:border-red-500 rounded-2xl px-5 py-4 outline-none text-white transition-colors"
+              />
+            </div>
+            
+            <div>
+              <label className="block mb-3 font-bold text-zinc-300">Key Ingredients</label>
+              <input
+                type="text"
+                value={keyIngredients}
+                onChange={(e) => setKeyIngredients(e.target.value)}
+                placeholder="e.g. Micellar casein, Magnesium, Cocoa"
+                className="w-full bg-black border border-white/10 focus:border-red-500 rounded-2xl px-5 py-4 outline-none text-white transition-colors"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <label className="font-bold text-sm text-zinc-400">Nutrition Cards / Highlights (e.g. 25g protein, 4g carbs)</label>
+              <button
+                type="button"
+                onClick={handleAddNutritionCard}
+                className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white hover:text-black text-white px-4 py-2 rounded-full font-bold text-xs transition-all cursor-pointer"
+              >
+                <Plus className="w-4 h-4" /> Add Card
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {nutritionCards.map((card, idx) => (
+                <div key={idx} className="flex gap-4 items-center">
+                  <input
+                    type="text"
+                    value={card.label}
+                    onChange={(e) => handleUpdateNutritionCard(idx, "label", e.target.value)}
+                    placeholder="Label (e.g. protein)"
+                    className="flex-1 bg-black border border-white/10 focus:border-red-500 rounded-2xl px-5 py-3 outline-none text-white text-sm transition-colors"
+                  />
+                  <input
+                    type="text"
+                    value={card.value}
+                    onChange={(e) => handleUpdateNutritionCard(idx, "value", e.target.value)}
+                    placeholder="Value (e.g. 25g)"
+                    className="flex-1 bg-black border border-white/10 focus:border-red-500 rounded-2xl px-5 py-3 outline-none text-white text-sm transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteNutritionCard(idx)}
+                    className="p-3 text-red-500 hover:bg-red-500/10 rounded-full transition-colors animate-fade-in cursor-pointer"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* BENEFITS EDITOR */}
+        <div className="border-t border-white/10 pt-8 space-y-6">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-xl font-bold text-white">Product Benefits</h3>
+            <button
+              type="button"
+              onClick={handleAddBenefit}
+              className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white hover:text-black text-white px-4 py-2 rounded-full font-bold text-xs transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" /> Add Benefit
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {benefitsList.map((benefit, idx) => (
+              <div key={idx} className="flex gap-4 items-center">
+                <input
+                  type="text"
+                  value={benefit}
+                  onChange={(e) => handleUpdateBenefit(idx, e.target.value)}
+                  placeholder="Benefit description..."
+                  className="flex-1 bg-black border border-white/10 focus:border-red-500 rounded-2xl px-5 py-3 outline-none text-white text-sm transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleDeleteBenefit(idx)}
+                  className="p-3 text-red-500 hover:bg-red-500/10 rounded-full transition-colors animate-fade-in cursor-pointer"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* BUTTON */}
         <button
 
@@ -754,14 +1143,19 @@ export default function EditProductPage() {
           disabled={saving}
 
           className="
-            bg-black
-            hover:bg-red-500
+            bg-red-600
+            hover:bg-white
+            hover:text-zinc-950
             text-white
             px-8
             py-4
             rounded-2xl
             font-bold
             transition-all
+            disabled:opacity-50
+            shadow-lg
+            shadow-red-950/20
+            cursor-pointer
           "
         >
 

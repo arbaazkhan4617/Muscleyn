@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -15,6 +15,8 @@ import {
   PackageOpen,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -28,14 +30,104 @@ import {
   products,
 } from "@/lib/commerce";
 import { useCartStore } from "@/store/cartStore";
+import api from "@/services/api";
 
 const pageSize = 6;
 
 const filterButtonClass =
   "rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-zinc-300 transition hover:border-red-500 hover:text-white hover:bg-white/10";
 
-export default function ShopPage() {
-  const [search, setSearch] = useState("");
+const mapBackendProductToCommerce = (backendProd: any): CommerceProduct => {
+  const primaryVariant = backendProd.variants?.[0];
+  const priceVal = primaryVariant?.price ? Number(primaryVariant.price) : 0;
+  const oldPriceVal = primaryVariant?.oldPrice ? Number(primaryVariant.oldPrice) : 0;
+  
+  let discountStr = "";
+  if (oldPriceVal > priceVal) {
+    const diff = oldPriceVal - priceVal;
+    const pct = Math.round((diff / oldPriceVal) * 100);
+    discountStr = `${pct}% OFF`;
+  }
+  
+  let nutritionObj = {
+    servingSize: "1 Scoop (30g)",
+    protein: "0g",
+    carbs: "0g",
+    calories: "0 kcal",
+    keyIngredients: [] as string[]
+  };
+  
+  if (backendProd.nutrition) {
+    try {
+      const parsed = JSON.parse(backendProd.nutrition);
+      nutritionObj.servingSize = parsed.servingSize || "1 Scoop (30g)";
+      nutritionObj.keyIngredients = parsed.ingredients ? parsed.ingredients.split(",").map((s: string) => s.trim()) : [];
+      
+      const facts = parsed.facts || [];
+      const proteinFact = facts.find((f: any) => f.label?.toLowerCase() === "protein");
+      const carbsFact = facts.find((f: any) => f.label?.toLowerCase() === "carbs");
+      const caloriesFact = facts.find((f: any) => f.label?.toLowerCase() === "calories");
+      
+      nutritionObj.protein = proteinFact?.value || "0g";
+      nutritionObj.carbs = carbsFact?.value || "0g";
+      nutritionObj.calories = caloriesFact?.value || "0 kcal";
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  let parsedBenefits = [
+    "Accelerates muscle protein synthesis",
+    "Reduces muscle soreness and fatigue",
+    "Mixes instantly with no clumps",
+    "Zero artificial colors or dyes",
+    "Enhanced with digestive enzymes",
+    "Incredible, award-winning taste"
+  ];
+  if (backendProd.benefits) {
+    try {
+      parsedBenefits = JSON.parse(backendProd.benefits) || parsedBenefits;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  const galleryImages = backendProd.productImages?.map((img: any) => img.imageUrl) || [];
+
+  return {
+    id: backendProd.id,
+    variantId: primaryVariant?.id,
+    slug: backendProd.name ? backendProd.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "",
+    name: backendProd.name || "",
+    category: backendProd.subCategoryName || backendProd.categoryName || "Whey Protein",
+    brand: backendProd.brandName || "Muscleyn Elite",
+    goal: "Protein",
+    image: backendProd.imageUrl || "/images/products/1.jpeg",
+    gallery: galleryImages.length > 0 ? galleryImages : [backendProd.imageUrl || "/images/products/1.jpeg"],
+    price: priceVal,
+    oldPrice: oldPriceVal,
+    discount: discountStr,
+    rating: 4.8,
+    reviews: 120,
+    stock: primaryVariant?.stock ? Number(primaryVariant.stock) : 10,
+    popularity: 90,
+    createdAt: new Date().toISOString(),
+    shortDescription: backendProd.description ? backendProd.description.substring(0, 100) + "..." : "",
+    description: backendProd.description || "",
+    nutrition: nutritionObj,
+    customFacts: backendProd.nutrition ? (() => {
+      try {
+        return JSON.parse(backendProd.nutrition).facts || [];
+      } catch (e) { return []; }
+    })() : [],
+    customBenefits: parsedBenefits
+  } as any;
+};
+
+function ShopPageContent() {
+  const searchParams = useSearchParams();
+  const [allProducts, setAllProducts] = useState<CommerceProduct[]>(products);
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const [maxPrice, setMaxPrice] = useState(10000);
   const [sortBy, setSortBy] = useState("latest");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -45,6 +137,31 @@ export default function ShopPage() {
   const [page, setPage] = useState(1);
   const [quickView, setQuickView] = useState<CommerceProduct | null>(null);
   const addToCart = useCartStore((state) => state.addToCart);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get("/products");
+        if (response.data && response.data.status) {
+          const items = response.data.data.content || response.data.data || [];
+          const mapped = items.map(mapBackendProductToCommerce);
+          const dbNames = new Set(mapped.map((p: any) => p.name.toLowerCase()));
+          const filteredMocks = products.filter(p => !dbNames.has(p.name.toLowerCase()));
+          setAllProducts([...mapped, ...filteredMocks]);
+        }
+      } catch (err) {
+        console.warn("Could not load products from database, using static fallback.", err);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    const q = searchParams.get("search");
+    if (q !== null) {
+      setSearch(q);
+    }
+  }, [searchParams]);
 
   const toggleFilter = (
     value: string,
@@ -62,7 +179,7 @@ export default function ShopPage() {
   const filteredProducts = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
-    return products
+    return allProducts
       .filter((product) => {
         const matchesSearch =
           !normalizedSearch ||
@@ -126,6 +243,7 @@ export default function ShopPage() {
   const addQuickViewToCart = (product: CommerceProduct) => {
     addToCart({
       id: product.id,
+      variantId: (product as any).variantId,
       name: product.name,
       image: product.image,
       price: formatPrice(product.price),
@@ -502,6 +620,19 @@ export default function ShopPage() {
 
       <Footer />
     </>
+  );
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-4 text-white">
+        <div className="w-12 h-12 border-4 border-white/10 border-t-red-500 rounded-full animate-spin"></div>
+        <div className="text-zinc-500 font-bold uppercase tracking-widest text-sm">Loading Shop Catalog...</div>
+      </div>
+    }>
+      <ShopPageContent />
+    </Suspense>
   );
 }
 

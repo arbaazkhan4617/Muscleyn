@@ -182,212 +182,61 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <aside className="
-      admin-sidebar
-      w-[280px]
-      text-white
-      min-h-screen
-      flex
-      flex-col
-      px-6
-      py-8
-    ">
-
+    <aside className="admin-sidebar w-[280px] text-white h-screen fixed left-0 top-0 bottom-0 overflow-y-auto flex flex-col px-6 py-8 border-r border-white/5 z-40">
       {/* LOGO */}
-      <div className="
-        admin-sidebar-brand
-        mb-10
-        p-5
-      ">
-
-        <div className="
-          relative
-          z-10
-          mb-5
-          flex
-          h-14
-          w-14
-          items-center
-          justify-center
-          rounded-2xl
-          bg-red-600
-          shadow-xl
-          shadow-red-950/40
-        ">
-
-          <Dumbbell
-            className="
-              h-7
-              w-7
-            "
-          />
-
+      <div className="mb-8 flex flex-col gap-3 pl-1">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-red-600 shadow-lg shadow-red-900/50">
+            <Dumbbell className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black tracking-widest text-white leading-none">
+              MUSCLEYN
+            </h1>
+            <p className="mt-1 flex items-center gap-1.5 text-xs font-bold text-zinc-400 uppercase tracking-widest">
+              <Sparkles className="h-3 w-3 text-red-500" />
+              Admin Panel
+            </p>
+          </div>
         </div>
-
-        <h1 className="
-          relative
-          z-10
-          text-3xl
-          font-extrabold
-          tracking-wide
-        ">
-          MUSCLEYN
-        </h1>
-
-        <p className="
-          relative
-          z-10
-          text-gray-300
-          mt-2
-          flex
-          items-center
-          gap-2
-        ">
-          <Sparkles
-            className="
-              h-4
-              w-4
-              text-red-300
-            "
-          />
-
-          Admin Panel
-        </p>
-
+        <div className="h-px bg-white/10 w-full" />
       </div>
 
+
       {/* MENUS */}
-      <div className="
-        flex-1
-        space-y-3
-      ">
+      <div className="flex-1 space-y-3">
+        {menus.map((menu) => {
+          const Icon = menu.icon;
+          const active = pathname === menu.href || pathname.startsWith(`${menu.href}/`);
 
-        {menus.map(
-          (menu) => {
-
-            const Icon =
-              menu.icon;
-
-            const active =
-
-              pathname ===
-              menu.href ||
-              pathname.startsWith(
-                `${menu.href}/`
-              );
-
-            return (
-
-              <Link
-
-                key={menu.href}
-
-                href={menu.href}
-
-                className={`
-                  admin-nav-link
-                  flex
-                  items-center
-                  justify-between
-                  gap-4
-                  px-5
-                  py-4
-                  rounded-2xl
-                  transition-all
-
-                  ${
-                    active
-
-                      ? "bg-white text-black shadow-xl shadow-red-950/20"
-
-                      : "text-white/80 hover:bg-white/10 hover:text-white"
-                  }
-                `}
-              >
-
-                <span className="
-                  flex
-                  items-center
-                  gap-4
-                ">
-
-                  <Icon
-                    className="
-                      w-6
-                      h-6
-                    "
-                  />
-
-                  <span className="
-                    font-semibold
-                    text-lg
-                  ">
-                    {menu.name}
-                  </span>
-
-                </span>
-
-                <ChevronRight
-                  className={`
-                    h-4
-                    w-4
-                    transition
-                    ${
-                      active
-
-                        ? "opacity-100"
-
-                        : "opacity-0"
-                    }
-                  `}
-                />
-
-              </Link>
-            );
-          }
-        )}
-
+          return (
+            <Link
+              key={menu.href}
+              href={menu.href}
+              className={`admin-nav-link flex items-center justify-between gap-4 px-5 py-4 rounded-2xl transition-all ${
+                active
+                  ? "bg-white text-black shadow-xl shadow-red-950/20"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <span className="flex items-center gap-4">
+                <Icon className="w-6 h-6" />
+                <span className="font-semibold text-lg">{menu.name}</span>
+              </span>
+              <ChevronRight className={`h-4 w-4 transition ${active ? "opacity-100" : "opacity-0"}`} />
+            </Link>
+          );
+        })}
       </div>
 
       {/* LOGOUT */}
       <button
-
-        onClick={
-          handleLogout
-        }
-
-        className="
-          mt-10
-          flex
-          items-center
-          justify-center
-          gap-3
-          border
-          border-white/20
-          rounded-2xl
-          py-4
-          bg-white/5
-          hover:bg-red-600
-          hover:border-red-400
-          hover:text-white
-          transition-all
-          font-semibold
-          shadow-xl
-          shadow-black/20
-        "
+        onClick={handleLogout}
+        className="mt-10 flex items-center justify-center gap-3 border border-white/20 rounded-2xl py-4 bg-white/5 hover:bg-red-600 hover:border-red-400 hover:text-white transition-all font-semibold shadow-xl shadow-black/20 cursor-pointer"
       >
-
-        <LogOut
-          className="
-            w-5
-            h-5
-          "
-        />
-
+        <LogOut className="w-5 h-5" />
         Logout
-
       </button>
-
     </aside>
   );
 }

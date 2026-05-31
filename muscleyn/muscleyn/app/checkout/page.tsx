@@ -42,10 +42,6 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE">("COD");
   const [paymentGateway, setPaymentGateway] = useState<"RAZORPAY" | "PHONEPE">("RAZORPAY");
 
-  // GUEST USER
-  const [guestMobile, setGuestMobile] = useState("");
-  const [guestName, setGuestName] = useState("");
-
   // LOAD DATA
   useEffect(() => {
     // ADDRESS
@@ -87,30 +83,23 @@ export default function CheckoutPage() {
       return;
     }
 
-    // LOGIN USER ADDRESS
-    if (isLoggedIn && !selectedAddress) {
-      toast.error("Please select an address");
+    // REQUIRE LOGIN — redirect guest users to login page
+    if (!isLoggedIn) {
+      toast.error("Please login to place your order");
+      router.push("/login?returnUrl=/checkout");
       return;
     }
 
-    // GUEST USER
-    if (!isLoggedIn) {
-      if (!guestName || !guestMobile) {
-        toast.error("Please enter guest details");
-        return;
-      }
+    // LOGIN USER ADDRESS
+    if (isLoggedIn && !selectedAddress) {
+      toast.error("Please select a delivery address");
+      return;
     }
 
     try {
       setLoading(true);
 
-      let finalUserId = user?.id;
-
-      // GUEST FLOW
-      if (!isLoggedIn) {
-        // FUTURE: OTP LOGIN / AUTO REGISTER
-        finalUserId = 1;
-      }
+      const finalUserId = user?.id;
 
       // PLACE ORDER
       const orderResponse = await placeOrder({
@@ -120,7 +109,7 @@ export default function CheckoutPage() {
         paymentGateway,
         items: cartItems.map((item) => ({
           productId: item.id,
-          variantId: item.id,
+          variantId: item.variantId || item.id,
           quantity: Number(item.quantity),
         })),
       });
@@ -165,7 +154,7 @@ export default function CheckoutPage() {
 
                   clearCart();
                   toast.success("Payment successful");
-                  router.push("/order-success");
+                  router.push(`/order-success?orderId=${orderId}`);
                 } catch (error) {
                   console.log(error);
                   toast.error("Payment verification failed");
@@ -212,7 +201,7 @@ export default function CheckoutPage() {
       // COD SUCCESS or Fallback
       clearCart();
       toast.success("Order placed successfully");
-      router.push("/order-success");
+      router.push(`/order-success?orderId=${orderId}`);
     } catch (error) {
       console.log(error);
       toast.error("Failed to place order");
@@ -241,36 +230,24 @@ export default function CheckoutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-12">
             {/* LEFT */}
             <div className="space-y-8">
-              {/* GUEST DETAILS */}
+              {/* LOGIN PROMPT FOR GUESTS */}
               {!isLoggedIn && (
-                <div className="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] p-8 border border-white/10 shadow-xl">
-                  <div className="flex items-center gap-3 mb-8">
-                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-red-600 text-white font-bold text-sm">1</span>
-                    <h2 className="text-2xl font-black">Contact Details</h2>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Full Name</label>
-                      <input
-                        type="text"
-                        placeholder="John Doe"
-                        value={guestName}
-                        onChange={(e) => setGuestName(e.target.value)}
-                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl p-4 outline-none text-white transition-colors"
-                      />
+                <div className="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] p-8 border border-amber-500/30 shadow-xl">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="p-3 bg-amber-500/10 rounded-2xl border border-amber-500/20">
+                      <Lock className="w-6 h-6 text-amber-400" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Mobile Number</label>
-                      <input
-                        type="text"
-                        placeholder="+91 98765 43210"
-                        value={guestMobile}
-                        onChange={(e) => setGuestMobile(e.target.value)}
-                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl p-4 outline-none text-white transition-colors"
-                      />
+                      <h2 className="text-xl font-black text-white">Login Required</h2>
+                      <p className="text-zinc-400 text-sm mt-0.5">You need to be logged in to place an order</p>
                     </div>
                   </div>
+                  <button
+                    onClick={() => router.push("/login?returnUrl=/checkout")}
+                    className="w-full bg-amber-500 hover:bg-amber-400 text-black py-4 rounded-xl font-black uppercase tracking-widest text-sm transition-all"
+                  >
+                    Login / Register to Continue
+                  </button>
                 </div>
               )}
 

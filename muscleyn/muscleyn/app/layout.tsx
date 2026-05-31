@@ -7,6 +7,7 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 
 import { AuthProvider } from "@/context/AuthContext";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -55,7 +56,9 @@ export default function RootLayout({
       className={`${inter.variable} ${outfit.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-zinc-950 text-white font-sans selection:bg-red-600 selection:text-white">
-        <AuthProvider>{children}</AuthProvider>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+          <AuthProvider>{children}</AuthProvider>
+        </GoogleOAuthProvider>
 
         <Toaster
           position="top-right"

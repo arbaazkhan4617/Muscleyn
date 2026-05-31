@@ -520,7 +520,7 @@ const handleEdit =
         justify-center
         text-2xl
         font-bold
-        text-black
+        text-white
       ">
 
         Loading variants...
@@ -540,7 +540,7 @@ const handleEdit =
         <h1 className="
           text-4xl
           font-extrabold
-          text-black
+          text-white
         ">
           Product Variants
         </h1>
@@ -563,7 +563,7 @@ const handleEdit =
 
         className="
           bg-white
-          text-black
+          text-white
           rounded-3xl
           p-10
           shadow-sm
@@ -634,7 +634,7 @@ const handleEdit =
               rounded-2xl
               px-5
               py-4
-              text-black
+              text-white
             "
           />
 
@@ -652,7 +652,7 @@ const handleEdit =
               rounded-2xl
               px-5
               py-4
-              text-black
+              text-white
             "
           />
 
@@ -670,7 +670,7 @@ const handleEdit =
               rounded-2xl
               px-5
               py-4
-              text-black
+              text-white
             "
           />
 
@@ -688,7 +688,7 @@ const handleEdit =
               rounded-2xl
               px-5
               py-4
-              text-black
+              text-white
             "
           />
 
@@ -706,7 +706,7 @@ const handleEdit =
               rounded-2xl
               px-5
               py-4
-              text-black
+              text-white
             "
           />
 
@@ -724,7 +724,7 @@ const handleEdit =
               rounded-2xl
               px-5
               py-4
-              text-black
+              text-white
             "
           />
 
@@ -742,7 +742,7 @@ const handleEdit =
               rounded-2xl
               px-5
               py-4
-              text-black
+              text-white
             "
           />
 
@@ -760,7 +760,7 @@ const handleEdit =
               rounded-2xl
               px-5
               py-4
-              text-black
+              text-white
             "
           />
 
@@ -778,7 +778,7 @@ const handleEdit =
               rounded-2xl
               px-5
               py-4
-              text-black
+              text-white
             "
           />
 
@@ -796,7 +796,7 @@ const handleEdit =
               rounded-2xl
               px-5
               py-4
-              text-black
+              text-white
             "
           />
 
@@ -895,7 +895,7 @@ const handleEdit =
             text-3xl
             font-bold
             mb-3
-            text-black
+            text-white
           ">
             No Variants Found
           </h2>
@@ -981,7 +981,7 @@ const handleEdit =
 
                       <td className="
                         p-5
-                        text-black
+                        text-zinc-300
                       ">
 
                         {
@@ -992,7 +992,7 @@ const handleEdit =
 
                       <td className="
                         p-5
-                        text-black
+                        text-zinc-300
                       ">
 
                         ₹
@@ -1002,7 +1002,7 @@ const handleEdit =
 
                       <td className="
                         p-5
-                        text-black
+                        text-zinc-300
                       ">
 
                         {variant.stock}
@@ -1011,7 +1011,7 @@ const handleEdit =
 
                       <td className="
                         p-5
-                        text-black
+                        text-zinc-300
                       ">
 
                         {variant.weight}
@@ -1020,7 +1020,7 @@ const handleEdit =
 
                       <td className="
                         p-5
-                        text-black
+                        text-zinc-300
                       ">
 
                         {variant.flavor}

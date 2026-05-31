@@ -24,6 +24,7 @@ export default function PremiumProductCard({
     e.stopPropagation();
     addToCart({
       id: product.id,
+      variantId: (product as any).variantId,
       name: product.name,
       image: product.image,
       price: formatPrice(product.price),
@@ -39,7 +40,7 @@ export default function PremiumProductCard({
   };
 
   return (
-    <article className="group relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-zinc-900 shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-red-500/50 hover:shadow-[0_30px_80px_rgba(220,38,38,0.15)]">
+    <article className="group relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-zinc-900 shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-red-500/50 hover:shadow-[0_30px_80px_rgba(220,38,38,0.15)] flex flex-col h-full">
       <Link
         href={`/product/${product.id}`}
         className="absolute inset-0 z-10"
@@ -84,7 +85,7 @@ export default function PremiumProductCard({
         </button>
       </div>
 
-      <div className="relative p-7">
+      <div className="relative p-7 flex-1 flex flex-col">
         <div className="mb-4 flex items-center justify-between gap-4">
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-red-500">
             {product.category}
@@ -111,7 +112,7 @@ export default function PremiumProductCard({
           </span>
         </div>
 
-        <div className="mt-7 flex items-end justify-between gap-4">
+        <div className="mt-auto pt-7 flex items-end justify-between gap-4">
           <div>
             <p className="text-3xl font-black text-red-500">
               {formatPrice(product.price)}

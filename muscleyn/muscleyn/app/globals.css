@@ -116,11 +116,14 @@ select {
 }
 
 .admin-sidebar {
-  position: sticky;
+  position: fixed;
+  left: 0;
   top: 0;
+  bottom: 0;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(9, 9, 11, 0.6);
   backdrop-filter: blur(24px);
+  z-index: 40;
 }
 
 .admin-sidebar-brand {
@@ -272,6 +275,7 @@ select {
     position: relative;
     width: auto !important;
     min-height: auto !important;
+    height: auto !important;
   }
 }
 

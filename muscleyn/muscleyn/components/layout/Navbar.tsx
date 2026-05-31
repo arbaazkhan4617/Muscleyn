@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -27,14 +27,27 @@ const navItems = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [cartOpen, setCartOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const cartItems = useCartStore((state) => state.cartItems);
   const { isLoggedIn, user } = useAuth();
 
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
   const disableCartDrawer = pathname === "/cart" || pathname === "/checkout";
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchOpen(false);
+      setMobileMenuOpen(false);
+      setSearchQuery("");
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,8 +62,9 @@ export default function Navbar() {
   };
 
   return (
-    <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
+    <>
+      <header
+        className={`sticky top-0 z-50 transition-all duration-300 ${
         scrolled
           ? "border-b border-white/10 bg-zinc-950/80 shadow-2xl backdrop-blur-xl"
           : "bg-transparent py-2"
@@ -105,13 +119,42 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="hidden h-11 w-11 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white md:flex"
-              aria-label="Search products"
-            >
-              <Search className="h-5 w-5" />
-            </button>
+            <AnimatePresence>
+              {searchOpen ? (
+                <motion.form
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: 220, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  onSubmit={handleSearchSubmit}
+                  className="relative hidden items-center h-11 md:flex"
+                >
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Search supplements..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full h-full bg-white/5 border border-white/10 rounded-lg px-4 pr-10 text-xs outline-none text-white focus:border-red-500 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setSearchOpen(false)}
+                    className="absolute right-3 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </motion.form>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen(true)}
+                  className="hidden h-11 w-11 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white md:flex cursor-pointer"
+                  aria-label="Search products"
+                >
+                  <Search className="h-5 w-5" />
+                </button>
+              )}
+            </AnimatePresence>
 
             <button
               type="button"
@@ -201,6 +244,19 @@ export default function Navbar() {
             className="border-t border-white/10 bg-zinc-900/95 backdrop-blur-xl lg:hidden overflow-hidden"
           >
             <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5">
+              <form onSubmit={handleSearchSubmit} className="relative flex items-center h-12 mb-3">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-full bg-white/5 border border-white/10 rounded-lg px-4 pr-10 text-sm outline-none text-white focus:border-red-500 transition-colors"
+                />
+                <button type="submit" className="absolute right-3 text-zinc-400 hover:text-white transition-colors cursor-pointer">
+                  <Search className="w-5 h-5" />
+                </button>
+              </form>
+
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -260,7 +316,9 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
+      </header>
+
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
-    </header>
+    </>
   );
 }

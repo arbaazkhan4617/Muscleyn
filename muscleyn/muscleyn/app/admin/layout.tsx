@@ -51,7 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <AdminSidebar />
 
       {/* CONTENT */}
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col lg:pl-[280px]">
         <header className="mx-4 mt-4 lg:mx-8 lg:mt-8 rounded-[2rem] border border-white/10 bg-zinc-900/50 px-6 py-5 shadow-2xl backdrop-blur-xl z-10 sticky top-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>

@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 
 interface CartItem {
   id: number;
+  variantId?: number;
 
   name: string;
 
@@ -21,7 +22,8 @@ interface CartStore {
   cartItems: CartItem[];
 
   addToCart: (
-    product: Omit<CartItem, "quantity">
+    product: Omit<CartItem, "quantity">,
+    quantity?: number
   ) => void;
 
   removeFromCart: (id: number) => void;
@@ -52,7 +54,7 @@ export const useCartStore =
     cartItems: [],
 
     // ADD TO CART
-    addToCart: (product) =>
+    addToCart: (product, quantity = 1) =>
 
       set((state) => {
 
@@ -65,12 +67,10 @@ export const useCartStore =
         if (existingProduct) {
 
   // STOCK LIMIT
-  if (
-    existingProduct.quantity >=
+  const newQuantity = Math.min(
+    existingProduct.quantity + quantity,
     existingProduct.stock
-  ) {
-    return state;
-  }
+  );
 
   return {
     cartItems: state.cartItems.map((item) =>
@@ -78,7 +78,7 @@ export const useCartStore =
       item.id === product.id
         ? {
             ...item,
-            quantity: item.quantity + 1,
+            quantity: newQuantity,
           }
         : item
     ),
@@ -91,7 +91,7 @@ export const useCartStore =
             ...state.cartItems,
             {
               ...product,
-              quantity: 1,
+              quantity: Math.min(quantity, product.stock),
             },
           ],
         };

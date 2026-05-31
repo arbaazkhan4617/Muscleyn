@@ -17,6 +17,7 @@ import {
 } from "next/navigation";
 
 import toast from "react-hot-toast";
+import { Upload } from "lucide-react";
 
 import api from "@/services/api";
 
@@ -353,12 +354,13 @@ useState<string[]>([]);
         <h1 className="
           text-4xl
           font-extrabold
+          text-white
         ">
           Add Product
         </h1>
 
         <p className="
-          text-gray-500
+          text-zinc-400
           mt-2
         ">
           Create new product
@@ -374,11 +376,14 @@ useState<string[]>([]);
         }
 
         className="
- bg-white
-  text-black
-  rounded-3xl
+          bg-zinc-900/50
+          backdrop-blur-md
+          text-white
+          border
+          border-white/10
+          rounded-3xl
           p-10
-          shadow-sm
+          shadow-xl
           space-y-8
         "
       >
@@ -434,14 +439,19 @@ useState<string[]>([]);
     Product Gallery Images
   </label>
 
-  <input
-    type="file"
-    multiple
-    accept="image/*"
-    onChange={
-      handleMultipleImages
-    }
-  />
+  <label className="inline-flex items-center gap-2 px-6 py-3.5 bg-white/5 border border-white/10 hover:bg-white hover:text-zinc-950 text-white rounded-xl font-bold cursor-pointer transition-all shadow-md group">
+    <Upload className="w-5 h-5 text-zinc-400 group-hover:text-zinc-950 transition-colors" />
+    <span>Choose Files</span>
+    <input
+      type="file"
+      multiple
+      accept="image/*"
+      onChange={
+        handleMultipleImages
+      }
+      className="hidden"
+    />
+  </label>
 
   <div className="
     flex
@@ -498,11 +508,16 @@ useState<string[]>([]);
             "
             className="
               w-full
+              bg-black
               border
+              border-white/10
+              focus:border-red-500
               rounded-2xl
               px-5
               py-4
               outline-none
+              text-white
+              transition-colors
             "
           />
 
@@ -529,11 +544,16 @@ useState<string[]>([]);
             rows={6}
             className="
               w-full
+              bg-black
               border
+              border-white/10
+              focus:border-red-500
               rounded-2xl
               px-5
               py-4
               outline-none
+              text-white
+              transition-colors
             "
           />
 
@@ -570,15 +590,20 @@ useState<string[]>([]);
 
               className="
                 w-full
+                bg-black
                 border
+                border-white/10
+                focus:border-red-500
                 rounded-2xl
                 px-5
                 py-4
                 outline-none
+                text-white
+                transition-colors
               "
             >
 
-              <option value="">
+              <option value="" className="bg-zinc-900 text-white">
                 Select Brand
               </option>
 
@@ -590,6 +615,7 @@ useState<string[]>([]);
                     key={brand.id}
 
                     value={brand.id}
+                    className="bg-zinc-900 text-white"
                   >
 
                     {brand.name}
@@ -625,15 +651,20 @@ useState<string[]>([]);
 
               className="
                 w-full
+                bg-black
                 border
+                border-white/10
+                focus:border-red-500
                 rounded-2xl
                 px-5
                 py-4
                 outline-none
+                text-white
+                transition-colors
               "
             >
 
-              <option value="">
+              <option value="" className="bg-zinc-900 text-white">
                 Select Category
               </option>
 
@@ -645,6 +676,7 @@ useState<string[]>([]);
                     key={category.id}
 
                     value={category.id}
+                    className="bg-zinc-900 text-white"
                   >
 
                     {category.name}
@@ -682,15 +714,20 @@ useState<string[]>([]);
 
               className="
                 w-full
+                bg-black
                 border
+                border-white/10
+                focus:border-red-500
                 rounded-2xl
                 px-5
                 py-4
                 outline-none
+                text-white
+                transition-colors
               "
             >
 
-              <option value="">
+              <option value="" className="bg-zinc-900 text-white">
                 Select Sub Category
               </option>
 
@@ -702,6 +739,7 @@ useState<string[]>([]);
                     key={subCategory.id}
 
                     value={subCategory.id}
+                    className="bg-zinc-900 text-white"
                   >
 
                     {subCategory.name}
@@ -753,14 +791,19 @@ useState<string[]>([]);
           disabled={loading}
 
           className="
-            bg-black
-            hover:bg-red-500
+            bg-red-600
+            hover:bg-white
+            hover:text-zinc-950
             text-white
             px-8
             py-4
             rounded-2xl
             font-bold
             transition-all
+            disabled:opacity-50
+            shadow-lg
+            shadow-red-950/20
+            cursor-pointer
           "
         >
 

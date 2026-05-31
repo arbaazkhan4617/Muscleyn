@@ -1,8 +1,9 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -20,7 +21,8 @@ import toast from "react-hot-toast";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { login, register } from "@/services/authService";
+import { login, register, googleLogin } from "@/services/authService";
+import { GoogleLogin } from "@react-oauth/google";
 
 type AuthMode = "login" | "register";
 
@@ -48,11 +50,13 @@ const accessBenefits: Array<{
   },
 ];
 
-export default function LoginPage() {
+function LoginContent() {
   const [mode, setMode] = useState<AuthMode>("login");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState(initialForm);
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl") || "/";
 
   const isLogin = mode === "login";
 
@@ -89,7 +93,7 @@ export default function LoginPage() {
         toast.success("Your Muscleyn account is ready");
       }
 
-      window.location.assign("/");
+      window.location.assign(returnUrl);
     } catch (error) {
       console.error(error);
       toast.error(
@@ -251,25 +255,33 @@ export default function LoginPage() {
                   </button>
                 </form>
 
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      toast("Mobile OTP login is ready for backend integration")
-                    }
-                    className="rounded-full border border-zinc-200 px-5 py-4 text-sm font-black transition hover:border-red-500 hover:text-red-600"
-                  >
-                    Login with OTP
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      toast("Google login is ready for OAuth integration")
-                    }
-                    className="rounded-full border border-zinc-200 px-5 py-4 text-sm font-black transition hover:border-red-500 hover:text-red-600"
-                  >
-                    Continue with Google
-                  </button>
+                <div className="mt-6 flex flex-col gap-3">
+                  {/* GOOGLE LOGIN */}
+                  <div className="flex justify-center">
+                    <GoogleLogin
+                      onSuccess={async (credentialResponse) => {
+                        try {
+                          if (!credentialResponse.credential) {
+                            toast.error("Google login failed — no credential");
+                            return;
+                          }
+                          await googleLogin(credentialResponse.credential);
+                          toast.success("Signed in with Google!");
+                          window.location.assign(returnUrl);
+                        } catch (err) {
+                          console.error(err);
+                          toast.error("Google login failed. Please try again.");
+                        }
+                      }}
+                      onError={() => toast.error("Google login was cancelled or failed")}
+                      useOneTap
+                      theme="filled_black"
+                      shape="pill"
+                      size="large"
+                      text="continue_with"
+                      width="360"
+                    />
+                  </div>
                 </div>
 
                 <p className="mt-8 text-center text-sm font-semibold text-zinc-500">
@@ -285,6 +297,14 @@ export default function LoginPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-zinc-950 flex items-center justify-center"><div className="w-10 h-10 border-4 border-white/10 border-t-red-500 rounded-full animate-spin" /></div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
 

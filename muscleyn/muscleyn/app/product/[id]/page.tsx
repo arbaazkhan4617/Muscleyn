@@ -23,6 +23,97 @@ import Footer from "@/components/layout/Footer";
 import PremiumProductCard from "@/components/product/PremiumProductCard";
 import { useCartStore } from "@/store/cartStore";
 import { products, formatPrice, CommerceProduct } from "@/lib/commerce";
+import api from "@/services/api";
+
+const mapBackendProductToCommerce = (backendProd: any): CommerceProduct => {
+  const primaryVariant = backendProd.variants?.[0];
+  const priceVal = primaryVariant?.price ? Number(primaryVariant.price) : 0;
+  const oldPriceVal = primaryVariant?.oldPrice ? Number(primaryVariant.oldPrice) : 0;
+  
+  // Calculate discount percentage
+  let discountStr = "";
+  if (oldPriceVal > priceVal) {
+    const diff = oldPriceVal - priceVal;
+    const pct = Math.round((diff / oldPriceVal) * 100);
+    discountStr = `${pct}% OFF`;
+  }
+  
+  // Parse nutrition facts
+  let nutritionObj = {
+    servingSize: "1 Scoop (30g)",
+    protein: "0g",
+    carbs: "0g",
+    calories: "0 kcal",
+    keyIngredients: [] as string[]
+  };
+  
+  if (backendProd.nutrition) {
+    try {
+      const parsed = JSON.parse(backendProd.nutrition);
+      nutritionObj.servingSize = parsed.servingSize || "1 Scoop (30g)";
+      nutritionObj.keyIngredients = parsed.ingredients ? parsed.ingredients.split(",").map((s: string) => s.trim()) : [];
+      
+      const facts = parsed.facts || [];
+      const proteinFact = facts.find((f: any) => f.label?.toLowerCase() === "protein");
+      const carbsFact = facts.find((f: any) => f.label?.toLowerCase() === "carbs");
+      const caloriesFact = facts.find((f: any) => f.label?.toLowerCase() === "calories");
+      
+      nutritionObj.protein = proteinFact?.value || "0g";
+      nutritionObj.carbs = carbsFact?.value || "0g";
+      nutritionObj.calories = caloriesFact?.value || "0 kcal";
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // Parse benefits list
+  let parsedBenefits = [
+    "Accelerates muscle protein synthesis",
+    "Reduces muscle soreness and fatigue",
+    "Mixes instantly with no clumps",
+    "Zero artificial colors or dyes",
+    "Enhanced with digestive enzymes",
+    "Incredible, award-winning taste"
+  ];
+  if (backendProd.benefits) {
+    try {
+      parsedBenefits = JSON.parse(backendProd.benefits) || parsedBenefits;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  const galleryImages = backendProd.productImages?.map((img: any) => img.imageUrl) || [];
+
+  return {
+    id: backendProd.id,
+    variantId: primaryVariant?.id,
+    slug: backendProd.name ? backendProd.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "",
+    name: backendProd.name || "",
+    category: backendProd.subCategoryName || backendProd.categoryName || "Whey Protein",
+    brand: backendProd.brandName || "Muscleyn Elite",
+    goal: "Protein",
+    image: backendProd.imageUrl || "/images/products/1.jpeg",
+    gallery: galleryImages.length > 0 ? galleryImages : [backendProd.imageUrl || "/images/products/1.jpeg"],
+    price: priceVal,
+    oldPrice: oldPriceVal,
+    discount: discountStr,
+    rating: 4.8,
+    reviews: 120,
+    stock: primaryVariant?.stock ? Number(primaryVariant.stock) : 10,
+    popularity: 90,
+    createdAt: new Date().toISOString(),
+    shortDescription: backendProd.description ? backendProd.description.substring(0, 100) + "..." : "",
+    description: backendProd.description || "",
+    nutrition: nutritionObj,
+    customFacts: backendProd.nutrition ? (() => {
+      try {
+        return JSON.parse(backendProd.nutrition).facts || [];
+      } catch (e) { return []; }
+    })() : [],
+    customBenefits: parsedBenefits
+  } as any;
+};
 
 export default function ProductDetailsPage({
   params,
@@ -32,6 +123,7 @@ export default function ProductDetailsPage({
   const router = useRouter();
   const cartItems = useCartStore((state) => state.cartItems);
   const addToCart = useCartStore((state) => state.addToCart);
+  const updateQuantity = useCartStore((state) => state.updateQuantity);
 
   const { id } = use(params);
 
@@ -43,15 +135,43 @@ export default function ProductDetailsPage({
   const [isZoomed, setIsZoomed] = useState(false);
   
   const imageRef = useRef<HTMLDivElement>(null);
+  const hasInitializedQuantity = useRef(false);
 
   useEffect(() => {
-    // For demonstration, use local commerce data to build out the rich UI
-    const foundProduct = products.find((p) => p.id.toString() === id);
-    if (foundProduct) {
-      setProduct(foundProduct);
-      setActiveImage(foundProduct.image);
+    const fetchProduct = async () => {
+      try {
+        const response = await api.get(`/products/${id}`);
+        if (response.data && response.data.status && response.data.data) {
+          const mapped = mapBackendProductToCommerce(response.data.data);
+          setProduct(mapped);
+          setActiveImage(mapped.image);
+        } else {
+          throw new Error("Invalid product data");
+        }
+      } catch (err) {
+        console.warn("Could not load product from backend, using local mock data fallback.", err);
+        const foundProduct = products.find((p) => p.id.toString() === id);
+        if (foundProduct) {
+          setProduct(foundProduct);
+          setActiveImage(foundProduct.image);
+        }
+      }
+    };
+    
+    if (id) {
+      fetchProduct();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (product && !hasInitializedQuantity.current && cartItems.length >= 0) {
+      const existingItem = cartItems.find((item) => item.id === product.id);
+      if (existingItem) {
+        setQuantity(existingItem.quantity);
+      }
+      hasInitializedQuantity.current = true;
+    }
+  }, [product, cartItems]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!imageRef.current) return;
@@ -75,27 +195,24 @@ export default function ProductDetailsPage({
 
   const handleAddToCart = () => {
     const existingItem = cartItems.find((item) => item.id === product.id);
-    const currentQuantity = existingItem?.quantity || 0;
-    const availableStock = product.stock - currentQuantity;
+    
+    // Limit quantity to available stock
+    const finalQuantity = Math.min(quantity, product.stock);
 
-    if (availableStock <= 0) {
-      toast.error("Maximum stock limit reached");
-      return;
-    }
-
-    const quantityToAdd = Math.min(quantity, availableStock);
-
-    for (let i = 0; i < quantityToAdd; i++) {
+    if (existingItem) {
+      updateQuantity(product.id, finalQuantity);
+      toast.success(`${product.name} quantity in cart updated to ${finalQuantity}`);
+    } else {
       addToCart({
         id: product.id,
+        variantId: (product as any).variantId,
         name: product.name,
         image: product.image,
         price: formatPrice(product.price),
         stock: product.stock,
-      });
+      }, finalQuantity);
+      toast.success(`${finalQuantity} ${product.name} added to cart`);
     }
-
-    toast.success(`${quantityToAdd} ${product.name} added to cart`);
   };
 
   const handleBuyNow = () => {
@@ -207,19 +324,34 @@ export default function ProductDetailsPage({
               </p>
 
               {/* KEY NUTRITION (Mini) */}
-              <div className="grid grid-cols-3 gap-4 mb-10">
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center text-center">
-                  <span className="text-3xl font-black text-white">{product.nutrition.protein}</span>
-                  <span className="text-xs font-bold uppercase tracking-widest text-zinc-500 mt-1">Protein</span>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center text-center">
-                  <span className="text-3xl font-black text-white">{product.nutrition.carbs}</span>
-                  <span className="text-xs font-bold uppercase tracking-widest text-zinc-500 mt-1">Carbs</span>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center text-center">
-                  <span className="text-3xl font-black text-white">{product.nutrition.calories}</span>
-                  <span className="text-xs font-bold uppercase tracking-widest text-zinc-500 mt-1">Calories</span>
-                </div>
+              <div className={`grid gap-4 mb-10 ${
+                (product as any).customFacts && (product as any).customFacts.length > 0
+                  ? `grid-cols-2 sm:grid-cols-${Math.min(4, (product as any).customFacts.length)}`
+                  : 'grid-cols-3'
+              }`}>
+                {(product as any).customFacts && (product as any).customFacts.length > 0 ? (
+                  (product as any).customFacts.map((fact: any, index: number) => (
+                    <div key={index} className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center text-center">
+                      <span className="text-3xl font-black text-white">{fact.value}</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-zinc-500 mt-1">{fact.label}</span>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center text-center">
+                      <span className="text-3xl font-black text-white">{product.nutrition.protein}</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-zinc-500 mt-1">Protein</span>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center text-center">
+                      <span className="text-3xl font-black text-white">{product.nutrition.carbs}</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-zinc-500 mt-1">Carbs</span>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center text-center">
+                      <span className="text-3xl font-black text-white">{product.nutrition.calories}</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-zinc-500 mt-1">Calories</span>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* PRICE & ADD TO CART */}
@@ -237,7 +369,7 @@ export default function ProductDetailsPage({
                   <div className="flex items-center justify-between bg-black border border-white/10 rounded-full px-4 sm:w-1/3 min-h-[60px]">
                     <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-10 h-10 rounded-full flex items-center justify-center text-xl font-black hover:bg-white/10 transition">-</button>
                     <span className="text-xl font-black">{quantity}</span>
-                    <button onClick={() => setQuantity(q => q + 1)} className="w-10 h-10 rounded-full flex items-center justify-center text-xl font-black hover:bg-white/10 transition">+</button>
+                    <button onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} className="w-10 h-10 rounded-full flex items-center justify-center text-xl font-black hover:bg-white/10 transition">+</button>
                   </div>
                   <button onClick={handleAddToCart} className="flex-1 min-h-[60px] bg-red-600 hover:bg-white hover:text-black rounded-full flex items-center justify-center gap-3 text-sm font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)]">
                     <ShoppingCart className="w-5 h-5" /> Add To Cart
@@ -301,15 +433,24 @@ export default function ProductDetailsPage({
                   <div className="bg-zinc-900 border border-white/10 rounded-3xl overflow-hidden">
                     <div className="p-6 border-b border-white/10 bg-black/50">
                       <h3 className="text-2xl font-black">Supplement Facts</h3>
-                      <p className="text-zinc-500 text-sm mt-1">Serving Size: 1 Scoop (32g)</p>
+                      <p className="text-zinc-500 text-sm mt-1">Serving Size: {product.nutrition.servingSize}</p>
                     </div>
                     <div className="p-6 divide-y divide-white/5">
-                      {Object.entries(product.nutrition).filter(([k])=>k!=='keyIngredients').map(([key, val]) => (
-                        <div key={key} className="flex justify-between py-4">
-                          <span className="font-bold text-zinc-300 uppercase tracking-wider text-sm">{key}</span>
-                          <span className="font-black text-white">{val}</span>
-                        </div>
-                      ))}
+                      {(product as any).customFacts && (product as any).customFacts.length > 0 ? (
+                        (product as any).customFacts.map((fact: any, index: number) => (
+                          <div key={index} className="flex justify-between py-4">
+                            <span className="font-bold text-zinc-300 uppercase tracking-wider text-sm">{fact.label}</span>
+                            <span className="font-black text-white">{fact.value}</span>
+                          </div>
+                        ))
+                      ) : (
+                        Object.entries(product.nutrition).filter(([k])=>k!=='keyIngredients'&&k!=='servingSize').map(([key, val]) => (
+                          <div key={key} className="flex justify-between py-4">
+                            <span className="font-bold text-zinc-300 uppercase tracking-wider text-sm">{key}</span>
+                            <span className="font-black text-white">{val as string}</span>
+                          </div>
+                        ))
+                      )}
                     </div>
                     <div className="p-6 bg-white/5 border-t border-white/10">
                       <p className="font-bold text-zinc-300 uppercase tracking-wider text-sm mb-3">Key Ingredients</p>
@@ -322,14 +463,14 @@ export default function ProductDetailsPage({
               )}
               {activeTab === 'benefits' && (
                 <motion.div key="bene" initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-20}} className="grid sm:grid-cols-2 gap-6">
-                  {[
+                  {((product as any).customBenefits || [
                     "Accelerates muscle protein synthesis",
                     "Reduces muscle soreness and fatigue",
                     "Mixes instantly with no clumps",
                     "Zero artificial colors or dyes",
                     "Enhanced with digestive enzymes",
                     "Incredible, award-winning taste"
-                  ].map((benefit, i) => (
+                  ]).map((benefit: string, i: number) => (
                     <div key={i} className="flex items-start gap-4 p-6 rounded-2xl bg-white/5 border border-white/10">
                       <CheckCircle2 className="w-6 h-6 text-red-500 shrink-0" />
                       <p className="font-bold text-lg text-zinc-200">{benefit}</p>
