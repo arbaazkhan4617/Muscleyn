@@ -108,7 +108,7 @@ export default function AddressPage() {
       state: address.state || "",
       country: address.country || "India",
       pincode: address.pincode || "",
-      addressType: address.addressType || "HOME",
+      addressType: address.addressType === "OFFICE" ? "WORK" : address.addressType || "HOME",
       isDefault: address.isDefault || false,
     });
     setEditingId(address.id);
@@ -122,7 +122,12 @@ export default function AddressPage() {
     }
     try {
       setSaving(true);
-      const payload: SaveAddressRequest = { ...form, userId: user?.id };
+      const mappedAddressType = form.addressType === "WORK" ? "OFFICE" : form.addressType;
+      const payload: SaveAddressRequest = { 
+        ...form, 
+        addressType: mappedAddressType, 
+        userId: user?.id 
+      };
       if (editingId) {
         await updateAddress(editingId, payload);
         toast.success("Address updated");
@@ -251,11 +256,11 @@ export default function AddressPage() {
 
                   <div className="flex items-start gap-4">
                     <div className={`p-2.5 rounded-xl flex-shrink-0 ${
-                      address.addressType === "WORK"
+                      address.addressType === "OFFICE" || address.addressType === "WORK"
                         ? "bg-blue-500/10 border border-blue-500/20"
                         : "bg-white/5 border border-white/10"
                     }`}>
-                      {address.addressType === "WORK"
+                      {address.addressType === "OFFICE" || address.addressType === "WORK"
                         ? <Building2 className="w-5 h-5 text-blue-400" />
                         : <Home className="w-5 h-5 text-zinc-400" />
                       }
@@ -265,7 +270,7 @@ export default function AddressPage() {
                       <div className="flex items-center gap-3 mb-1">
                         <h3 className="font-black text-white text-lg">{address.fullName}</h3>
                         <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest border border-white/10 px-2 py-0.5 rounded-full">
-                          {address.addressType}
+                          {address.addressType === "OFFICE" ? "WORK" : address.addressType}
                         </span>
                       </div>
                       <p className="text-zinc-400 leading-relaxed">

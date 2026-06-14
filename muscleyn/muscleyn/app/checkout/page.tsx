@@ -161,8 +161,8 @@ export default function CheckoutPage() {
                 }
               },
               prefill: {
-                name: user?.name || guestName,
-                contact: user?.mobileNumber || guestMobile,
+                name: user?.name || "",
+                contact: user?.mobileNumber || "",
               },
               theme: {
                 color: "#dc2626", // Red-600

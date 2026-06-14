@@ -32,25 +32,10 @@ export const login = async (
   const result =
     response.data;
 
-  if (
-    result?.data?.token
-  ) {
-
-    localStorage.setItem(
-
-      "token",
-
-      result.data.token
-    );
-
-    localStorage.setItem(
-
-      "user",
-
-      JSON.stringify(
-        result.data
-      )
-    );
+  if (result?.data?.token) {
+    localStorage.setItem("token", result.data.token);
+    const userObj = { ...result.data, id: result.data.id || result.data.userId };
+    localStorage.setItem("user", JSON.stringify(userObj));
   }
 
   return result;
@@ -64,7 +49,8 @@ export const googleLogin = async (idToken: string) => {
 
   if (result?.data?.token) {
     localStorage.setItem("token", result.data.token);
-    localStorage.setItem("user", JSON.stringify(result.data));
+    const userObj = { ...result.data, id: result.data.id || result.data.userId };
+    localStorage.setItem("user", JSON.stringify(userObj));
   }
 
   return result;
@@ -88,25 +74,10 @@ export const register =
     const result =
       response.data;
 
-    if (
-      result?.data?.token
-    ) {
-
-      localStorage.setItem(
-
-        "token",
-
-        result.data.token
-      );
-
-      localStorage.setItem(
-
-        "user",
-
-        JSON.stringify(
-          result.data
-        )
-      );
+    if (result?.data?.token) {
+      localStorage.setItem("token", result.data.token);
+      const userObj = { ...result.data, id: result.data.id || result.data.userId };
+      localStorage.setItem("user", JSON.stringify(userObj));
     }
 
     return result;

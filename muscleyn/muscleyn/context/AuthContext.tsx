@@ -64,23 +64,16 @@ export const AuthProvider = (
     );
 
   useEffect(() => {
+    const savedUser = getUser();
+    const savedToken = getToken();
 
-    const savedUser =
-      getUser();
-
-    const savedToken =
-      getToken();
-
-    if (
-      savedUser &&
-      savedToken
-    ) {
-
-      setUser(savedUser);
-
+    if (savedUser && savedToken) {
+      setUser({
+        ...savedUser,
+        id: savedUser.id || savedUser.userId
+      });
       setToken(savedToken);
     }
-
   }, []);
 
   const logoutUser = () => {
