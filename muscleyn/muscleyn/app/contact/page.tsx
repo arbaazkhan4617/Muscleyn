@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -18,6 +18,7 @@ import toast from "react-hot-toast";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { submitContactEnquiry } from "@/services/contactService";
+import api from "@/services/api";
 
 const faqs = [
   {
@@ -50,49 +51,49 @@ const contactCards: Array<{
   title: string;
   value: string;
 }> = [
-  {
-    icon: Phone,
-    title: "Phone",
-    value: "+91 98765 43210",
-  },
-  {
-    icon: Mail,
-    title: "Email",
-    value: "support@muscleyn.com",
-  },
-  {
-    icon: MapPin,
-    title: "Business",
-    value: "Fitness District, Indore, India",
-  },
-  {
-    icon: Clock,
-    title: "Support Hours",
-    value: "Mon-Sat, 10:00 AM - 7:00 PM",
-  },
-];
+    {
+      icon: Phone,
+      title: "Phone",
+      value: "+91 98765 43210",
+    },
+    {
+      icon: Mail,
+      title: "Email",
+      value: "support@muscleyn.com",
+    },
+    {
+      icon: MapPin,
+      title: "Business",
+      value: "Fitness District, Indore, India",
+    },
+    {
+      icon: Clock,
+      title: "Support Hours",
+      value: "Mon-Sat, 10:00 AM - 7:00 PM",
+    },
+  ];
 
 const supportCards: Array<{
   icon: LucideIcon;
   title: string;
   copy: string;
 }> = [
-  {
-    icon: Headphones,
-    title: "Order Support",
-    copy: "Delivery, payment, returns",
-  },
-  {
-    icon: MessageCircle,
-    title: "Stack Guidance",
-    copy: "Goal-based supplement advice",
-  },
-  {
-    icon: Send,
-    title: "Social",
-    copy: "Follow drops and athlete stories",
-  },
-];
+    {
+      icon: Headphones,
+      title: "Order Support",
+      copy: "Delivery, payment, returns",
+    },
+    {
+      icon: MessageCircle,
+      title: "Stack Guidance",
+      copy: "Goal-based supplement advice",
+    },
+    {
+      icon: Send,
+      title: "Social",
+      copy: "Follow drops and athlete stories",
+    },
+  ];
 
 const stores = [
   {
@@ -129,11 +130,104 @@ const stores = [
   },
 ];
 
+const getIconByName = (name: string): LucideIcon => {
+  const map: Record<string, LucideIcon> = {
+    Phone: Phone,
+    Mail: Mail,
+    MapPin: MapPin,
+    Clock: Clock,
+    Headphones: Headphones,
+    MessageCircle: MessageCircle,
+    Send: Send
+  };
+  return map[name] || MapPin;
+};
+
 export default function ContactPage() {
   const [form, setForm] = useState(initialForm);
   const [activeStoreIdx, setActiveStoreIdx] = useState(0);
-  const activeStore = stores[activeStoreIdx];
   const [loading, setLoading] = useState(false);
+
+  // Dynamic CMS States with static fallbacks
+  const [header, setHeader] = useState({
+    eyebrow: "Contact Us",
+    title: "Need help with products, orders, or your stack?",
+    description: "Reach the Muscleyn support team for product guidance, order questions, partnerships, or business enquiries.",
+    bgImage: "https://images.unsplash.com/photo-1549476464-37392f717541?q=80&w=1800&auto=format&fit=crop"
+  });
+
+  const [contactCardsState, setContactCardsState] = useState<any[]>(contactCards);
+  const [supportCardsState, setSupportCardsState] = useState<any[]>(supportCards);
+  const [storesState, setStoresState] = useState<any[]>(stores);
+  const [faqsState, setFaqsState] = useState<any[]>(faqs);
+
+  const activeStore = storesState[activeStoreIdx] || storesState[0] || stores[0];
+
+  useEffect(() => {
+    const fetchCmsData = async () => {
+      try {
+        const [headerRes, infoRes, supportRes, storesRes, faqsRes] = await Promise.allSettled([
+          api.get("/cms/contact-header"),
+          api.get("/cms/contact-info-cards"),
+          api.get("/cms/contact-support-cards"),
+          api.get("/cms/contact-stores"),
+          api.get("/cms/contact-faqs")
+        ]);
+
+        if (headerRes.status === "fulfilled" && headerRes.value.data.data && headerRes.value.data.data.cmsValue) {
+          try {
+            const parsed = JSON.parse(headerRes.value.data.data.cmsValue);
+            setHeader({
+              eyebrow: parsed.eyebrow || "Contact Us",
+              title: parsed.title || "Need help with products, orders, or your stack?",
+              description: parsed.description || "Reach the Muscleyn support team for product guidance, order questions, partnerships, or business enquiries.",
+              bgImage: parsed.bgImage || "https://images.unsplash.com/photo-1549476464-37392f717541?q=80&w=1800&auto=format&fit=crop"
+            });
+          } catch (e) {}
+        }
+
+        if (infoRes.status === "fulfilled" && infoRes.value.data.data && infoRes.value.data.data.cmsValue) {
+          try {
+            const parsed = JSON.parse(infoRes.value.data.data.cmsValue);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setContactCardsState(parsed);
+            }
+          } catch (e) {}
+        }
+
+        if (supportRes.status === "fulfilled" && supportRes.value.data.data && supportRes.value.data.data.cmsValue) {
+          try {
+            const parsed = JSON.parse(supportRes.value.data.data.cmsValue);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setSupportCardsState(parsed);
+            }
+          } catch (e) {}
+        }
+
+        if (storesRes.status === "fulfilled" && storesRes.value.data.data && storesRes.value.data.data.cmsValue) {
+          try {
+            const parsed = JSON.parse(storesRes.value.data.data.cmsValue);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setStoresState(parsed);
+            }
+          } catch (e) {}
+        }
+
+        if (faqsRes.status === "fulfilled" && faqsRes.value.data.data && faqsRes.value.data.data.cmsValue) {
+          try {
+            const parsed = JSON.parse(faqsRes.value.data.data.cmsValue);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setFaqsState(parsed);
+            }
+          } catch (e) {}
+        }
+      } catch (err) {
+        console.error("Failed to load contact page CMS config", err);
+      }
+    };
+
+    fetchCmsData();
+  }, []);
 
   const updateField = (field: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -165,41 +259,45 @@ export default function ContactPage() {
       <Navbar />
       <main className="bg-zinc-950 text-white">
         <section className="relative isolate overflow-hidden py-24 md:py-32">
-          <Image
-            src="https://images.unsplash.com/photo-1549476464-37392f717541?q=80&w=1800&auto=format&fit=crop"
-            alt="Fitness support"
-            fill
-            priority
-            sizes="100vw"
-            className="-z-10 object-cover opacity-35"
-          />
+          {header.bgImage && (
+            <Image
+              src={header.bgImage}
+              alt="Fitness support"
+              fill
+              priority
+              sizes="100vw"
+              className="-z-10 object-cover opacity-35"
+            />
+          )}
           <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black via-black/85 to-red-950/40" />
           <div className="mx-auto max-w-7xl px-4">
             <p className="text-sm font-black uppercase tracking-[0.24em] text-red-400">
-              Contact Us
+              {header.eyebrow}
             </p>
             <h1 className="mt-5 max-w-4xl text-5xl font-black leading-none tracking-[-0.06em] md:text-7xl">
-              Need help with products, orders, or your stack?
+              {header.title}
             </h1>
             <p className="mt-7 max-w-2xl text-lg leading-8 text-zinc-300">
-              Reach the Muscleyn support team for product guidance, order
-              questions, partnerships, or business enquiries.
+              {header.description}
             </p>
           </div>
         </section>
 
         <section className="mx-auto grid max-w-7xl gap-8 px-4 py-20 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="space-y-5">
-            {contactCards.map(({ icon: Icon, title, value }) => (
-              <div
-                key={title}
-                className="rounded-[2rem] border border-white/10 bg-white/[0.06] p-7"
-              >
-                <Icon className="h-8 w-8 text-red-500" />
-                <h3 className="mt-5 text-2xl font-black">{title}</h3>
-                <p className="mt-2 text-zinc-300">{value}</p>
-              </div>
-            ))}
+            {contactCardsState.map((card) => {
+              const Icon = getIconByName(card.icon);
+              return (
+                <div
+                  key={card.title}
+                  className="rounded-[2rem] border border-white/10 bg-white/[0.06] p-7"
+                >
+                  <Icon className="h-8 w-8 text-red-500" />
+                  <h3 className="mt-5 text-2xl font-black">{card.title}</h3>
+                  <p className="mt-2 text-zinc-300">{card.value}</p>
+                </div>
+              );
+            })}
           </div>
 
           <form
@@ -268,16 +366,19 @@ export default function ContactPage() {
 
         <section className="bg-white py-20 text-zinc-950">
           <div className="mx-auto grid max-w-7xl gap-6 px-4 md:grid-cols-3">
-            {supportCards.map(({ icon: Icon, title, copy }) => (
-              <div
-                key={title}
-                className="rounded-[2rem] border border-zinc-200 bg-zinc-50 p-8"
-              >
-                <Icon className="h-10 w-10 text-red-600" />
-                <h3 className="mt-6 text-2xl font-black">{title}</h3>
-                <p className="mt-3 leading-7 text-zinc-600">{copy}</p>
-              </div>
-            ))}
+            {supportCardsState.map((card) => {
+              const Icon = getIconByName(card.icon);
+              return (
+                <div
+                  key={card.title}
+                  className="rounded-[2rem] border border-zinc-200 bg-zinc-50 p-8"
+                >
+                  <Icon className="h-10 w-10 text-red-600" />
+                  <h3 className="mt-6 text-2xl font-black">{card.title}</h3>
+                  <p className="mt-3 leading-7 text-zinc-600">{card.copy}</p>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -288,16 +389,15 @@ export default function ContactPage() {
             Experience Centers <span className="text-red-500">& Labs</span>
           </h2>
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory" style={{ scrollbarWidth: "none" }}>
-            {stores.map((store, idx) => (
+            {storesState.map((store, idx) => (
               <button
                 key={store.id}
                 type="button"
                 onClick={() => setActiveStoreIdx(idx)}
-                className={`snap-start shrink-0 w-72 p-6 rounded-[2rem] border transition-all duration-300 text-left ${
-                  activeStoreIdx === idx
+                className={`snap-start shrink-0 w-72 p-6 rounded-[2rem] border transition-all duration-300 text-left ${activeStoreIdx === idx
                     ? "border-red-600 bg-red-600/10 text-white shadow-lg shadow-red-950/20"
                     : "border-white/10 bg-white/[0.03] text-zinc-400 hover:border-white/20 hover:text-white"
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-black uppercase tracking-[0.15em] text-red-500">
@@ -313,51 +413,55 @@ export default function ContactPage() {
         </section>
 
         <section className="mx-auto grid max-w-7xl gap-8 px-4 py-10 lg:grid-cols-2">
-          <div className="relative min-h-[620px] overflow-hidden rounded-[2.25rem] border border-white/10 bg-zinc-900 shadow-2xl shadow-black/30">
-            <iframe
-              key={activeStore.id}
-              title={`${activeStore.name} location`}
-              src={activeStore.mapUrl}
-              className="absolute inset-0 h-full w-full border-0 grayscale-[15%] contrast-110"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-            <div className="pointer-events-none absolute left-1/2 top-[42%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-red-600 text-white shadow-2xl shadow-red-950/50">
-                <MapPin className="h-8 w-8 fill-white" />
-              </div>
-              <div className="mt-3 rounded-full bg-black/75 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white backdrop-blur">
-                {activeStore.name}
-              </div>
-            </div>
-            <div className="absolute inset-x-5 bottom-5 rounded-[1.75rem] border border-white/15 bg-black/80 p-6 text-white shadow-2xl backdrop-blur-xl">
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-red-400">
-                Visit our support desk
-              </p>
-              <h3 className="mt-3 text-2xl font-black">
-                {activeStore.name}
-              </h3>
-              <p className="mt-3 leading-7 text-zinc-300">
-                {activeStore.address}
-              </p>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-zinc-400">
-                    Pickup
-                  </p>
-                  <p className="mt-1 font-bold">{activeStore.timings}</p>
+          {activeStore && (
+            <div className="relative min-h-[620px] overflow-hidden rounded-[2.25rem] border border-white/15 bg-zinc-900 shadow-2xl shadow-black/30">
+              <iframe
+                key={activeStore.id}
+                title={`${activeStore.name} location`}
+                src={activeStore.mapUrl}
+                className="absolute inset-0 h-full w-full border-0 grayscale-[15%] contrast-110"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+              <div className="pointer-events-none absolute left-1/2 top-[42%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-red-600 text-white shadow-2xl shadow-red-950/50">
+                  <MapPin className="h-8 w-8 fill-white" />
                 </div>
-                <Link
-                  href={activeStore.directionsUrl}
-                  target="_blank"
-                  className="flex items-center justify-center rounded-2xl bg-red-600 px-5 py-4 text-sm font-black uppercase tracking-[0.16em] transition hover:bg-white hover:text-zinc-950"
-                >
-                  Get Directions
-                </Link>
+                <div className="mt-3 rounded-full bg-black/75 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white backdrop-blur">
+                  {activeStore.name}
+                </div>
+              </div>
+              <div className="absolute inset-x-5 bottom-5 rounded-[1.75rem] border border-white/15 bg-black/80 p-6 text-white shadow-2xl backdrop-blur-xl">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-red-400">
+                  Visit our support desk
+                </p>
+                <h3 className="mt-3 text-2xl font-black">
+                  {activeStore.name}
+                </h3>
+                <p className="mt-3 leading-7 text-zinc-300">
+                  {activeStore.address}
+                </p>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-zinc-400">
+                      Pickup
+                    </p>
+                    <p className="mt-1 font-bold">{activeStore.timings}</p>
+                  </div>
+                  {activeStore.directionsUrl && (
+                    <Link
+                      href={activeStore.directionsUrl}
+                      target="_blank"
+                      className="flex items-center justify-center rounded-2xl bg-red-600 px-5 py-4 text-sm font-black uppercase tracking-[0.16em] transition hover:bg-white hover:text-zinc-950"
+                    >
+                      Get Directions
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
           <div>
             <p className="text-sm font-black uppercase tracking-[0.24em] text-red-400">
               FAQ
@@ -366,7 +470,7 @@ export default function ContactPage() {
               Quick answers before you contact us
             </h2>
             <div className="mt-8 space-y-4">
-              {faqs.map((faq) => (
+              {faqsState.map((faq) => (
                 <div
                   key={faq.question}
                   className="rounded-3xl border border-white/10 bg-white/[0.06] p-6"
@@ -376,23 +480,6 @@ export default function ContactPage() {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        <section className="px-4 pb-20">
-          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 rounded-[2rem] border border-white/10 bg-red-600 p-8 text-center md:flex-row md:text-left">
-            <div>
-              <h2 className="text-3xl font-black">Follow the grind</h2>
-              <p className="mt-2 text-red-50">
-                Campaigns, transformation stories, and new product drops.
-              </p>
-            </div>
-            <Link
-              href="https://instagram.com"
-              className="rounded-full bg-white px-7 py-4 text-sm font-black uppercase tracking-[0.16em] text-zinc-950 transition hover:bg-zinc-950 hover:text-white"
-            >
-              Social Media
-            </Link>
           </div>
         </section>
       </main>

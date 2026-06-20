@@ -29,10 +29,10 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto px-4 py-20 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-12">
-          
+
           {/* Left Side: Why Choose Us & Newsletter (Span 5) */}
           <div className="lg:col-span-5 flex flex-col justify-between gap-10">
-            
+
             {/* Why Choose Us Stats Block */}
             <div>
               <div className="flex items-center gap-2 mb-6">
@@ -41,7 +41,7 @@ export default function Footer() {
                   Why Choose Us
                 </h3>
               </div>
-              
+
               {/* Stat Grid */}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3">
                 {/* 16 Years */}
@@ -94,7 +94,7 @@ export default function Footer() {
               <p className="text-xs text-zinc-400 font-medium mb-4 leading-relaxed">
                 Subscribe to get early access to exclusive drops, new formulations, and members-only deals.
               </p>
-              
+
               <form onSubmit={handleSubscribe} className="relative flex items-center h-12">
                 <input
                   type="email"
@@ -137,7 +137,7 @@ export default function Footer() {
 
           {/* Right Side: Columns (Span 7) */}
           <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-3 gap-10">
-            
+
             {/* Column 1: Quick Links */}
             <div>
               <h4 className="text-xs font-black uppercase tracking-[0.2em] text-red-500 border-b border-white/5 pb-3 mb-5">
@@ -253,7 +253,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="hover:text-white transition-colors">
+                  <Link href="/return-policy" className="hover:text-white transition-colors">
                     Return and Refund
                   </Link>
                 </li>
@@ -269,8 +269,8 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
           <p>© {new Date().getFullYear()} PRABHA PHARMA. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6">
-            <Link href="/contact" className="hover:text-white transition">Terms</Link>
-            <Link href="/contact" className="hover:text-white transition">Privacy</Link>
+            {/* <Link href="/terms" className="hover:text-white transition">Terms</Link> 
+              <Link href="/privacy" className="hover:text-white transition">Privacy</Link> */}
           </div>
         </div>
       </section>

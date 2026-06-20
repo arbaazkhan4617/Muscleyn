@@ -55,14 +55,10 @@ class CmsServiceImpl(
 
     override fun getCmsByKey(
         cmsKey: String
-    ): Cms {
+    ): Cms? {
 
         return cmsRepository
             .findByCmsKey(cmsKey)
-
-            ?: throw RuntimeException(
-                "Cms not found"
-            )
     }
 
     override fun getAllCms():

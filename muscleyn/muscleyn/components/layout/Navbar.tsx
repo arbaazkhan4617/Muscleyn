@@ -519,19 +519,19 @@ export default function Navbar() {
                         ) : (
                           <>
                             <li>
-                              <Link href="/recommend" className="flex items-center gap-1.5 hover:text-white transition-colors">
+                              <Link href="/authenticity" className="flex items-center gap-1.5 hover:text-white transition-colors">
                                 <Activity className="w-3.5 h-3.5 text-yellow-500" />
                                 Check Authenticity
                               </Link>
                             </li>
                             <li>
-                              <Link href="/recommend" className="flex items-center gap-1.5 hover:text-white transition-colors">
+                              <Link href="/authenticity" className="flex items-center gap-1.5 hover:text-white transition-colors">
                                 <FileText className="w-3.5 h-3.5 text-yellow-500" />
                                 Protein Lab Certificate
                               </Link>
                             </li>
                             <li>
-                              <Link href="/recommend" className="flex items-center gap-1.5 hover:text-white transition-colors">
+                              <Link href="/authenticity" className="flex items-center gap-1.5 hover:text-white transition-colors">
                                 <Award className="w-3.5 h-3.5 text-yellow-500" />
                                 Labdoor
                               </Link>
@@ -690,7 +690,7 @@ export default function Navbar() {
                     ))
                   ) : (
                     <Link
-                      href="/recommend"
+                      href="/authenticity"
                       className="rounded-lg px-4 py-2 text-sm font-bold text-zinc-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
                       onClick={() => setMobileMenuOpen(false)}
                     >

@@ -98,7 +98,9 @@ class SecurityConfig(
 
                         "/api/coupons/**",
 
-                        "/api/contact/enquiries/**"
+                        "/api/contact/enquiries/**",
+
+                        "/api/banners/**"
 
                     )
 

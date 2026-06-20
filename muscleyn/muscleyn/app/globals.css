@@ -279,3 +279,69 @@ select {
   }
 }
 
+/* Custom typography styles to restore standard HTML elements within .prose */
+.prose h1 {
+  font-size: 1.875rem !important; /* text-3xl */
+  font-weight: 800 !important; /* font-extrabold */
+  color: #ffffff !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+  display: block !important;
+  font-family: var(--font-heading), sans-serif !important;
+}
+
+.prose h2 {
+  font-size: 1.5rem !important; /* text-2xl */
+  font-weight: 700 !important; /* font-bold */
+  color: #ffffff !important;
+  margin-top: 1.25rem !important;
+  margin-bottom: 0.5rem !important;
+  display: block !important;
+  font-family: var(--font-heading), sans-serif !important;
+}
+
+.prose h3 {
+  font-size: 1.25rem !important; /* text-xl */
+  font-weight: 600 !important; /* font-semibold */
+  color: #ffffff !important;
+  margin-top: 1rem !important;
+  margin-bottom: 0.5rem !important;
+  display: block !important;
+  font-family: var(--font-heading), sans-serif !important;
+}
+
+.prose p {
+  margin-bottom: 1rem !important;
+}
+
+.prose ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.prose ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.prose li {
+  margin-bottom: 0.25rem !important;
+}
+
+.prose strong, .prose b {
+  font-weight: 700 !important;
+  color: #ffffff !important;
+}
+
+.prose a {
+  color: #ef4444 !important; /* red-500 */
+  text-decoration: underline !important;
+}
+
+.prose a:hover {
+  color: #f87171 !important; /* red-400 */
+}
+
+

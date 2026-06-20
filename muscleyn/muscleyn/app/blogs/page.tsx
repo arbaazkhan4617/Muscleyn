@@ -46,24 +46,45 @@ const blogPosts = [
 
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState<any[]>([]);
+  const [headerTitle, setHeaderTitle] = useState("Our Blogs");
+  const [headerSubtitle, setHeaderSubtitle] = useState("Science-backed articles, sports nutrition reports, and training insights curated by our medical and coaching panels.");
 
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         const res = await api.get("/cms/blogs-list");
+        let loaded = false;
         if (res.data.data && res.data.data.cmsValue) {
           const parsed = JSON.parse(res.data.data.cmsValue);
           if (Array.isArray(parsed) && parsed.length > 0) {
             setBlogs(parsed);
-            return;
+            loaded = true;
           }
+        }
+        if (!loaded) {
+          setBlogs(blogPosts);
         }
       } catch (err) {
         console.log("No dynamic blogs configured in CMS", err);
+        setBlogs(blogPosts);
       }
-      setBlogs(blogPosts);
     };
+
+    const fetchHeader = async () => {
+      try {
+        const res = await api.get("/cms/blogs-page-header");
+        if (res.data.data && res.data.data.cmsValue) {
+          const parsed = JSON.parse(res.data.data.cmsValue);
+          if (parsed.title) setHeaderTitle(parsed.title);
+          if (parsed.subtitle) setHeaderSubtitle(parsed.subtitle);
+        }
+      } catch (err) {
+        console.log("No custom blogs header configured", err);
+      }
+    };
+
     fetchBlogs();
+    fetchHeader();
   }, []);
 
   return (
@@ -81,10 +102,10 @@ export default function BlogsPage() {
             <ArrowLeft className="w-4 h-4" /> Back to Home
           </Link>
           <h1 className="text-4xl md:text-6xl font-black tracking-tight">
-            Our Blogs
+            {headerTitle}
           </h1>
           <p className="mt-4 text-zinc-400 text-sm md:text-base font-medium max-w-xl mx-auto">
-            Science-backed articles, sports nutrition reports, and training insights curated by our medical and coaching panels.
+            {headerSubtitle}
           </p>
         </div>
       </section>
@@ -131,17 +152,23 @@ export default function BlogsPage() {
               </div>
 
               {/* Title & summary */}
-              <h2 className="text-3xl md:text-4xl font-black text-white hover:text-red-500 transition-colors leading-tight mb-4">
-                {post.title}
-              </h2>
+              <Link href={`/blogs/${post.id}`}>
+                <h2 className="text-3xl md:text-4xl font-black text-white hover:text-red-500 transition-colors leading-tight mb-4">
+                  {post.title}
+                </h2>
+              </Link>
               <p className="text-zinc-300 text-sm leading-relaxed mb-6 font-semibold">
                 {post.summary}
               </p>
 
-              {/* Full Content */}
-              <div className="text-zinc-400 text-xs md:text-sm leading-relaxed whitespace-pre-line font-medium bg-white/[0.01] border border-white/5 rounded-2xl p-6">
-                {post.content}
-              </div>
+              {/* Read Full Article Button */}
+              <Link
+                href={`/blogs/${post.id}`}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-red-600 px-6 text-xs font-black uppercase tracking-wider text-white transition hover:bg-white hover:text-zinc-950"
+              >
+                Read Full Article
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </article>
           ))}
         </div>

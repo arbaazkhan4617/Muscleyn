@@ -11,7 +11,7 @@ interface CmsService {
 
     fun getCmsByKey(
         cmsKey: String
-    ): Cms
+    ): Cms?
 
     fun getAllCms():
             List<Cms>

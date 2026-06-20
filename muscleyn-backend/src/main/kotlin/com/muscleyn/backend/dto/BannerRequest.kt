@@ -4,6 +4,10 @@ data class BannerRequest(
 
     val title: String?,
 
+    val eyebrow: String?,
+
+    val subtitle: String?,
+
     val imageUrl: String?,
 
     val redirectUrl: String?,

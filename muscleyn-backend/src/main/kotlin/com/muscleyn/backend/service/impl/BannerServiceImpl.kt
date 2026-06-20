@@ -23,6 +23,10 @@ class BannerServiceImpl(
 
             title = request.title,
 
+            eyebrow = request.eyebrow,
+
+            subtitle = request.subtitle,
+
             imageUrl =
                 request.imageUrl,
 
@@ -62,6 +66,12 @@ class BannerServiceImpl(
 
         banner.title =
             request.title
+
+        banner.eyebrow =
+            request.eyebrow
+
+        banner.subtitle =
+            request.subtitle
 
         banner.imageUrl =
             request.imageUrl

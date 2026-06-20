@@ -107,6 +107,90 @@ class DatabaseInitializer(
             "icon": "Star"
           }
         ]""")
+
+        seedCmsKey("blogs-page-header", """{
+          "title": "Our Blogs",
+          "subtitle": "Science-backed articles, sports nutrition reports, and training insights curated by our medical and coaching panels."
+        }""")
+
+        seedCmsKey("news-page-header", """{
+          "title": "Our News",
+          "subtitle": "Media features, corporate announcements, and press coverage of our award-winning clean sports nutrition initiatives."
+        }""")
+
+        seedCmsKey("return-refund-policy", "Default Return and Refund Policy: Prabha Pharma is dedicated to customer satisfaction. Unopened products in their original packaging can be returned within 14 days of delivery. Please contact support for assistance.")
+
+        seedCmsKey("trust-ticker-list", """["50K+ Customers", "10K+ Orders Delivered", "500+ Products", "Trusted By Athletes"]""")
+
+        seedCmsKey("contact-header", """{
+          "eyebrow": "Contact Us",
+          "title": "Need help with products, orders, or your stack?",
+          "description": "Reach the Muscleyn support team for product guidance, order questions, partnerships, or business enquiries.",
+          "bgImage": "https://images.unsplash.com/photo-1549476464-37392f717541?q=80&w=1800&auto=format&fit=crop"
+        }""")
+
+        seedCmsKey("contact-info-cards", """[
+          { "icon": "Phone", "title": "Phone", "value": "+91 98765 43210" },
+          { "icon": "Mail", "title": "Email", "value": "support@muscleyn.com" },
+          { "icon": "MapPin", "title": "Business", "value": "Fitness District, Indore, India" },
+          { "icon": "Clock", "title": "Support Hours", "value": "Mon-Sat, 10:00 AM - 7:00 PM" }
+        ]""")
+
+        seedCmsKey("contact-support-cards", """[
+          { "icon": "Headphones", "title": "Order Support", "copy": "Delivery, payment, returns" },
+          { "icon": "MessageCircle", "title": "Stack Guidance", "copy": "Goal-based supplement advice" },
+          { "icon": "Send", "title": "Social", "copy": "Follow drops and athlete stories" }
+        ]""")
+
+        seedCmsKey("contact-stores", """[
+          {
+            "id": "indore",
+            "name": "Muscleyn Indore HQ",
+            "address": "Vijay Nagar, Indore, Madhya Pradesh 452010",
+            "timings": "Mon-Sat, 10 AM - 7 PM",
+            "mapUrl": "https://www.google.com/maps?q=22.7533,75.8937&z=16&output=embed",
+            "directionsUrl": "https://www.google.com/maps?q=22.7533,75.8937"
+          },
+          {
+            "id": "mumbai",
+            "name": "Muscleyn Mumbai Experience Center",
+            "address": "Bandra West, Link Road, Mumbai, Maharashtra 400050",
+            "timings": "Mon-Sun, 11 AM - 8 PM",
+            "mapUrl": "https://www.google.com/maps?q=19.0600,72.8311&z=16&output=embed",
+            "directionsUrl": "https://www.google.com/maps?q=19.0600,72.8311"
+          },
+          {
+            "id": "delhi",
+            "name": "Muscleyn Delhi Experience Center",
+            "address": "Connaught Place, Radial Road 1, New Delhi 110001",
+            "timings": "Mon-Sun, 10 AM - 9 PM",
+            "mapUrl": "https://www.google.com/maps?q=28.6304,77.2177&z=16&output=embed",
+            "directionsUrl": "https://www.google.com/maps?q=28.6304,77.2177"
+          },
+          {
+            "id": "bengaluru",
+            "name": "Muscleyn Bengaluru Experience Center",
+            "address": "Indiranagar, 100 Feet Rd, Bengaluru, Karnataka 560038",
+            "timings": "Mon-Sat, 10 AM - 8 PM",
+            "mapUrl": "https://www.google.com/maps?q=12.9719,77.6412&z=16&output=embed",
+            "directionsUrl": "https://www.google.com/maps?q=12.9719,77.6412"
+          }
+        ]""")
+
+        seedCmsKey("contact-faqs", """[
+          {
+            "question": "How fast do you ship orders?",
+            "answer": "Most orders are prepared within 24 hours. Final delivery depends on the destination and courier coverage."
+          },
+          {
+            "question": "Can I get help choosing a supplement stack?",
+            "answer": "Yes. Share your training goal, diet preference, and budget through the contact form and support can guide you."
+          },
+          {
+            "question": "Do you support cash on delivery?",
+            "answer": "COD can be enabled based on delivery location and order value. The checkout flow is structured for this support."
+          }
+        ]""")
     }
 
     private fun seedCmsKey(key: String, value: String) {

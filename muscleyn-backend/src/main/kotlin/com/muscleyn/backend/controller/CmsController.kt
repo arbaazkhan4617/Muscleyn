@@ -46,7 +46,7 @@ class CmsController(
         @PathVariable
         cmsKey: String
 
-    ): ResponseDto<Cms> {
+    ): ResponseDto<Cms?> {
 
         val cms =
             cmsService
@@ -59,7 +59,7 @@ class CmsController(
             status = true,
 
             message =
-                "Cms fetched successfully",
+                if (cms != null) "Cms fetched successfully" else "Cms key not found",
 
             data = cms
         )

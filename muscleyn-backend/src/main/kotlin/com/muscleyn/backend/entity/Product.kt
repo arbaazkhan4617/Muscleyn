@@ -17,7 +17,7 @@ class Product(
     @Column(nullable = false)
     var name: String? = null,
 
-    @Column(length = 1000)
+    @Column
     var description: String? = null,
 
     @ManyToOne

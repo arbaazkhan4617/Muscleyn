@@ -129,7 +129,7 @@ export default function BlogSection() {
 
                 <div className="mt-6 pt-5 border-t border-white/5 flex items-center justify-between">
                   <Link
-                    href={blog.link}
+                    href={`/blogs/${blog.id}`}
                     className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-red-500 hover:text-white transition-colors cursor-pointer group/btn"
                   >
                     Read More

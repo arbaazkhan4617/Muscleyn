@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Newspaper } from "lucide-react";
 import api from "@/services/api";
+import Link from "next/link";
 
 const defaultPublications = [
   {
@@ -94,7 +95,8 @@ export default function NewsSection() {
         {/* Logos Grid */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-6 justify-center items-center">
           {newsList.map((pub) => (
-            <div
+            <Link
+              href={`/news/${pub.id}`}
               key={pub.id}
               className="h-32 rounded-[2rem] border border-white/5 bg-white/[0.02] p-5 flex flex-col items-center justify-center hover:bg-white/[0.05] hover:border-white/10 hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer shadow-lg"
             >
@@ -141,7 +143,7 @@ export default function NewsSection() {
               <span className="text-[9px] text-zinc-500 group-hover:text-zinc-400 font-bold uppercase tracking-wider transition-colors">
                 {pub.tagline}
               </span>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

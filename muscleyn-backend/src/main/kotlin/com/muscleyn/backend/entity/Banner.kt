@@ -16,6 +16,10 @@ class Banner(
 
     var title: String? = null,
 
+    var eyebrow: String? = null,
+
+    var subtitle: String? = null,
+
     @Column(
         columnDefinition = "LONGTEXT"
     )

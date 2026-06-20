@@ -36,63 +36,39 @@ import {
 } from "@/lib/commerce";
 import api from "@/services/api";
 
-const heroSlides = [
-  {
-    eyebrow: "Premium Sports Nutrition",
-    title: "Fuel The Physique You Are Building",
-    copy: "Science-backed supplements, bold taste, and a high-performance shopping experience for serious athletes.",
-    image:
-      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1800&auto=format&fit=crop",
-  },
-  {
-    eyebrow: "Summer Shred Stack",
-    title: "Lean Muscle. Clean Energy. Zero Excuses.",
-    copy: "Curated stacks for muscle gain, fat loss, endurance, and daily recovery.",
-    image:
-      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1800&auto=format&fit=crop",
-  },
-  {
-    eyebrow: "Strength Essentials",
-    title: "Power Every Rep With Clean Formulas",
-    copy: "Creatine, whey, and pre-workout stacks designed for strength progression and faster recovery.",
-    image:
-      "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1800&auto=format&fit=crop",
-  },
-];
-
 const trustCards: Array<{
   icon: LucideIcon;
   title: string;
   copy: string;
 }> = [
-  {
-    icon: ShieldCheck,
-    title: "Batch Tested",
-    copy: "Every batch is quality checked for consistency and purity by independent labs.",
-  },
-  {
-    icon: Truck,
-    title: "Fast Fulfilment",
-    copy: "Optimized delivery flow and clear order updates. Next-day delivery on elite stacks.",
-  },
-  {
-    icon: BadgeCheck,
-    title: "Authentic Formulas",
-    copy: "Transparent nutrition and premium sourcing. No proprietary blends or hidden fillers.",
-  },
-  {
-    icon: Dumbbell,
-    title: "Athlete Focused",
-    copy: "Built around real training goals and routines, trusted by IFBB pros.",
-  },
-];
+    {
+      icon: ShieldCheck,
+      title: "Batch Tested",
+      copy: "Every batch is quality checked for consistency and purity by independent labs.",
+    },
+    {
+      icon: Truck,
+      title: "Fast Fulfilment",
+      copy: "Optimized delivery flow and clear order updates. Next-day delivery on elite stacks.",
+    },
+    {
+      icon: BadgeCheck,
+      title: "Authentic Formulas",
+      copy: "Transparent nutrition and premium sourcing. No proprietary blends or hidden fillers.",
+    },
+    {
+      icon: Dumbbell,
+      title: "Athlete Focused",
+      copy: "Built around real training goals and routines, trusted by IFBB pros.",
+    },
+  ];
 
 export default function Home() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [featuredProducts, setFeaturedProducts] = useState<CommerceProduct[]>([]);
   const [bestSellers, setBestSellers] = useState<CommerceProduct[]>([]);
   const [socialProducts, setSocialProducts] = useState<CommerceProduct[]>([]);
-  const [banners, setBanners] = useState<any[]>(heroSlides);
+  const [banners, setBanners] = useState<any[]>([]);
 
   const [goalsList, setGoalsList] = useState<any[]>([]);
 
@@ -104,7 +80,7 @@ export default function Home() {
           const items = response.data.data.content || response.data.data || [];
           const mapped = items.map(mapBackendProductToCommerce);
           setFeaturedProducts(mapped.slice(0, 3));
-          
+
           const bestSellersList = mapped.filter((p: any) => p.isBestSeller);
           if (bestSellersList.length > 0) {
             setBestSellers(bestSellersList.slice(0, 4));
@@ -123,9 +99,9 @@ export default function Home() {
         const response = await api.get("/banners/active");
         if (response.data && response.data.status && response.data.data?.length > 0) {
           const mappedBanners = response.data.data.map((b: any) => ({
-            eyebrow: "EXCLUSIVE ANNOUNCEMENT",
+            eyebrow: b.eyebrow || "EXCLUSIVE ANNOUNCEMENT",
             title: b.title || "Premium Supplement Drop",
-            copy: "Formulated for performance, clinically tested, and athlete approved.",
+            copy: b.subtitle || "Formulated for performance, clinically tested, and athlete approved.",
             image: b.imageUrl ? getBackendImageUrl(b.imageUrl) : "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1800&auto=format&fit=crop",
             redirectUrl: b.redirectUrl || "/shop"
           }));
@@ -161,67 +137,10 @@ export default function Home() {
     fetchGoals();
   }, []);
 
-  const currentSlide = banners[activeSlide] || heroSlides[0];
-  const nextSlide = banners[(activeSlide + 1) % banners.length] || heroSlides[0];
+  const currentSlide = banners[activeSlide];
+  const nextSlide = banners[(activeSlide + 1) % banners.length];
 
-  // Dynamic Flash Sale Offer Settings
-  const [flashSale, setFlashSale] = useState({
-    active: true,
-    title: "Flash Sale Active",
-    subtitle: "Up to 40% off on all whey proteins.",
-    hours: 12,
-    minutes: 45,
-    seconds: 30
-  });
-
-  useEffect(() => {
-    const fetchFlashSale = async () => {
-      try {
-        const res = await api.get("/cms/flash-sale-offer");
-        if (res.data.data && res.data.data.cmsValue) {
-          const parsed = JSON.parse(res.data.data.cmsValue);
-          setFlashSale(prev => ({
-            ...prev,
-            ...parsed
-          }));
-        }
-      } catch (err) {
-        console.log("No dynamic flash sale configured", err);
-      }
-    };
-    fetchFlashSale();
-  }, []);
-
-  // Flash Sale Timer
-  const [timeLeft, setTimeLeft] = useState({ h: 12, m: 45, s: 30 });
-
-  useEffect(() => {
-    setTimeLeft({
-      h: flashSale.hours,
-      m: flashSale.minutes,
-      s: flashSale.seconds
-    });
-  }, [flashSale]);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        let { h, m, s } = prev;
-        if (s > 0) s--;
-        else {
-          s = 59;
-          if (m > 0) m--;
-          else {
-            m = 59;
-            if (h > 0) h--;
-          }
-        }
-        return { h, m, s };
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
+  // Active Slide Timer
   useEffect(() => {
     const timer = window.setInterval(() => {
       setActiveSlide((current) => (current + 1) % banners.length);
@@ -230,171 +149,174 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, [banners]);
 
+  // Dynamic Trust Ticker List Settings
+  const [tickerItems, setTickerItems] = useState<string[]>([
+    "50K+ Customers",
+    "10K+ Orders Delivered",
+    "500+ Products",
+    "Trusted By Athletes"
+  ]);
+
+  useEffect(() => {
+    const fetchTickerItems = async () => {
+      try {
+        const res = await api.get("/cms/trust-ticker-list");
+        if (res.data.data && res.data.data.cmsValue) {
+          const parsed = JSON.parse(res.data.data.cmsValue);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setTickerItems(parsed);
+          }
+        }
+      } catch (err) {
+        console.log("No dynamic trust ticker configured", err);
+      }
+    };
+    fetchTickerItems();
+  }, []);
+
   return (
     <main className="bg-zinc-950 text-white min-h-screen selection:bg-red-600 selection:text-white">
       <Navbar />
 
       {/* Hero Section */}
       <section className="relative isolate overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_left,rgba(220,38,38,0.2),transparent_45%),linear-gradient(90deg,#09090b_0%,rgba(9,9,11,0.8)_50%,rgba(9,9,11,0.3)_100%)]" />
-        
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentSlide.image}
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.8 } }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            className="absolute inset-0 -z-10"
-          >
-            <Image
-              src={currentSlide.image}
-              alt={currentSlide.title}
-              fill
-              priority={activeSlide === 0}
-              sizes="100vw"
-              className="object-cover opacity-60"
-            />
-          </motion.div>
-        </AnimatePresence>
+        {banners.length === 0 ? (
+          /* Loading skeleton shown while banners fetch from API */
+          <div className="min-h-[90vh] bg-zinc-950 animate-pulse flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full border-4 border-red-600 border-t-transparent animate-spin" />
+          </div>
+        ) : (
+          <>
+            <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_left,rgba(220,38,38,0.2),transparent_45%),linear-gradient(90deg,#09090b_0%,rgba(9,9,11,0.8)_50%,rgba(9,9,11,0.3)_100%)]" />
 
-        <div className="relative z-10 mx-auto grid min-h-[90vh] max-w-7xl items-center gap-12 px-4 py-20 lg:grid-cols-[1.1fr_0.9fr]">
-          <div>
             <AnimatePresence mode="wait">
               <motion.div
-                key={currentSlide.title}
-                initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, y: -20, filter: "blur(4px)" }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
+                key={currentSlide.image}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, transition: { duration: 0.8 } }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
+                className="absolute inset-0 -z-10"
               >
-                <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-red-500/30 bg-red-500/10 px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-red-500 backdrop-blur-md">
-                  <Sparkles className="h-4 w-4" />
-                  {currentSlide.eyebrow}
-                </div>
-                <h1 className="max-w-4xl text-5xl font-black leading-[1.05] tracking-tight text-white drop-shadow-2xl sm:text-7xl lg:text-[5.5rem]">
-                  {currentSlide.title}
-                </h1>
-                <p className="mt-8 max-w-xl text-lg font-medium leading-relaxed text-zinc-300">
-                  {currentSlide.copy}
-                </p>
-                <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                  <Link
-                    href="/shop"
-                    className="group inline-flex h-14 items-center justify-center gap-3 rounded-full bg-red-600 px-8 text-sm font-black uppercase tracking-[0.15em] text-white transition-all hover:bg-white hover:text-zinc-950 hover:scale-105 shadow-[0_0_30px_rgba(220,38,38,0.3)]"
-                  >
-                    Shop Performance
-                    <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                  <Link
-                    href="/about"
-                    className="inline-flex h-14 items-center justify-center gap-3 rounded-full border border-white/20 bg-white/5 px-8 text-sm font-black uppercase tracking-[0.15em] text-white backdrop-blur-md transition-all hover:border-white hover:bg-white/10"
-                  >
-                    Our Standards
-                  </Link>
-                </div>
+                <Image
+                  src={currentSlide.image}
+                  alt={currentSlide.title}
+                  fill
+                  priority={activeSlide === 0}
+                  sizes="100vw"
+                  className="object-cover opacity-60"
+                />
               </motion.div>
             </AnimatePresence>
 
-            <div className="mt-16 flex items-center gap-3">
-              {banners.map((slide, index) => (
-                <button
-                  key={slide.title}
-                  type="button"
-                  onClick={() => setActiveSlide(index)}
-                  className={`h-1.5 rounded-full transition-all duration-500 ${
-                    activeSlide === index
-                      ? "w-16 bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]"
-                      : "w-4 bg-white/20 hover:bg-white/50"
-                  }`}
-                  aria-label={`Show slide ${index + 1}: ${slide.eyebrow}`}
-                />
-              ))}
-            </div>
-          </div>
+            <div className="relative z-10 mx-auto grid min-h-[90vh] max-w-7xl items-center gap-12 px-4 py-20 lg:grid-cols-[1.1fr_0.9fr]">
+              <div>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentSlide.title}
+                    initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, y: -20, filter: "blur(4px)" }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                  >
+                    <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-red-500/30 bg-red-500/10 px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-red-500 backdrop-blur-md">
+                      <Sparkles className="h-4 w-4" />
+                      {currentSlide.eyebrow}
+                    </div>
+                    <h1 className="max-w-4xl text-5xl font-black leading-[1.05] tracking-tight text-white drop-shadow-2xl sm:text-7xl lg:text-[5.5rem]">
+                      {currentSlide.title}
+                    </h1>
+                    <p className="mt-8 max-w-xl text-lg font-medium leading-relaxed text-zinc-300">
+                      {currentSlide.copy}
+                    </p>
+                    <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                      <Link
+                        href="/shop"
+                        className="group inline-flex h-14 items-center justify-center gap-3 rounded-full bg-red-600 px-8 text-sm font-black uppercase tracking-[0.15em] text-white transition-all hover:bg-white hover:text-zinc-950 hover:scale-105 shadow-[0_0_30px_rgba(220,38,38,0.3)]"
+                      >
+                        Shop Performance
+                        <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                      </Link>
+                      <Link
+                        href="/about"
+                        className="inline-flex h-14 items-center justify-center gap-3 rounded-full border border-white/20 bg-white/5 px-8 text-sm font-black uppercase tracking-[0.15em] text-white backdrop-blur-md transition-all hover:border-white hover:bg-white/10"
+                      >
+                        Our Standards
+                      </Link>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
 
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="hidden lg:block relative rounded-[2.5rem] border border-white/10 bg-white/5 p-4 shadow-2xl backdrop-blur-xl group"
-          >
-            <div className="relative overflow-hidden rounded-[2rem] bg-zinc-950 aspect-[4/5]">
-              <Image
-                src={nextSlide.image}
-                alt={nextSlide.title}
-                fill
-                className="object-cover opacity-60 transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-10">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-red-500 mb-3 flex items-center gap-2">
-                  <Clock className="w-4 h-4" /> Next Drop
-                </p>
-                <h2 className="text-3xl font-black text-white leading-tight">
-                  {nextSlide.eyebrow}
-                </h2>
-                <p className="mt-3 text-zinc-400 font-medium">
-                  Complete strength stack from {formatPrice(4999)}
-                </p>
+                <div className="mt-16 flex items-center gap-3">
+                  {banners.map((slide, index) => (
+                    <button
+                      key={slide.title}
+                      type="button"
+                      onClick={() => setActiveSlide(index)}
+                      className={`h-1.5 rounded-full transition-all duration-500 ${activeSlide === index
+                        ? "w-16 bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]"
+                        : "w-4 bg-white/20 hover:bg-white/50"
+                        }`}
+                      aria-label={`Show slide ${index + 1}: ${slide.eyebrow}`}
+                    />
+                  ))}
+                </div>
               </div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="hidden lg:block relative rounded-[2.5rem] border border-white/10 bg-white/5 p-4 shadow-2xl backdrop-blur-xl group"
+              >
+                <Link href={nextSlide.redirectUrl || "/shop"} className="block">
+                  <div className="relative overflow-hidden rounded-[2rem] bg-zinc-950 aspect-[4/5]">
+                    <Image
+                      src={nextSlide.image}
+                      alt={nextSlide.title}
+                      fill
+                      className="object-cover opacity-60 transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-10">
+                      <p className="text-xs font-black uppercase tracking-[0.2em] text-red-500 mb-3 flex items-center gap-2">
+                        <Clock className="w-4 h-4" /> Up Next
+                      </p>
+                      <h2 className="text-3xl font-black text-white leading-tight">
+                        {nextSlide.title}
+                      </h2>
+                      <p className="mt-3 text-zinc-400 font-medium line-clamp-2">
+                        {nextSlide.copy}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
             </div>
-          </motion.div>
-        </div>
+          </>
+        )}
       </section>
 
       {/* Trust Ticker */}
       <section className="border-y border-white/10 bg-black py-5 overflow-hidden flex">
-        <motion.div 
-          animate={{ x: [0, -1000] }} 
+        <motion.div
+          animate={{ x: [0, -1000] }}
           transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
           className="flex gap-16 whitespace-nowrap px-8 text-sm font-black uppercase tracking-[0.2em] text-zinc-500"
         >
-          {Array.from({ length: 12 }).map((_, i) => (
-            <span key={i} className="flex items-center gap-4">
-              <span className={i % 2 === 0 ? "text-red-600" : ""}>
-                {["50K+ Customers", "10K+ Orders Delivered", "500+ Products", "Trusted By Athletes"][i % 4]}
+          {Array.from({ length: 12 }).map((_, i) => {
+            const item = tickerItems[i % tickerItems.length];
+            return (
+              <span key={i} className="flex items-center gap-4">
+                <span className={i % 2 === 0 ? "text-red-600" : ""}>
+                  {item}
+                </span>
+                <Sparkles className="h-3 w-3 text-zinc-700" />
               </span>
-              <Sparkles className="h-3 w-3 text-zinc-700" />
-            </span>
-          ))}
+            );
+          })}
         </motion.div>
       </section>
-
-      {/* Flash Sale Banner */}
-      {flashSale.active && (
-        <section className="relative overflow-hidden border-b border-white/10">
-          <div className="absolute inset-0 bg-gradient-to-r from-red-950 via-red-900 to-black opacity-40" />
-          <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-8 md:flex-row">
-            <div className="flex items-center gap-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-600 text-white shadow-[0_0_30px_rgba(220,38,38,0.4)]">
-                <Zap className="h-8 w-8" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-black uppercase tracking-tight text-white">{flashSale.title}</h3>
-                <p className="text-zinc-400 font-medium">{flashSale.subtitle}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex gap-2 text-center">
-                {[
-                  { label: "HRS", val: timeLeft.h },
-                  { label: "MIN", val: timeLeft.m },
-                  { label: "SEC", val: timeLeft.s }
-                ].map(t => (
-                  <div key={t.label} className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-white/5 w-16 h-16 backdrop-blur-md">
-                    <span className="text-xl font-black text-white">{String(t.val).padStart(2, '0')}</span>
-                    <span className="text-[10px] font-bold text-red-500 tracking-wider">{t.label}</span>
-                  </div>
-                ))}
-              </div>
-              <Link href="/shop" className="hidden md:flex h-16 items-center justify-center rounded-xl bg-white px-8 text-sm font-black uppercase tracking-widest text-black hover:bg-zinc-200 transition">
-                Shop Now
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
 
       <DealOfTheDay />
 
