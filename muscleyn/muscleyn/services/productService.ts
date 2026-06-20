@@ -35,39 +35,38 @@ export const getProductById =
 
 export const searchProducts =
   async (
-
     search?: string,
-
-    category?: string,
-
-    brand?: string,
-
+    categories?: string[],
+    brands?: string[],
+    goals?: string[],
+    isBestSeller?: boolean,
+    isOffer?: boolean,
+    minPrice?: number,
+    maxPrice?: number,
     page = 0,
-
-    size = 10
-
+    size = 10,
+    sortBy = "id",
+    direction = "desc"
   ) => {
+    const params: any = {
+      page,
+      size,
+      sortBy,
+      direction,
+    };
+    if (search) params.search = search;
+    if (categories && categories.length > 0) params.categories = categories.join(",");
+    if (brands && brands.length > 0) params.brands = brands.join(",");
+    if (goals && goals.length > 0) params.goals = goals.join(",");
+    if (isBestSeller !== undefined) params.isBestSeller = isBestSeller;
+    if (isOffer !== undefined) params.isOffer = isOffer;
+    if (minPrice !== undefined) params.minPrice = minPrice;
+    if (maxPrice !== undefined) params.maxPrice = maxPrice;
 
-    const response =
-
-      await api.get(
-        "/products/search",
-
-        {
-          params: {
-
-            search,
-
-            category,
-
-            brand,
-
-            page,
-
-            size,
-          },
-        }
-      );
+    const response = await api.get(
+      "/products/search",
+      { params }
+    );
 
     return response.data;
 };

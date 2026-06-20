@@ -24,8 +24,9 @@ interface ProductService {
 
     fun searchProducts(
         search: String?,
-        category: String?,
-        brand: String?,
+        categories: List<String>?,
+        brands: List<String>?,
+        goals: List<String>?,
         isBestSeller: Boolean?,
         isOffer: Boolean?,
         minPrice: Double?,

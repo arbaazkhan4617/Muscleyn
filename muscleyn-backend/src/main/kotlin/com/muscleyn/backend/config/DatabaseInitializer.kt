@@ -11,7 +11,7 @@ class DatabaseInitializer(
     private val cmsRepository: CmsRepository
 ) : CommandLineRunner {
 
-    override fun run(vararg args: String?) {
+    override fun run(vararg args: String) {
         seedCmsKey("goals-list", """[
           { "title": "Muscle Gain", "copy": "Heavy calorie stacks for lean bulking", "img": "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=800&auto=format&fit=crop" },
           { "title": "Fat Loss", "copy": "Clean energy and cutting support", "img": "https://images.unsplash.com/photo-1546483875-ad9014c88eba?q=80&w=800&auto=format&fit=crop" },

@@ -34,13 +34,34 @@ interface ProductRepository :
         OR LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%'))
     )
     AND (
-        :category IS NULL
-        OR LOWER(p.subCategory.category.name) LIKE LOWER(CONCAT('%', :category, '%'))
-        OR LOWER(p.subCategory.name) LIKE LOWER(CONCAT('%', :category, '%'))
+        :categories IS NULL
+        OR LOWER(p.subCategory.category.name) IN :categories
+        OR LOWER(p.subCategory.name) IN :categories
     )
     AND (
-        :brand IS NULL
-        OR LOWER(p.brand.name) LIKE LOWER(CONCAT('%', :brand, '%'))
+        :brands IS NULL
+        OR LOWER(p.brand.name) IN :brands
+    )
+    AND (
+        :goals IS NULL
+        OR (
+            'Muscle Gain' IN :goals AND (LOWER(p.subCategory.category.name) LIKE '%gainer%' OR LOWER(p.subCategory.name) LIKE '%gainer%' OR LOWER(p.name) LIKE '%gainer%' OR LOWER(p.subCategory.category.name) LIKE '%bulk%' OR LOWER(p.subCategory.name) LIKE '%bulk%' OR LOWER(p.name) LIKE '%bulk%' OR LOWER(p.subCategory.category.name) LIKE '%mass%' OR LOWER(p.subCategory.name) LIKE '%mass%' OR LOWER(p.name) LIKE '%mass%')
+        )
+        OR (
+            'Fat Loss' IN :goals AND (LOWER(p.subCategory.category.name) LIKE '%fat%' OR LOWER(p.subCategory.name) LIKE '%fat%' OR LOWER(p.name) LIKE '%fat%' OR LOWER(p.subCategory.category.name) LIKE '%burn%' OR LOWER(p.subCategory.name) LIKE '%burn%' OR LOWER(p.name) LIKE '%burn%' OR LOWER(p.subCategory.category.name) LIKE '%carnitine%' OR LOWER(p.subCategory.name) LIKE '%carnitine%' OR LOWER(p.name) LIKE '%carnitine%' OR LOWER(p.subCategory.category.name) LIKE '%cut%' OR LOWER(p.subCategory.name) LIKE '%cut%' OR LOWER(p.name) LIKE '%cut%' OR LOWER(p.subCategory.category.name) LIKE '%weight management%' OR LOWER(p.subCategory.name) LIKE '%weight management%' OR LOWER(p.name) LIKE '%weight management%')
+        )
+        OR (
+            'Strength' IN :goals AND (LOWER(p.subCategory.category.name) LIKE '%creatine%' OR LOWER(p.subCategory.name) LIKE '%creatine%' OR LOWER(p.name) LIKE '%creatine%' OR LOWER(p.subCategory.category.name) LIKE '%strength%' OR LOWER(p.subCategory.name) LIKE '%strength%' OR LOWER(p.name) LIKE '%strength%' OR LOWER(p.subCategory.category.name) LIKE '%power%' OR LOWER(p.subCategory.name) LIKE '%power%' OR LOWER(p.name) LIKE '%power%')
+        )
+        OR (
+            'Recovery' IN :goals AND (LOWER(p.subCategory.category.name) LIKE '%recovery%' OR LOWER(p.subCategory.name) LIKE '%recovery%' OR LOWER(p.name) LIKE '%recovery%' OR LOWER(p.subCategory.category.name) LIKE '%bcaa%' OR LOWER(p.subCategory.name) LIKE '%bcaa%' OR LOWER(p.name) LIKE '%bcaa%' OR LOWER(p.subCategory.category.name) LIKE '%casein%' OR LOWER(p.subCategory.name) LIKE '%casein%' OR LOWER(p.name) LIKE '%casein%' OR LOWER(p.subCategory.category.name) LIKE '%glutamine%' OR LOWER(p.subCategory.name) LIKE '%glutamine%' OR LOWER(p.name) LIKE '%glutamine%' OR LOWER(p.subCategory.category.name) LIKE '%amino%' OR LOWER(p.subCategory.name) LIKE '%amino%' OR LOWER(p.name) LIKE '%amino%')
+        )
+        OR (
+            'Energy' IN :goals AND (LOWER(p.subCategory.category.name) LIKE '%pre-workout%' OR LOWER(p.subCategory.name) LIKE '%pre-workout%' OR LOWER(p.name) LIKE '%pre-workout%' OR LOWER(p.subCategory.category.name) LIKE '%pre workout%' OR LOWER(p.subCategory.name) LIKE '%pre workout%' OR LOWER(p.name) LIKE '%pre workout%' OR LOWER(p.subCategory.category.name) LIKE '%energy%' OR LOWER(p.subCategory.name) LIKE '%energy%' OR LOWER(p.name) LIKE '%energy%' OR LOWER(p.subCategory.category.name) LIKE '%ignite%' OR LOWER(p.subCategory.name) LIKE '%ignite%' OR LOWER(p.name) LIKE '%ignite%' OR LOWER(p.subCategory.category.name) LIKE '%rage%' OR LOWER(p.subCategory.name) LIKE '%rage%' OR LOWER(p.name) LIKE '%rage%')
+        )
+        OR (
+            'Protein' IN :goals AND (LOWER(p.subCategory.category.name) LIKE '%protein%' OR LOWER(p.subCategory.name) LIKE '%protein%' OR LOWER(p.name) LIKE '%protein%' OR LOWER(p.subCategory.category.name) LIKE '%whey%' OR LOWER(p.subCategory.name) LIKE '%whey%' OR LOWER(p.name) LIKE '%whey%' OR LOWER(p.subCategory.category.name) LIKE '%isolate%' OR LOWER(p.subCategory.name) LIKE '%isolate%' OR LOWER(p.name) LIKE '%isolate%')
+        )
     )
     AND (:isBestSeller IS NULL OR p.isBestSeller = :isBestSeller)
     AND (:isOffer IS NULL OR p.isOffer = :isOffer)
@@ -50,8 +71,9 @@ interface ProductRepository :
     )
     fun searchProducts(
         @Param("search") search: String?,
-        @Param("category") category: String?,
-        @Param("brand") brand: String?,
+        @Param("categories") categories: List<String>?,
+        @Param("brands") brands: List<String>?,
+        @Param("goals") goals: List<String>?,
         @Param("isBestSeller") isBestSeller: Boolean?,
         @Param("isOffer") isOffer: Boolean?,
         @Param("minPrice") minPrice: Double?,

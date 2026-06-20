@@ -11,6 +11,8 @@ export type CommerceProduct = {
   slug: string;
   name: string;
   category: string;
+  categoryName?: string;
+  subCategoryName?: string;
   brand: string;
   goal: ProductGoal;
   image: string;
@@ -40,6 +42,7 @@ export type CommerceProduct = {
   richDetails?: any;
   variants?: any[];
 };
+
 
 export const categories = [
   {
@@ -378,14 +381,32 @@ export const mapBackendProductToCommerce = (backendProd: any): CommerceProduct =
 
   const galleryImages = backendProd.productImages?.map((img: any) => img.imageUrl) || [];
 
+  let goalVal: ProductGoal = "Protein";
+  const catAndSub = `${backendProd.categoryName || ""} ${backendProd.subCategoryName || ""} ${backendProd.name || ""}`.toLowerCase();
+  if (catAndSub.includes("gainer") || catAndSub.includes("bulk") || catAndSub.includes("mass")) {
+    goalVal = "Muscle Gain";
+  } else if (catAndSub.includes("fat") || catAndSub.includes("burn") || catAndSub.includes("carnitine") || catAndSub.includes("cut") || catAndSub.includes("weight management")) {
+    goalVal = "Fat Loss";
+  } else if (catAndSub.includes("creatine") || catAndSub.includes("strength") || catAndSub.includes("power")) {
+    goalVal = "Strength";
+  } else if (catAndSub.includes("recovery") || catAndSub.includes("bcaa") || catAndSub.includes("casein") || catAndSub.includes("glutamine") || catAndSub.includes("amino")) {
+    goalVal = "Recovery";
+  } else if (catAndSub.includes("pre-workout") || catAndSub.includes("pre workout") || catAndSub.includes("energy") || catAndSub.includes("ignite") || catAndSub.includes("rage")) {
+    goalVal = "Energy";
+  } else if (catAndSub.includes("protein") || catAndSub.includes("whey") || catAndSub.includes("isolate")) {
+    goalVal = "Protein";
+  }
+
   return {
     id: backendProd.id,
     variantId: primaryVariant?.id,
     slug: backendProd.name ? backendProd.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "",
     name: backendProd.name || "",
     category: backendProd.subCategoryName || backendProd.categoryName || "Whey Protein",
+    categoryName: backendProd.categoryName || "",
+    subCategoryName: backendProd.subCategoryName || "",
     brand: backendProd.brandName || "Muscleyn Elite",
-    goal: "Protein",
+    goal: goalVal,
     image: getBackendImageUrl(galleryImages.length > 0 ? galleryImages[0] : backendProd.imageUrl),
     gallery: galleryImages.length > 0 
       ? galleryImages.map((img: any) => getBackendImageUrl(img)) 

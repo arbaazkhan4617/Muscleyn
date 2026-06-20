@@ -31,6 +31,7 @@ import {
 } from "@/lib/commerce";
 import { useCartStore } from "@/store/cartStore";
 import api from "@/services/api";
+import { searchProducts } from "@/services/productService";
 
 const pageSize = 6;
 
@@ -39,15 +40,25 @@ const filterButtonClass =
 
 function ShopPageContent() {
   const searchParams = useSearchParams();
-  const [allProducts, setAllProducts] = useState<CommerceProduct[]>([]);
+  const [products, setProducts] = useState<CommerceProduct[]>([]);
+  const [totalProductsCount, setTotalProductsCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [dynamicGoals, setDynamicGoals] = useState<string[]>(goals);
   const [dbCategories, setDbCategories] = useState<any[]>([]);
   const [dbBrands, setDbBrands] = useState<any[]>([]);
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [maxPrice, setMaxPrice] = useState(10000);
   const [sortBy, setSortBy] = useState(searchParams.get("sort") || "latest");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    searchParams.get("category") ? [searchParams.get("category")!] : []
+  );
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(
+    searchParams.get("brand") ? [searchParams.get("brand")!] : []
+  );
+  const [selectedGoals, setSelectedGoals] = useState<string[]>(
+    searchParams.get("goal") ? [searchParams.get("goal")!] : []
+  );
   const [minRating, setMinRating] = useState(0);
   const [filterBestSeller, setFilterBestSeller] = useState(searchParams.get("filter") === "best-seller");
   const [filterOffers, setFilterOffers] = useState(searchParams.get("filter") === "offers");
@@ -56,24 +67,12 @@ function ShopPageContent() {
   const addToCart = useCartStore((state) => state.addToCart);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await api.get("/products");
-        if (response.data && response.data.status) {
-          const items = response.data.data.content || response.data.data || [];
-          const mapped = items.map(mapBackendProductToCommerce);
-          setAllProducts(mapped);
-        }
-      } catch (err) {
-        console.error("Could not load products from database:", err);
-      }
-    };
-
     const fetchFilters = async () => {
       try {
-        const [catRes, brandRes] = await Promise.all([
+        const [catRes, brandRes, cmsRes] = await Promise.all([
           api.get("/categories"),
           api.get("/brands"),
+          api.get("/cms/goals-list"),
         ]);
         if (catRes.data && catRes.data.status) {
           setDbCategories(catRes.data.data || []);
@@ -81,12 +80,22 @@ function ShopPageContent() {
         if (brandRes.data && brandRes.data.status) {
           setDbBrands(brandRes.data.data || []);
         }
+        if (cmsRes.data && cmsRes.data.status && cmsRes.data.data) {
+          try {
+            const parsed = JSON.parse(cmsRes.data.data.cmsValue || "[]");
+            const goalTitles = parsed.map((g: any) => g.title);
+            if (goalTitles.length > 0) {
+              setDynamicGoals(goalTitles);
+            }
+          } catch (e) {
+            console.error("Error parsing dynamic goals:", e);
+          }
+        }
       } catch (err) {
         console.error("Failed to load filter metadata:", err);
       }
     };
 
-    fetchProducts();
     fetchFilters();
   }, []);
 
@@ -94,6 +103,18 @@ function ShopPageContent() {
     const q = searchParams.get("search");
     if (q !== null) {
       setSearch(q);
+    }
+    const cat = searchParams.get("category");
+    if (cat) {
+      setSelectedCategories([cat]);
+    }
+    const brnd = searchParams.get("brand");
+    if (brnd) {
+      setSelectedBrands([brnd]);
+    }
+    const gl = searchParams.get("goal");
+    if (gl) {
+      setSelectedGoals([gl]);
     }
     const f = searchParams.get("filter");
     if (f === "best-seller") {
@@ -109,6 +130,75 @@ function ShopPageContent() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    const loadFilteredProducts = async () => {
+      try {
+        setLoading(true);
+        let mappedSortBy = "id";
+        let direction = "desc";
+        if (sortBy === "latest") {
+          mappedSortBy = "latest";
+          direction = "desc";
+        } else if (sortBy === "popular") {
+          mappedSortBy = "popularity";
+          direction = "desc";
+        } else if (sortBy === "low") {
+          mappedSortBy = "price";
+          direction = "asc";
+        } else if (sortBy === "high") {
+          mappedSortBy = "price";
+          direction = "desc";
+        }
+
+        const data = await searchProducts(
+          search || undefined,
+          selectedCategories.length > 0 ? selectedCategories : undefined,
+          selectedBrands.length > 0 ? selectedBrands : undefined,
+          selectedGoals.length > 0 ? selectedGoals : undefined,
+          filterBestSeller || undefined,
+          filterOffers || undefined,
+          undefined,
+          maxPrice,
+          page - 1,
+          pageSize,
+          mappedSortBy,
+          direction
+        );
+
+        if (data && data.status) {
+          const items = data.data.content || [];
+          const mapped = items.map(mapBackendProductToCommerce);
+          
+          let finalItems = mapped;
+          if (minRating > 0) {
+            finalItems = mapped.filter((p: any) => p.rating >= minRating);
+          }
+          
+          setProducts(finalItems);
+          setTotalPages(data.data.totalPages || 1);
+          setTotalProductsCount(data.data.totalElements || finalItems.length);
+        }
+      } catch (err) {
+        console.error("Failed to load products dynamically:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFilteredProducts();
+  }, [
+    search,
+    selectedCategories,
+    selectedBrands,
+    selectedGoals,
+    filterBestSeller,
+    filterOffers,
+    maxPrice,
+    minRating,
+    page,
+    sortBy,
+  ]);
+
   const toggleFilter = (
     value: string,
     selected: string[],
@@ -122,72 +212,7 @@ function ShopPageContent() {
     setPage(1);
   };
 
-  const filteredProducts = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-
-    return allProducts
-      .filter((product) => {
-        const matchesSearch =
-          !normalizedSearch ||
-          [product.name, product.category, product.brand, product.goal]
-            .join(" ")
-            .toLowerCase()
-            .includes(normalizedSearch);
-
-        const matchesCategory =
-          selectedCategories.length === 0 ||
-          selectedCategories.some(
-            c =>
-              c.toLowerCase().trim() ===
-              String(product.category).toLowerCase().trim()
-          )
-
-        const matchesBrand =
-          selectedBrands.length === 0 || selectedBrands.includes(product.brand);
-
-        const matchesGoal =
-          selectedGoals.length === 0 || selectedGoals.includes(product.goal);
-
-        const matchesBestSeller = !filterBestSeller || product.isBestSeller;
-        const matchesOffers = !filterOffers || product.isOffer;
-
-        return (
-          matchesSearch &&
-          matchesCategory &&
-          matchesBrand &&
-          matchesGoal &&
-          matchesBestSeller &&
-          matchesOffers &&
-          product.price <= maxPrice &&
-          product.rating >= minRating
-        );
-      })
-      .sort((a, b) => {
-        if (sortBy === "low") return a.price - b.price;
-        if (sortBy === "high") return b.price - a.price;
-        if (sortBy === "popular") return b.popularity - a.popularity;
-        const dateA = a.updatedAt || a.createdAt;
-        const dateB = b.updatedAt || b.createdAt;
-        return new Date(dateB).getTime() - new Date(dateA).getTime();
-      });
-  }, [
-    allProducts,
-    maxPrice,
-    minRating,
-    search,
-    selectedBrands,
-    selectedCategories,
-    selectedGoals,
-    sortBy,
-    filterBestSeller,
-    filterOffers,
-  ]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
-  const paginatedProducts = filteredProducts.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
+  const paginatedProducts = products;
 
   const clearFilters = () => {
     setSearch("");
@@ -250,7 +275,7 @@ function ShopPageContent() {
                 All Products
               </h2>
               <p className="mt-3 text-zinc-400 font-medium">
-                Showing {paginatedProducts.length} of {filteredProducts.length}{" "}
+                Showing {products.length > 0 ? `${(page - 1) * pageSize + 1}-${Math.min(page * pageSize, totalProductsCount)}` : "0"} of {totalProductsCount}{" "}
                 products
               </p>
             </div>
@@ -337,7 +362,7 @@ function ShopPageContent() {
                 </FilterGroup>
 
                 <FilterGroup title="Goal">
-                  {goals.map((goal) => (
+                  {dynamicGoals.map((goal) => (
                     <FilterPill
                       key={goal}
                       label={goal}

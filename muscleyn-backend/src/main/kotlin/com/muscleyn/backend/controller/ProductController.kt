@@ -73,8 +73,9 @@ class ProductController(
     @GetMapping("/search")
     fun searchProducts(
         @RequestParam(required = false) search: String?,
-        @RequestParam(required = false) category: String?,
-        @RequestParam(required = false) brand: String?,
+        @RequestParam(required = false) categories: List<String>?,
+        @RequestParam(required = false) brands: List<String>?,
+        @RequestParam(required = false) goals: List<String>?,
         @RequestParam(required = false) isBestSeller: Boolean?,
         @RequestParam(required = false) isOffer: Boolean?,
         @RequestParam(required = false) minPrice: Double?,
@@ -86,8 +87,9 @@ class ProductController(
     ): ResponseDto<Page<ProductResponse>> {
         val products = productService.searchProducts(
             search,
-            category,
-            brand,
+            categories,
+            brands,
+            goals,
             isBestSeller,
             isOffer,
             minPrice,

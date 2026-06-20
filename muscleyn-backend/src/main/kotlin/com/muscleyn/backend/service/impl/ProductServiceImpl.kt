@@ -137,8 +137,9 @@ class ProductServiceImpl(
 
     override fun searchProducts(
         search: String?,
-        category: String?,
-        brand: String?,
+        categories: List<String>?,
+        brands: List<String>?,
+        goals: List<String>?,
         isBestSeller: Boolean?,
         isOffer: Boolean?,
         minPrice: Double?,
@@ -162,10 +163,15 @@ class ProductServiceImpl(
 
         val pageable = PageRequest.of(page, size, sort)
 
+        val catList = if (categories.isNullOrEmpty()) null else categories.map { it.lowercase() }
+        val brandList = if (brands.isNullOrEmpty()) null else brands.map { it.lowercase() }
+        val goalList = if (goals.isNullOrEmpty()) null else goals
+
         return productRepository.searchProducts(
             search,
-            category,
-            brand,
+            catList,
+            brandList,
+            goalList,
             isBestSeller,
             isOffer,
             minPrice,
