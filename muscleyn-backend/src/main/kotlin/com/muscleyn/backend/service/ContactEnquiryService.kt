@@ -12,4 +12,9 @@ interface ContactEnquiryService {
     fun getEnquiries(
         status: String?
     ): List<ContactEnquiryResponse>
+
+    fun updateEnquiryStatus(
+        id: Long,
+        status: String
+    ): ContactEnquiryResponse
 }

@@ -58,4 +58,8 @@ data class ProductRequest(
     val nutrition: String?,
 
     val benefits: String?,
+
+    val isBestSeller: Boolean? = false,
+
+    val isOffer: Boolean? = false,
 )

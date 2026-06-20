@@ -4,6 +4,7 @@ import com.muscleyn.backend.dto.CreateSubCategoryRequest
 import com.muscleyn.backend.entity.SubCategory
 import com.muscleyn.backend.repository.CategoryRepository
 import com.muscleyn.backend.repository.SubCategoryRepository
+import com.muscleyn.backend.repository.ProductRepository
 import com.muscleyn.backend.service.SubCategoryService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -17,7 +18,10 @@ class SubCategoryServiceImpl(
     SubCategoryRepository,
 
     private val categoryRepository:
-    CategoryRepository
+    CategoryRepository,
+
+    private val productRepository:
+    ProductRepository
 
 ) : SubCategoryService {
 
@@ -79,7 +83,7 @@ class SubCategoryServiceImpl(
                         image.originalFilename
 
             val uploadFolder =
-                File(uploadDir)
+                File(uploadDir).absoluteFile
 
             if (!uploadFolder.exists()) {
 
@@ -198,7 +202,7 @@ class SubCategoryServiceImpl(
                         image.originalFilename
 
             val uploadFolder =
-                File(uploadDir)
+                File(uploadDir).absoluteFile
 
             if (!uploadFolder.exists()) {
 
@@ -240,6 +244,9 @@ class SubCategoryServiceImpl(
                         "Sub category not found"
                     )
                 }
+
+        // Dissociate subcategory from products
+        productRepository.dissociateSubCategory(subCategoryId)
 
         subCategoryRepository
             .delete(subCategory)

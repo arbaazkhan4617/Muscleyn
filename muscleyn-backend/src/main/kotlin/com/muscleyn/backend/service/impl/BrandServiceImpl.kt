@@ -3,6 +3,7 @@ package com.muscleyn.backend.service.impl
 import com.muscleyn.backend.dto.BrandRequest
 import com.muscleyn.backend.entity.Brand
 import com.muscleyn.backend.repository.BrandRepository
+import com.muscleyn.backend.repository.ProductRepository
 import com.muscleyn.backend.service.BrandService
 import org.springframework.stereotype.Service
 
@@ -15,7 +16,10 @@ import java.io.File
 class BrandServiceImpl(
 
     private val brandRepository:
-    BrandRepository
+    BrandRepository,
+
+    private val productRepository:
+    ProductRepository
 
 ) : BrandService {
 
@@ -87,7 +91,7 @@ class BrandServiceImpl(
                         image.originalFilename
 
             val uploadFolder =
-                File(uploadDir)
+                File(uploadDir).absoluteFile
 
             if (!uploadFolder.exists()) {
 
@@ -187,7 +191,7 @@ class BrandServiceImpl(
                         image.originalFilename
 
             val uploadFolder =
-                File(uploadDir)
+                File(uploadDir).absoluteFile
 
             if (!uploadFolder.exists()) {
 
@@ -229,6 +233,9 @@ class BrandServiceImpl(
                         "Brand not found"
                     )
                 }
+
+        // Dissociate brand from products
+        productRepository.dissociateBrand(brandId)
 
         brandRepository
             .delete(brand)

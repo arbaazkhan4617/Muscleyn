@@ -8,6 +8,7 @@ import { Toaster } from "react-hot-toast";
 
 import { AuthProvider } from "@/context/AuthContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import BackendHealthCheck from "@/components/layout/BackendHealthCheck";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -57,7 +58,11 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col bg-zinc-950 text-white font-sans selection:bg-red-600 selection:text-white">
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <BackendHealthCheck>
+              {children}
+            </BackendHealthCheck>
+          </AuthProvider>
         </GoogleOAuthProvider>
 
         <Toaster

@@ -72,51 +72,29 @@ class ProductController(
 
     @GetMapping("/search")
     fun searchProducts(
-
-        @RequestParam(
-            required = false
-        ) search: String?,
-
-        @RequestParam(
-            required = false
-        ) category: String?,
-
-        @RequestParam(
-            required = false
-        ) brand: String?,
-
-        @RequestParam(
-            defaultValue = "0"
-        ) page: Int,
-
-        @RequestParam(
-            defaultValue = "10"
-        ) size: Int,
-
-        @RequestParam(
-            defaultValue = "id"
-        ) sortBy: String,
-
-        @RequestParam(
-            defaultValue = "desc"
-        ) direction: String,
-
-        ): ResponseDto<Page<ProductResponse>> {
-
+        @RequestParam(required = false) search: String?,
+        @RequestParam(required = false) category: String?,
+        @RequestParam(required = false) brand: String?,
+        @RequestParam(required = false) isBestSeller: Boolean?,
+        @RequestParam(required = false) isOffer: Boolean?,
+        @RequestParam(required = false) minPrice: Double?,
+        @RequestParam(required = false) maxPrice: Double?,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "10") size: Int,
+        @RequestParam(defaultValue = "id") sortBy: String,
+        @RequestParam(defaultValue = "desc") direction: String,
+    ): ResponseDto<Page<ProductResponse>> {
         val products = productService.searchProducts(
-
             search,
-
             category,
-
             brand,
-
+            isBestSeller,
+            isOffer,
+            minPrice,
+            maxPrice,
             page,
-
             size,
-
             sortBy,
-
             direction
         )
 
@@ -255,7 +233,17 @@ class ProductController(
         @RequestParam(
             required = false
         )
-        benefits: String?
+        benefits: String?,
+
+        @RequestParam(
+            required = false
+        )
+        isBestSeller: Boolean?,
+
+        @RequestParam(
+            required = false
+        )
+        isOffer: Boolean?
 
     ): ResponseDto<Product>{
 
@@ -281,7 +269,13 @@ class ProductController(
                     nutrition,
 
                 benefits =
-                    benefits
+                    benefits,
+
+                isBestSeller =
+                    isBestSeller ?: false,
+
+                isOffer =
+                    isOffer ?: false
             )
 
         val response =
@@ -356,7 +350,17 @@ class ProductController(
         @RequestParam(
             required = false
         )
-        benefits: String?
+        benefits: String?,
+
+        @RequestParam(
+            required = false
+        )
+        isBestSeller: Boolean?,
+
+        @RequestParam(
+            required = false
+        )
+        isOffer: Boolean?
 
     ): ResponseDto<Product> {
 
@@ -382,7 +386,13 @@ class ProductController(
                     nutrition,
 
                 benefits =
-                    benefits
+                    benefits,
+
+                isBestSeller =
+                    isBestSeller ?: false,
+
+                isOffer =
+                    isOffer ?: false
             )
 
         val response =
@@ -419,6 +429,30 @@ class ProductController(
             status = true,
             message = "Product image deleted successfully",
             data = null
+        )
+    }
+
+    @PutMapping("/{productId}/toggle-best-seller")
+    fun toggleBestSeller(
+        @PathVariable productId: Long
+    ): ResponseDto<ProductResponse> {
+        val product = productService.toggleBestSeller(productId)
+        return ResponseDto(
+            status = true,
+            message = "Best seller status toggled successfully",
+            data = product
+        )
+    }
+
+    @PutMapping("/{productId}/toggle-offer")
+    fun toggleOffer(
+        @PathVariable productId: Long
+    ): ResponseDto<ProductResponse> {
+        val product = productService.toggleOffer(productId)
+        return ResponseDto(
+            status = true,
+            message = "Offer status toggled successfully",
+            data = product
         )
     }
 }

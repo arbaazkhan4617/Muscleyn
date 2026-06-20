@@ -52,49 +52,40 @@ class JwtAuthenticationFilter(
             try {
 
                 val mobileNumber =
-
                     jwtUtil
                         .extractMobileNumber(
                             token
                         )
 
                 val user =
-
                     userRepository
                         .findByMobileNumber(
                             mobileNumber
                         )
 
-                        ?: throw RuntimeException(
-                            "User not found"
-                        )
-
-                val auth =
-                    UsernamePasswordAuthenticationToken(
-
-                        mobileNumber,
-
-                        null,
-
-                        listOf(
-                            SimpleGrantedAuthority(
-                                user.role!!.name
+                if (user != null) {
+                    val auth =
+                        UsernamePasswordAuthenticationToken(
+                            mobileNumber,
+                            null,
+                            listOf(
+                                SimpleGrantedAuthority(
+                                    user.role!!.name
+                                )
                             )
                         )
-                    )
 
-                SecurityContextHolder
-                    .getContext()
-
-                    .authentication =
-                    auth
+                    SecurityContextHolder
+                        .getContext()
+                        .authentication =
+                        auth
+                }
 
             } catch (
                 ex: Exception
             ) {
-
-                response.status = 401
-                return
+                // Let the request proceed without setting authentication.
+                // The SecurityFilterChain will block it if it's a secured endpoint.
             }
         }
 

@@ -29,4 +29,15 @@ class Review(
     var createdAt:
     LocalDateTime? =
         LocalDateTime.now(),
+
+    @Column(columnDefinition = "TEXT")
+    var mediaUrls: String? = null,
+
+    var isVerifiedBuyer: Boolean? = false,
+
+    var appearInDashboard: Boolean? = false,
+
+    var userName: String? = null,
+
+    var userEmail: String? = null,
 )

@@ -26,6 +26,8 @@ import {
 
 } from "lucide-react";
 
+import { getBackendImageUrl } from "@/lib/commerce";
+
 
 export default function ProductVariantsPage() {
 
@@ -236,7 +238,7 @@ const handleEdit =
     );
 
     setPreview(
-      variant.imageUrl || ""
+      getBackendImageUrl(variant.imageUrl)
     );
   };
 

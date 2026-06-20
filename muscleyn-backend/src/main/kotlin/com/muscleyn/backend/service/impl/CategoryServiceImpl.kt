@@ -3,6 +3,7 @@ package com.muscleyn.backend.service.impl
 import com.muscleyn.backend.dto.CreateCategoryRequest
 import com.muscleyn.backend.entity.Category
 import com.muscleyn.backend.repository.CategoryRepository
+import com.muscleyn.backend.repository.SubCategoryRepository
 import com.muscleyn.backend.service.CategoryService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -13,7 +14,10 @@ import java.io.File
 class CategoryServiceImpl(
 
     private val categoryRepository:
-    CategoryRepository
+    CategoryRepository,
+
+    private val subCategoryRepository:
+    SubCategoryRepository
 
 ) : CategoryService {
 
@@ -58,7 +62,7 @@ class CategoryServiceImpl(
                         image.originalFilename
 
             val uploadFolder =
-                File(uploadDir)
+                File(uploadDir).absoluteFile
 
             if (!uploadFolder.exists()) {
 
@@ -158,7 +162,7 @@ class CategoryServiceImpl(
                         image.originalFilename
 
             val uploadFolder =
-                File(uploadDir)
+                File(uploadDir).absoluteFile
 
             if (!uploadFolder.exists()) {
 
@@ -200,6 +204,9 @@ class CategoryServiceImpl(
                         "Category not found"
                     )
                 }
+
+        // Dissociate category from subcategories
+        subCategoryRepository.dissociateCategory(categoryId)
 
         categoryRepository
             .delete(category)

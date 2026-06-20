@@ -1,118 +1,276 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { ArrowRight, Mail, Gift, ShieldCheck, Truck, Sparkles } from "lucide-react";
 import {
   FaFacebookF,
   FaInstagram,
   FaTwitter,
   FaYoutube,
 } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 export default function Footer() {
+  const [email, setEmail] = useState("");
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email.trim()) {
+      toast.success("Thank you for subscribing to our drops!");
+      setEmail("");
+    }
+  };
+
   return (
-    <footer className="bg-zinc-950 text-white relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(220,38,38,0.05),transparent_50%)] pointer-events-none" />
+    <footer className="bg-zinc-950 text-white relative overflow-hidden border-t border-white/10">
+      {/* Decorative gradient overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(220,38,38,0.04),transparent_50%)] pointer-events-none" />
 
-      {/* Newsletter */}
-      <section className="border-t border-b border-white/10 bg-white/[0.02]">
-        <div className="max-w-7xl mx-auto px-4 py-20 text-center">
-          <p className="text-red-500 font-bold tracking-[0.2em] uppercase text-sm mb-4">
-            Newsletter
-          </p>
-          <h2 className="text-4xl md:text-5xl font-black mb-6 tracking-tight">
-            Subscribe For Drops
-          </h2>
-          <p className="text-zinc-400 max-w-2xl mx-auto mb-10 text-lg">
-            Get the latest supplement offers, fitness tips, and exclusive early access discounts directly in your inbox.
-          </p>
-
-          <form className="flex flex-col sm:flex-row gap-4 justify-center max-w-xl mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-6 py-4 rounded-full border border-white/10 bg-white/5 text-white placeholder-zinc-500 outline-none focus:border-red-500 focus:bg-white/10 transition-all"
-              required
-            />
-            <button type="submit" className="bg-red-600 hover:bg-white hover:text-zinc-950 px-8 py-4 rounded-full font-black uppercase tracking-[0.1em] text-sm transition-all duration-300">
-              Subscribe
-            </button>
-          </form>
-        </div>
-      </section>
-
-      {/* Footer Main */}
-      <section className="max-w-7xl mx-auto px-4 py-20 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8">
+      <div className="max-w-7xl mx-auto px-4 py-20 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-12">
           
-          {/* Brand - Span 4 */}
-          <div className="lg:col-span-4">
-            <h3 className="text-3xl font-black mb-6 tracking-tight">
-              MUSCLEYN
-            </h3>
-            <p className="text-zinc-400 leading-relaxed mb-8 max-w-sm">
-              Premium quality supplements designed to help you achieve your fitness goals faster and smarter. No compromise on ingredients or taste.
-            </p>
-            <div className="flex gap-4">
-              {[FaFacebookF, FaInstagram, FaTwitter, FaYoutube].map((Icon, idx) => (
+          {/* Left Side: Why Choose Us & Newsletter (Span 5) */}
+          <div className="lg:col-span-5 flex flex-col justify-between gap-10">
+            
+            {/* Why Choose Us Stats Block */}
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <span className="h-2 w-2 rounded-full bg-red-600 animate-pulse" />
+                <h3 className="text-xl font-black uppercase tracking-widest text-white leading-none">
+                  Why Choose Us
+                </h3>
+              </div>
+              
+              {/* Stat Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+                {/* 16 Years */}
+                <div className="border border-white/10 bg-white/[0.01] rounded-2xl p-4 flex flex-col justify-center text-center">
+                  <span className="text-xl font-black text-white">16 YEARS</span>
+                  <span className="text-[8px] font-extrabold uppercase text-zinc-500 tracking-wider mt-1 leading-tight">
+                    Leading Sports Nutrition Brand
+                  </span>
+                </div>
+
+                {/* 10 Million+ (Red Highlight Card) */}
+                <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl p-4 flex flex-col justify-center text-center shadow-[0_0_20px_rgba(220,38,38,0.3)] border border-red-500/20">
+                  <span className="text-xl font-black text-white">10M+</span>
+                  <span className="text-[8px] font-extrabold uppercase text-white/90 tracking-wider mt-1 leading-tight">
+                    Happy Customers
+                  </span>
+                </div>
+
+                {/* 100+ Products */}
+                <div className="border border-white/10 bg-white/[0.01] rounded-2xl p-4 flex flex-col justify-center text-center">
+                  <span className="text-xl font-black text-white">100+</span>
+                  <span className="text-[8px] font-extrabold uppercase text-zinc-500 tracking-wider mt-1 leading-tight">
+                    Genuine Products
+                  </span>
+                </div>
+
+                {/* 100% Genuine */}
+                <div className="border border-white/10 bg-white/[0.01] rounded-2xl p-4 flex flex-col justify-center text-center">
+                  <span className="text-xl font-black text-white">100%</span>
+                  <span className="text-[8px] font-extrabold uppercase text-zinc-500 tracking-wider mt-1 leading-tight">
+                    Genuine Products
+                  </span>
+                </div>
+
+                {/* Free Shipping (Distinct Grey Card) */}
+                <div className="border border-white/20 bg-zinc-800/80 rounded-2xl p-4 flex flex-col justify-center text-center shadow-lg">
+                  <span className="text-xl font-black text-red-500">FREE</span>
+                  <span className="text-[8px] font-extrabold uppercase text-zinc-300 tracking-wider mt-1 leading-tight">
+                    Fast Shipping
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Newsletter Block */}
+            <div className="max-w-md">
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-red-500 mb-3">
+                Newsletter
+              </h4>
+              <p className="text-xs text-zinc-400 font-medium mb-4 leading-relaxed">
+                Subscribe to get early access to exclusive drops, new formulations, and members-only deals.
+              </p>
+              
+              <form onSubmit={handleSubscribe} className="relative flex items-center h-12">
+                <input
+                  type="email"
+                  required
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full h-full bg-white/5 border border-white/10 rounded-xl px-4 pr-12 text-xs outline-none text-white focus:border-red-500 focus:bg-white/10 transition-all font-medium"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-1 w-10 h-10 rounded-lg bg-red-600 hover:bg-white text-white hover:text-zinc-950 transition flex items-center justify-center cursor-pointer shadow"
+                  aria-label="Subscribe"
+                >
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </form>
+            </div>
+
+            {/* Socials Row */}
+            <div className="flex gap-3">
+              {[
+                { Icon: FaFacebookF, href: "#" },
+                { Icon: FaInstagram, href: "#" },
+                { Icon: FaTwitter, href: "#" },
+                { Icon: FaYoutube, href: "#" },
+              ].map(({ Icon, href }, idx) => (
                 <a
                   key={idx}
-                  href="#"
-                  className="w-11 h-11 rounded-full border border-white/10 bg-white/5 flex items-center justify-center hover:bg-red-600 hover:border-red-600 transition-all duration-300 group"
+                  href={href}
+                  className="w-10 h-10 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center hover:bg-red-600 hover:border-red-600 hover:scale-105 transition-all group"
+                  target="_blank"
+                  rel="noreferrer"
                 >
-                  <Icon className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" />
+                  <Icon className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Spacer */}
-          <div className="hidden lg:block lg:col-span-2"></div>
-
-          {/* Quick Links - Span 2 */}
-          <div className="lg:col-span-2">
-            <h4 className="text-xl font-bold mb-6">Quick Links</h4>
-            <ul className="space-y-4 text-sm font-medium text-zinc-400">
-              {["Home", "Shop", "About", "Contact"].map((item) => (
-                <li key={item}>
-                  <Link href={item === "Home" ? "/" : `/${item.toLowerCase()}`} className="hover:text-red-500 transition-colors">
-                    {item}
+          {/* Right Side: Columns (Span 7) */}
+          <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-3 gap-10">
+            
+            {/* Column 1: Quick Links */}
+            <div>
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-red-500 border-b border-white/5 pb-3 mb-5">
+                Quick Links
+              </h4>
+              <ul className="space-y-3.5 text-xs font-bold text-zinc-400">
+                <li>
+                  <Link href="/" className="hover:text-white transition-colors">
+                    Home
                   </Link>
                 </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Categories - Span 2 */}
-          <div className="lg:col-span-2">
-            <h4 className="text-xl font-bold mb-6">Categories</h4>
-            <ul className="space-y-4 text-sm font-medium text-zinc-400">
-              {["Whey Protein", "Mass Gainer", "Creatine", "Pre Workout"].map((item) => (
-                <li key={item}>
-                  <Link href="/shop" className="hover:text-red-500 transition-colors">
-                    {item}
+                <li>
+                  <Link href="/shop" className="hover:text-white transition-colors">
+                    Best Seller
                   </Link>
                 </li>
-              ))}
-            </ul>
-          </div>
+                <li>
+                  <Link href="/shop" className="hover:text-white transition-colors">
+                    Offers
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="hover:text-white transition-colors">
+                    Our Stores
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/recommend" className="hover:text-white transition-colors">
+                    Authenticity
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/about" className="hover:text-white transition-colors">
+                    About & Contact
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="hover:text-white transition-colors">
+                    Business Inquiry
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
-          {/* Contact - Span 2 */}
-          <div className="lg:col-span-2">
-            <h4 className="text-xl font-bold mb-6">Contact</h4>
-            <ul className="space-y-4 text-sm text-zinc-400 leading-relaxed">
-              <li>support@muscleyn.com</li>
-              <li>+91 9876543210</li>
-              <li>Mumbai, India</li>
-            </ul>
+            {/* Column 2: All Products */}
+            <div>
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-red-500 border-b border-white/5 pb-3 mb-5">
+                All Products
+              </h4>
+              <ul className="space-y-3.5 text-xs font-bold text-zinc-400">
+                <li>
+                  <Link href="/shop?brand=Muscleyn%20Bulk" className="hover:text-white transition-colors">
+                    Muscleyn - Massive Muscle
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/shop?category=Mass%20Gainer" className="hover:text-white transition-colors">
+                    Health Gainer
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/shop?category=Fat%20Burner" className="hover:text-white transition-colors">
+                    Resizer - Fat Burner
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/shop" className="hover:text-white transition-colors">
+                    Aloefit
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/shop" className="hover:text-white transition-colors">
+                    What's New
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 3: Support or Information */}
+            <div>
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-red-500 border-b border-white/5 pb-3 mb-5">
+                Support & Info
+              </h4>
+              <ul className="space-y-3.5 text-xs font-bold text-zinc-400">
+                <li>
+                  <Link href="/contact" className="hover:text-white transition-colors">
+                    Business Inquiry
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="hover:text-white transition-colors">
+                    About & Contact Us
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/recommend" className="hover:text-white transition-colors">
+                    Authenticity & Lab reports
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="hover:text-white transition-colors">
+                    Terms & Condition
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/privacy" className="hover:text-white transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="hover:text-white transition-colors">
+                    Shipping & Delivery Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="hover:text-white transition-colors">
+                    Return and Refund
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Bottom */}
-      <section className="border-t border-white/10 bg-zinc-950">
-        <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-bold text-zinc-500 uppercase tracking-widest">
-          <p>© {new Date().getFullYear()} MUSCLEYN. ALL RIGHTS RESERVED.</p>
+      {/* Copyright Bar at the bottom */}
+      <section className="border-t border-white/5 bg-zinc-950/60 py-6 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+          <p>© {new Date().getFullYear()} PRABHA PHARMA. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6">
-            <Link href="/terms" className="hover:text-white transition">Terms</Link>
-            <Link href="/privacy" className="hover:text-white transition">Privacy</Link>
+            <Link href="/contact" className="hover:text-white transition">Terms</Link>
+            <Link href="/contact" className="hover:text-white transition">Privacy</Link>
           </div>
         </div>
       </section>

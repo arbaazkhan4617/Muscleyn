@@ -38,12 +38,18 @@ api.interceptors.request.use(
       ) ||
       config.url?.startsWith(
         "/coupons"
+      ) ||
+      config.url?.startsWith(
+        "/banners"
+      ) ||
+      config.url?.startsWith(
+        "/contact"
       );
 
     const authToken =
       isAdminRequest
-        ? adminToken
-        : token;
+        ? (adminToken || token)
+        : (token || adminToken);
 
     if (authToken) {
 
@@ -52,6 +58,30 @@ api.interceptors.request.use(
     }
 
     return config;
+  }
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response && error.response.status === 401) {
+      const token = localStorage.getItem("token");
+      const adminToken = localStorage.getItem("adminToken");
+      if (token || adminToken) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("adminToken");
+        
+        // Retry the request without the Authorization header to see if it's a public endpoint
+        if (error.config && !error.config._retry) {
+          error.config._retry = true;
+          if (error.config.headers) {
+            delete error.config.headers.Authorization;
+          }
+          return api(error.config);
+        }
+      }
+    }
+    return Promise.reject(error);
   }
 );
 

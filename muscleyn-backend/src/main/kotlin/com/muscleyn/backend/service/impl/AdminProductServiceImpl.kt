@@ -87,7 +87,13 @@ class AdminProductServiceImpl(
                             ?.name,
 
                     active =
-                        product.isActive
+                        product.isActive,
+
+                    isBestSeller =
+                        product.isBestSeller,
+
+                    isOffer =
+                        product.isOffer
                 )
             }
     }

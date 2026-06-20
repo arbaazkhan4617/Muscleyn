@@ -27,7 +27,7 @@ import {
   CommerceProduct,
   formatPrice,
   goals,
-  products,
+  mapBackendProductToCommerce,
 } from "@/lib/commerce";
 import { useCartStore } from "@/store/cartStore";
 import api from "@/services/api";
@@ -37,103 +37,20 @@ const pageSize = 6;
 const filterButtonClass =
   "rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-zinc-300 transition hover:border-red-500 hover:text-white hover:bg-white/10";
 
-const mapBackendProductToCommerce = (backendProd: any): CommerceProduct => {
-  const primaryVariant = backendProd.variants?.[0];
-  const priceVal = primaryVariant?.price ? Number(primaryVariant.price) : 0;
-  const oldPriceVal = primaryVariant?.oldPrice ? Number(primaryVariant.oldPrice) : 0;
-  
-  let discountStr = "";
-  if (oldPriceVal > priceVal) {
-    const diff = oldPriceVal - priceVal;
-    const pct = Math.round((diff / oldPriceVal) * 100);
-    discountStr = `${pct}% OFF`;
-  }
-  
-  let nutritionObj = {
-    servingSize: "1 Scoop (30g)",
-    protein: "0g",
-    carbs: "0g",
-    calories: "0 kcal",
-    keyIngredients: [] as string[]
-  };
-  
-  if (backendProd.nutrition) {
-    try {
-      const parsed = JSON.parse(backendProd.nutrition);
-      nutritionObj.servingSize = parsed.servingSize || "1 Scoop (30g)";
-      nutritionObj.keyIngredients = parsed.ingredients ? parsed.ingredients.split(",").map((s: string) => s.trim()) : [];
-      
-      const facts = parsed.facts || [];
-      const proteinFact = facts.find((f: any) => f.label?.toLowerCase() === "protein");
-      const carbsFact = facts.find((f: any) => f.label?.toLowerCase() === "carbs");
-      const caloriesFact = facts.find((f: any) => f.label?.toLowerCase() === "calories");
-      
-      nutritionObj.protein = proteinFact?.value || "0g";
-      nutritionObj.carbs = carbsFact?.value || "0g";
-      nutritionObj.calories = caloriesFact?.value || "0 kcal";
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  let parsedBenefits = [
-    "Accelerates muscle protein synthesis",
-    "Reduces muscle soreness and fatigue",
-    "Mixes instantly with no clumps",
-    "Zero artificial colors or dyes",
-    "Enhanced with digestive enzymes",
-    "Incredible, award-winning taste"
-  ];
-  if (backendProd.benefits) {
-    try {
-      parsedBenefits = JSON.parse(backendProd.benefits) || parsedBenefits;
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  const galleryImages = backendProd.productImages?.map((img: any) => img.imageUrl) || [];
-
-  return {
-    id: backendProd.id,
-    variantId: primaryVariant?.id,
-    slug: backendProd.name ? backendProd.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "",
-    name: backendProd.name || "",
-    category: backendProd.subCategoryName || backendProd.categoryName || "Whey Protein",
-    brand: backendProd.brandName || "Muscleyn Elite",
-    goal: "Protein",
-    image: backendProd.imageUrl || "/images/products/1.jpeg",
-    gallery: galleryImages.length > 0 ? galleryImages : [backendProd.imageUrl || "/images/products/1.jpeg"],
-    price: priceVal,
-    oldPrice: oldPriceVal,
-    discount: discountStr,
-    rating: 4.8,
-    reviews: 120,
-    stock: primaryVariant?.stock ? Number(primaryVariant.stock) : 10,
-    popularity: 90,
-    createdAt: new Date().toISOString(),
-    shortDescription: backendProd.description ? backendProd.description.substring(0, 100) + "..." : "",
-    description: backendProd.description || "",
-    nutrition: nutritionObj,
-    customFacts: backendProd.nutrition ? (() => {
-      try {
-        return JSON.parse(backendProd.nutrition).facts || [];
-      } catch (e) { return []; }
-    })() : [],
-    customBenefits: parsedBenefits
-  } as any;
-};
-
 function ShopPageContent() {
   const searchParams = useSearchParams();
-  const [allProducts, setAllProducts] = useState<CommerceProduct[]>(products);
+  const [allProducts, setAllProducts] = useState<CommerceProduct[]>([]);
+  const [dbCategories, setDbCategories] = useState<any[]>([]);
+  const [dbBrands, setDbBrands] = useState<any[]>([]);
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [maxPrice, setMaxPrice] = useState(10000);
-  const [sortBy, setSortBy] = useState("latest");
+  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "latest");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [minRating, setMinRating] = useState(0);
+  const [filterBestSeller, setFilterBestSeller] = useState(searchParams.get("filter") === "best-seller");
+  const [filterOffers, setFilterOffers] = useState(searchParams.get("filter") === "offers");
   const [page, setPage] = useState(1);
   const [quickView, setQuickView] = useState<CommerceProduct | null>(null);
   const addToCart = useCartStore((state) => state.addToCart);
@@ -145,21 +62,50 @@ function ShopPageContent() {
         if (response.data && response.data.status) {
           const items = response.data.data.content || response.data.data || [];
           const mapped = items.map(mapBackendProductToCommerce);
-          const dbNames = new Set(mapped.map((p: any) => p.name.toLowerCase()));
-          const filteredMocks = products.filter(p => !dbNames.has(p.name.toLowerCase()));
-          setAllProducts([...mapped, ...filteredMocks]);
+          setAllProducts(mapped);
         }
       } catch (err) {
-        console.warn("Could not load products from database, using static fallback.", err);
+        console.error("Could not load products from database:", err);
       }
     };
+
+    const fetchFilters = async () => {
+      try {
+        const [catRes, brandRes] = await Promise.all([
+          api.get("/categories"),
+          api.get("/brands"),
+        ]);
+        if (catRes.data && catRes.data.status) {
+          setDbCategories(catRes.data.data || []);
+        }
+        if (brandRes.data && brandRes.data.status) {
+          setDbBrands(brandRes.data.data || []);
+        }
+      } catch (err) {
+        console.error("Failed to load filter metadata:", err);
+      }
+    };
+
     fetchProducts();
+    fetchFilters();
   }, []);
 
   useEffect(() => {
     const q = searchParams.get("search");
     if (q !== null) {
       setSearch(q);
+    }
+    const f = searchParams.get("filter");
+    if (f === "best-seller") {
+      setFilterBestSeller(true);
+      setFilterOffers(false);
+    } else if (f === "offers") {
+      setFilterOffers(true);
+      setFilterBestSeller(false);
+    }
+    const s = searchParams.get("sort");
+    if (s) {
+      setSortBy(s);
     }
   }, [searchParams]);
 
@@ -190,7 +136,11 @@ function ShopPageContent() {
 
         const matchesCategory =
           selectedCategories.length === 0 ||
-          selectedCategories.includes(product.category);
+          selectedCategories.some(
+            c =>
+              c.toLowerCase().trim() ===
+              String(product.category).toLowerCase().trim()
+          )
 
         const matchesBrand =
           selectedBrands.length === 0 || selectedBrands.includes(product.brand);
@@ -198,11 +148,16 @@ function ShopPageContent() {
         const matchesGoal =
           selectedGoals.length === 0 || selectedGoals.includes(product.goal);
 
+        const matchesBestSeller = !filterBestSeller || product.isBestSeller;
+        const matchesOffers = !filterOffers || product.isOffer;
+
         return (
           matchesSearch &&
           matchesCategory &&
           matchesBrand &&
           matchesGoal &&
+          matchesBestSeller &&
+          matchesOffers &&
           product.price <= maxPrice &&
           product.rating >= minRating
         );
@@ -211,9 +166,12 @@ function ShopPageContent() {
         if (sortBy === "low") return a.price - b.price;
         if (sortBy === "high") return b.price - a.price;
         if (sortBy === "popular") return b.popularity - a.popularity;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        const dateA = a.updatedAt || a.createdAt;
+        const dateB = b.updatedAt || b.createdAt;
+        return new Date(dateB).getTime() - new Date(dateA).getTime();
       });
   }, [
+    allProducts,
     maxPrice,
     minRating,
     search,
@@ -221,6 +179,8 @@ function ShopPageContent() {
     selectedCategories,
     selectedGoals,
     sortBy,
+    filterBestSeller,
+    filterOffers,
   ]);
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
@@ -237,6 +197,8 @@ function ShopPageContent() {
     setSelectedBrands([]);
     setSelectedGoals([]);
     setMinRating(0);
+    setFilterBestSeller(false);
+    setFilterOffers(false);
     setPage(1);
   };
 
@@ -345,7 +307,7 @@ function ShopPageContent() {
                 </div>
 
                 <FilterGroup title="Category">
-                  {categories.map((category) => (
+                  {dbCategories.map((category) => (
                     <FilterPill
                       key={category.name}
                       label={category.name}
@@ -362,13 +324,13 @@ function ShopPageContent() {
                 </FilterGroup>
 
                 <FilterGroup title="Brand">
-                  {brands.map((brand) => (
+                  {dbBrands.map((brand) => (
                     <FilterPill
-                      key={brand}
-                      label={brand}
-                      active={selectedBrands.includes(brand)}
+                      key={brand.name}
+                      label={brand.name}
+                      active={selectedBrands.includes(brand.name)}
                       onClick={() =>
-                        toggleFilter(brand, selectedBrands, setSelectedBrands)
+                        toggleFilter(brand.name, selectedBrands, setSelectedBrands)
                       }
                     />
                   ))}
@@ -418,11 +380,10 @@ function ShopPageContent() {
                           setMinRating(rating);
                           setPage(1);
                         }}
-                        className={`${filterButtonClass} ${
-                          minRating === rating
-                            ? "!border-red-600 !bg-red-600 !text-white"
-                            : ""
-                        }`}
+                        className={`${filterButtonClass} ${minRating === rating
+                          ? "!border-red-600 !bg-red-600 !text-white"
+                          : ""
+                          }`}
                       >
                         {rating === 0 ? "All" : `${rating}+`}
                       </button>
@@ -483,11 +444,10 @@ function ShopPageContent() {
                         key={pageNumber}
                         type="button"
                         onClick={() => setPage(pageNumber)}
-                        className={`h-12 w-12 rounded-full font-black transition ${
-                          page === pageNumber
-                            ? "bg-red-600 text-white border-transparent shadow-[0_0_15px_rgba(220,38,38,0.5)]"
-                            : "border border-white/10 text-zinc-400 hover:bg-white hover:text-zinc-950"
-                        }`}
+                        className={`h-12 w-12 rounded-full font-black transition ${page === pageNumber
+                          ? "bg-red-600 text-white border-transparent shadow-[0_0_15px_rgba(220,38,38,0.5)]"
+                          : "border border-white/10 text-zinc-400 hover:bg-white hover:text-zinc-950"
+                          }`}
                       >
                         {pageNumber}
                       </button>
@@ -664,9 +624,8 @@ function FilterPill({
     <button
       type="button"
       onClick={onClick}
-      className={`${filterButtonClass} ${
-        active ? "!border-red-600 !bg-red-600 !text-white" : ""
-      }`}
+      className={`${filterButtonClass} ${active ? "!border-red-600 !bg-red-600 !text-white" : ""
+        }`}
     >
       <span className="inline-flex items-center gap-2">
         {active && <Check className="h-4 w-4" />}

@@ -2,7 +2,7 @@ package com.muscleyn.backend.controller
 
 import com.muscleyn.backend.dto.ResponseDto
 import com.muscleyn.backend.dto.ReviewRequest
-import com.muscleyn.backend.entity.Review
+import com.muscleyn.backend.response.ReviewResponse
 import com.muscleyn.backend.service.ReviewService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
@@ -23,7 +23,7 @@ class ReviewController(
         @RequestBody
         request: ReviewRequest
 
-    ): ResponseDto<Review> {
+    ): ResponseDto<ReviewResponse> {
 
         val review =
             reviewService
@@ -46,7 +46,7 @@ class ReviewController(
         @PathVariable
         productId: Long
 
-    ): ResponseDto<List<Review>> {
+    ): ResponseDto<List<ReviewResponse>> {
 
         val reviews =
             reviewService
@@ -89,6 +89,16 @@ class ReviewController(
                 "Average rating fetched successfully",
 
             data = average
+        )
+    }
+
+    @GetMapping("/dashboard")
+    fun getDashboardReviews(): ResponseDto<List<ReviewResponse>> {
+        val reviews = reviewService.getDashboardReviews()
+        return ResponseDto(
+            status = true,
+            message = "Dashboard reviews fetched successfully",
+            data = reviews
         )
     }
 }

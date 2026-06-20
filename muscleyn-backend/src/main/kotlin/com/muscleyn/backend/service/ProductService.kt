@@ -23,22 +23,18 @@ interface ProductService {
     ): Page<ProductResponse>;
 
     fun searchProducts(
-
         search: String?,
-
         category: String?,
-
         brand: String?,
-
+        isBestSeller: Boolean?,
+        isOffer: Boolean?,
+        minPrice: Double?,
+        maxPrice: Double?,
         page: Int,
-
         size: Int,
-
         sortBy: String,
-
-        direction: String,
-
-        ): Page<ProductResponse>
+        direction: String
+    ): Page<ProductResponse>
 
     fun getProductById(
         productId: Long
@@ -81,4 +77,8 @@ interface ProductService {
     ): Product
 
     fun deleteProductImage(imageId: Long)
+
+    fun toggleBestSeller(productId: Long): ProductResponse
+
+    fun toggleOffer(productId: Long): ProductResponse
 }

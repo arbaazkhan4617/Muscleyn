@@ -176,7 +176,7 @@ export default function CategoriesPage() {
                     <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                     {preview ? (
                         <>
-                            <img src={preview.startsWith('blob:') ? preview : `http://localhost:8080/muscleyn-backend${preview}`} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                            <img src={preview.startsWith('blob:') || preview.startsWith('http') ? preview : preview} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                 <p className="text-white font-bold text-sm">Change Image</p>
                             </div>
@@ -229,7 +229,7 @@ export default function CategoriesPage() {
                     <td className="p-6">
                       <div className="relative w-16 h-16 rounded-xl bg-black border border-white/10 overflow-hidden">
                         {category.imageUrl ? (
-                            <img src={`http://localhost:8080/muscleyn-backend${category.imageUrl}`} alt={category.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                            <img src={category.imageUrl.startsWith('http') ? category.imageUrl : category.imageUrl} alt={category.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-zinc-600">
                                 <ImageIcon className="w-6 h-6" />

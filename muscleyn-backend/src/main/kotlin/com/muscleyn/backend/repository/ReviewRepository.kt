@@ -11,6 +11,8 @@ interface ReviewRepository :
         productId: Long
     ): List<Review>
 
+    fun findByAppearInDashboardTrueOrderByIdDesc(): List<Review>
+
     fun findByUserIdAndProductId(
 
         userId: Long,

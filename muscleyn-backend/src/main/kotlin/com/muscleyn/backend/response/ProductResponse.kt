@@ -27,7 +27,11 @@ data class ProductResponse(
     val isActive : Boolean?,
     val productImages: List<ProductImageResponse>?,
     val nutrition: String?,
-    val benefits: String?
+    val benefits: String?,
+    val isBestSeller: Boolean?,
+    val isOffer: Boolean?,
+    val createdAt: java.time.LocalDateTime?,
+    val updatedAt: java.time.LocalDateTime?
 )
 
 data class ProductImageResponse(

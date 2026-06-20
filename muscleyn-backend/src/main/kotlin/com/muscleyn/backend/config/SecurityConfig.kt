@@ -81,6 +81,14 @@ class SecurityConfig(
 
                     .permitAll()
 
+                    .requestMatchers(
+                        HttpMethod.GET,
+                        "/api/cms/**",
+                        "/api/coupons/**"
+                    )
+
+                    .permitAll()
+
                     // ADMIN APIs
                     .requestMatchers(
 
@@ -90,7 +98,7 @@ class SecurityConfig(
 
                         "/api/coupons/**",
 
-                        "/api/contact/enquiries"
+                        "/api/contact/enquiries/**"
 
                     )
 

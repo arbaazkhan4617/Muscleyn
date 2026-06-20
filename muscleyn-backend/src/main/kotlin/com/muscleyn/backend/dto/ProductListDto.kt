@@ -21,5 +21,9 @@ data class ProductListDto(
         String?,
 
     val active:
-        Boolean?
+        Boolean?,
+
+    val isBestSeller: Boolean?,
+
+    val isOffer: Boolean?
 )

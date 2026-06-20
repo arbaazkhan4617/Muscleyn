@@ -42,6 +42,8 @@ class Product(
     var imageUrl: String? = null,
 
     var isActive: Boolean? = true,
+    var isBestSeller: Boolean? = false,
+    var isOffer: Boolean? = false,
     @OneToMany(
         mappedBy = "product"
     )

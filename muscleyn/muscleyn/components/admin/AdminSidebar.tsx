@@ -1,183 +1,125 @@
 "use client";
 
 import Link from "next/link";
-
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
-
-  usePathname,
-
-  useRouter,
-
-} from "next/navigation";
-
-import {
-
   LayoutDashboard,
-
   Package,
-
   ShoppingCart,
-
   Users,
-
   ImageIcon,
-
   TicketPercent,
-
   BarChart3,
-
   LogOut,
-
   Dumbbell,
-
   Sparkles,
-
   ChevronRight,
-
+  ShieldCheck,
+  Settings,
+  MessageSquare,
+  Star,
+  FileText,
+  Zap,
 } from "lucide-react";
 
 export default function AdminSidebar() {
-
-  const pathname =
-    usePathname();
-
-  const router =
-    useRouter();
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get("tab");
 
   // LOGOUT
-  const handleLogout =
-    () => {
-
-      localStorage.removeItem(
-        "adminToken"
-      );
-
-      localStorage.removeItem(
-        "adminUser"
-      );
-
-      router.push(
-        "/admin/login"
-      );
-    };
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminUser");
+    router.push("/admin/login");
+  };
 
   const menus = [
-
     {
-
-      name:
-        "Dashboard",
-
-      href:
-        "/admin/dashboard",
-
-      icon:
-        LayoutDashboard,
+      name: "Dashboard",
+      href: "/admin/dashboard",
+      icon: LayoutDashboard,
     },
-  {
-
-  name:
-    "Brands",
-
-  href:
-    "/admin/brands",
-
-  icon:
-    Package,
-},
-{
-
-  name:
-    "Categories",
-
-  href:
-    "/admin/categories",
-
-  icon:
-    Package,
-},
-
-{
-
-  name:
-    "Sub Categories",
-
-  href:
-    "/admin/sub-categories",
-
-  icon:
-    Package,
-},
     {
-
-      name:
-        "Products",
-
-      href:
-        "/admin/products",
-
-      icon:
-        Package,
+      name: "Brands",
+      href: "/admin/brands",
+      icon: Package,
     },
-
     {
-
-      name:
-        "Orders",
-
-      href:
-        "/admin/orders",
-
-      icon:
-        ShoppingCart,
+      name: "Categories",
+      href: "/admin/categories",
+      icon: Package,
     },
-
     {
-
-      name:
-        "Customers",
-
-      href:
-        "/admin/customers",
-
-      icon:
-        Users,
+      name: "Sub Categories",
+      href: "/admin/sub-categories",
+      icon: Package,
     },
-
     {
-
-      name:
-        "Banners",
-
-      href:
-        "/admin/banners",
-
-      icon:
-        ImageIcon,
+      name: "Products",
+      href: "/admin/products",
+      icon: Package,
     },
-
     {
-
-      name:
-        "Coupons",
-
-      href:
-        "/admin/coupons",
-
-      icon:
-        TicketPercent,
+      name: "Orders",
+      href: "/admin/orders",
+      icon: ShoppingCart,
     },
-
     {
-
-      name:
-        "Reports",
-
-      href:
-        "/admin/reports",
-
-      icon:
-        BarChart3,
+      name: "Customers",
+      href: "/admin/customers",
+      icon: Users,
+    },
+    {
+      name: "Banners",
+      href: "/admin/banners",
+      icon: ImageIcon,
+    },
+    {
+      name: "Coupons",
+      href: "/admin/coupons",
+      icon: TicketPercent,
+    },
+    {
+      name: "Reports",
+      href: "/admin/reports",
+      icon: BarChart3,
+    },
+    {
+      name: "Deals of the Day",
+      href: "/admin/deals",
+      icon: Sparkles,
+    },
+    {
+      name: "Authenticity Links",
+      href: "/admin/authenticity",
+      icon: ShieldCheck,
+    },
+    {
+      name: "Terms & Conditions",
+      href: "/admin/cms?tab=terms",
+      icon: FileText,
+    },
+    {
+      name: "Privacy Policy",
+      href: "/admin/cms?tab=privacy",
+      icon: ShieldCheck,
+    },
+    {
+      name: "Homepage Banner",
+      href: "/admin/cms?tab=flash",
+      icon: Zap,
+    },
+    {
+      name: "Contact Enquiries",
+      href: "/admin/enquiries",
+      icon: MessageSquare,
+    },
+    {
+      name: "Product Reviews",
+      href: "/admin/reviews",
+      icon: Star,
     },
   ];
 
@@ -191,7 +133,7 @@ export default function AdminSidebar() {
           </div>
           <div>
             <h1 className="text-2xl font-black tracking-widest text-white leading-none">
-              MUSCLEYN
+              PRABHA PHARMA
             </h1>
             <p className="mt-1 flex items-center gap-1.5 text-xs font-bold text-zinc-400 uppercase tracking-widest">
               <Sparkles className="h-3 w-3 text-red-500" />
@@ -207,7 +149,11 @@ export default function AdminSidebar() {
       <div className="flex-1 space-y-3">
         {menus.map((menu) => {
           const Icon = menu.icon;
-          const active = pathname === menu.href || pathname.startsWith(`${menu.href}/`);
+          
+          // Match active tab if has query parameters, otherwise check base path match
+          const active = menu.href.includes("?")
+            ? (pathname === menu.href.split("?")[0] && currentTab === new URLSearchParams(menu.href.split("?")[1]).get("tab"))
+            : (pathname === menu.href || (menu.href !== "/admin/dashboard" && pathname.startsWith(`${menu.href}/`)));
 
           return (
             <Link

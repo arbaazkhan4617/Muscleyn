@@ -280,7 +280,7 @@ class ProductVariantServiceImpl(
                         image.originalFilename
 
             val uploadDir =
-                File(  uploadDirPath)
+                File(  uploadDirPath).absoluteFile
 
             if (!uploadDir.exists()) {
 
@@ -413,7 +413,7 @@ class ProductVariantServiceImpl(
                         image.originalFilename
 
             val uploadDir =
-                File(  uploadDirPath)
+                File(  uploadDirPath).absoluteFile
 
             if (!uploadDir.exists()) {
 

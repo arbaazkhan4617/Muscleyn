@@ -178,7 +178,7 @@ export default function AdminBannersPage() {
                 <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Preview</label>
                 <div className="w-full h-40 md:h-64 rounded-2xl overflow-hidden border border-white/10 relative bg-black">
                     <img 
-                        src={imageUrl.startsWith('http') ? imageUrl : `http://localhost:8080/muscleyn-backend${imageUrl}`} 
+                        src={imageUrl.startsWith('http') ? imageUrl : imageUrl} 
                         alt="Banner Preview" 
                         className="w-full h-full object-cover" 
                         onError={(e) => {
@@ -222,7 +222,7 @@ export default function AdminBannersPage() {
                   <div key={banner.id} className="bg-zinc-900/50 backdrop-blur-md rounded-3xl border border-white/10 shadow-xl overflow-hidden group">
                       <div className="w-full h-48 relative bg-black">
                           <img 
-                              src={banner.imageUrl?.startsWith('http') ? banner.imageUrl : `http://localhost:8080/muscleyn-backend${banner.imageUrl}`} 
+                              src={banner.imageUrl?.startsWith('http') ? banner.imageUrl : banner.imageUrl} 
                               alt={banner.title} 
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                               onError={(e) => {

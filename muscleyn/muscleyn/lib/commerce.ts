@@ -23,6 +23,9 @@ export type CommerceProduct = {
   stock: number;
   popularity: number;
   createdAt: string;
+  updatedAt?: string;
+  isBestSeller?: boolean;
+  isOffer?: boolean;
   shortDescription: string;
   description: string;
   nutrition: {
@@ -32,6 +35,10 @@ export type CommerceProduct = {
     calories: string;
     keyIngredients: string[];
   };
+  customFacts?: any[];
+  customBenefits?: string[];
+  richDetails?: any;
+  variants?: any[];
 };
 
 export const categories = [
@@ -292,3 +299,118 @@ export const formatPrice = (price: number) =>
     currency: "INR",
     maximumFractionDigits: 0,
   }).format(price);
+
+export const getBackendImageUrl = (url?: string | null): string => {
+  if (!url) return "/images/products/1.jpeg";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+    return url;
+  }
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/api";
+  const host = apiBase.replace(/\/api$/, "");
+  return `${host}${url.startsWith("/") ? "" : "/"}${url}`;
+};
+
+export const mapBackendProductToCommerce = (backendProd: any): CommerceProduct => {
+  const primaryVariant = backendProd.variants?.[0];
+  const priceVal = primaryVariant?.price ? Number(primaryVariant.price) : 0;
+  const oldPriceVal = primaryVariant?.oldPrice ? Number(primaryVariant.oldPrice) : 0;
+  
+  let discountStr = "";
+  if (oldPriceVal > priceVal) {
+    const diff = oldPriceVal - priceVal;
+    const pct = Math.round((diff / oldPriceVal) * 100);
+    discountStr = `${pct}% OFF`;
+  }
+  
+  let nutritionObj = {
+    servingSize: "1 Scoop (30g)",
+    protein: "0g",
+    carbs: "0g",
+    calories: "0 kcal",
+    keyIngredients: [] as string[]
+  };
+  
+  if (backendProd.nutrition) {
+    try {
+      const parsed = JSON.parse(backendProd.nutrition);
+      nutritionObj.servingSize = parsed.servingSize || "1 Scoop (30g)";
+      nutritionObj.keyIngredients = parsed.ingredients ? parsed.ingredients.split(",").map((s: string) => s.trim()) : [];
+      
+      const facts = parsed.facts || [];
+      const proteinFact = facts.find((f: any) => f.label?.toLowerCase() === "protein");
+      const carbsFact = facts.find((f: any) => f.label?.toLowerCase() === "carbs");
+      const caloriesFact = facts.find((f: any) => f.label?.toLowerCase() === "calories");
+      
+      nutritionObj.protein = proteinFact?.value || "0g";
+      nutritionObj.carbs = carbsFact?.value || "0g";
+      nutritionObj.calories = caloriesFact?.value || "0 kcal";
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  let parsedBenefits = [
+    "Accelerates muscle protein synthesis",
+    "Reduces muscle soreness and fatigue",
+    "Mixes instantly with no clumps",
+    "Zero artificial colors or dyes",
+    "Enhanced with digestive enzymes",
+    "Incredible, award-winning taste"
+  ];
+  let richDetailsObj: any = null;
+  if (backendProd.benefits) {
+    try {
+      const parsed = JSON.parse(backendProd.benefits);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.isRichDetails) {
+        richDetailsObj = parsed;
+        if (parsed.benefits && Array.isArray(parsed.benefits)) {
+          parsedBenefits = parsed.benefits.map((b: any) => typeof b === "string" ? b : (b.title || ""));
+        } else if (parsed.advantage && Array.isArray(parsed.advantage.points)) {
+          parsedBenefits = parsed.advantage.points;
+        }
+      } else if (Array.isArray(parsed)) {
+        parsedBenefits = parsed;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  const galleryImages = backendProd.productImages?.map((img: any) => img.imageUrl) || [];
+
+  return {
+    id: backendProd.id,
+    variantId: primaryVariant?.id,
+    slug: backendProd.name ? backendProd.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "",
+    name: backendProd.name || "",
+    category: backendProd.subCategoryName || backendProd.categoryName || "Whey Protein",
+    brand: backendProd.brandName || "Muscleyn Elite",
+    goal: "Protein",
+    image: getBackendImageUrl(galleryImages.length > 0 ? galleryImages[0] : backendProd.imageUrl),
+    gallery: galleryImages.length > 0 
+      ? galleryImages.map((img: any) => getBackendImageUrl(img)) 
+      : [getBackendImageUrl(backendProd.imageUrl)],
+    price: priceVal,
+    oldPrice: oldPriceVal,
+    discount: discountStr,
+    rating: 4.8,
+    reviews: 120,
+    stock: primaryVariant?.stock ? Number(primaryVariant.stock) : 10,
+    popularity: 90,
+    createdAt: backendProd.createdAt || new Date().toISOString(),
+    updatedAt: backendProd.updatedAt || new Date().toISOString(),
+    isBestSeller: backendProd.isBestSeller || false,
+    isOffer: backendProd.isOffer || false,
+    shortDescription: backendProd.description ? backendProd.description.substring(0, 100) + "..." : "",
+    description: backendProd.description || "",
+    nutrition: nutritionObj,
+    customFacts: backendProd.nutrition ? (() => {
+      try {
+        return JSON.parse(backendProd.nutrition).facts || [];
+      } catch (e) { return []; }
+    })() : [],
+    customBenefits: parsedBenefits,
+    richDetails: richDetailsObj,
+    variants: backendProd.variants || []
+  } as any;
+};

@@ -178,7 +178,7 @@ export default function BrandsPage() {
                     <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                     {preview ? (
                         <>
-                            <img src={preview.startsWith('blob:') ? preview : `http://localhost:8080/muscleyn-backend${preview}`} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform p-4" />
+                            <img src={preview.startsWith('blob:') || preview.startsWith('http') ? preview : preview} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform p-4" />
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                 <p className="text-white font-bold text-sm">Change Logo</p>
                             </div>
@@ -232,7 +232,7 @@ export default function BrandsPage() {
                     <td className="p-6">
                       <div className="relative w-16 h-16 rounded-xl bg-black border border-white/10 overflow-hidden p-2">
                         {brand.logoUrl ? (
-                            <img src={`http://localhost:8080/muscleyn-backend${brand.logoUrl}`} alt={brand.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
+                            <img src={brand.logoUrl.startsWith('http') ? brand.logoUrl : brand.logoUrl} alt={brand.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-zinc-600">
                                 <ShieldCheck className="w-6 h-6" />

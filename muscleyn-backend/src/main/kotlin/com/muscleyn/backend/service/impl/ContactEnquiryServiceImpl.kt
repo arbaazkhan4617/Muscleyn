@@ -74,6 +74,17 @@ class ContactEnquiryServiceImpl(
         }
     }
 
+    override fun updateEnquiryStatus(
+        id: Long,
+        status: String
+    ): ContactEnquiryResponse {
+        val enquiry = contactEnquiryRepository.findById(id)
+            .orElseThrow { RuntimeException("Enquiry not found") }
+        enquiry.status = status.trim().uppercase()
+        val saved = contactEnquiryRepository.save(enquiry)
+        return saved.toResponse()
+    }
+
     private fun ContactEnquiry.toResponse():
             ContactEnquiryResponse {
 

@@ -94,8 +94,45 @@ const supportCards: Array<{
   },
 ];
 
+const stores = [
+  {
+    id: "indore",
+    name: "Muscleyn Indore HQ",
+    address: "Vijay Nagar, Indore, Madhya Pradesh 452010",
+    timings: "Mon-Sat, 10 AM - 7 PM",
+    mapUrl: "https://www.google.com/maps?q=22.7533,75.8937&z=16&output=embed",
+    directionsUrl: "https://www.google.com/maps?q=22.7533,75.8937",
+  },
+  {
+    id: "mumbai",
+    name: "Muscleyn Mumbai Experience Center",
+    address: "Bandra West, Link Road, Mumbai, Maharashtra 400050",
+    timings: "Mon-Sun, 11 AM - 8 PM",
+    mapUrl: "https://www.google.com/maps?q=19.0600,72.8311&z=16&output=embed",
+    directionsUrl: "https://www.google.com/maps?q=19.0600,72.8311",
+  },
+  {
+    id: "delhi",
+    name: "Muscleyn Delhi Experience Center",
+    address: "Connaught Place, Radial Road 1, New Delhi 110001",
+    timings: "Mon-Sun, 10 AM - 9 PM",
+    mapUrl: "https://www.google.com/maps?q=28.6304,77.2177&z=16&output=embed",
+    directionsUrl: "https://www.google.com/maps?q=28.6304,77.2177",
+  },
+  {
+    id: "bengaluru",
+    name: "Muscleyn Bengaluru Experience Center",
+    address: "Indiranagar, 100 Feet Rd, Bengaluru, Karnataka 560038",
+    timings: "Mon-Sat, 10 AM - 8 PM",
+    mapUrl: "https://www.google.com/maps?q=12.9719,77.6412&z=16&output=embed",
+    directionsUrl: "https://www.google.com/maps?q=12.9719,77.6412",
+  },
+];
+
 export default function ContactPage() {
   const [form, setForm] = useState(initialForm);
+  const [activeStoreIdx, setActiveStoreIdx] = useState(0);
+  const activeStore = stores[activeStoreIdx];
   const [loading, setLoading] = useState(false);
 
   const updateField = (field: keyof typeof form, value: string) => {
@@ -244,11 +281,43 @@ export default function ContactPage() {
           </div>
         </section>
 
-        <section className="mx-auto grid max-w-7xl gap-8 px-4 py-20 lg:grid-cols-2">
+        {/* Store Locations Slider */}
+        <section className="max-w-7xl mx-auto px-4 pt-16 pb-4">
+          <p className="text-sm font-black uppercase tracking-[0.24em] text-red-500 mb-3">Our Stores</p>
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-8">
+            Experience Centers <span className="text-red-500">& Labs</span>
+          </h2>
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory" style={{ scrollbarWidth: "none" }}>
+            {stores.map((store, idx) => (
+              <button
+                key={store.id}
+                type="button"
+                onClick={() => setActiveStoreIdx(idx)}
+                className={`snap-start shrink-0 w-72 p-6 rounded-[2rem] border transition-all duration-300 text-left ${
+                  activeStoreIdx === idx
+                    ? "border-red-600 bg-red-600/10 text-white shadow-lg shadow-red-950/20"
+                    : "border-white/10 bg-white/[0.03] text-zinc-400 hover:border-white/20 hover:text-white"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-black uppercase tracking-[0.15em] text-red-500">
+                    Location 0{idx + 1}
+                  </span>
+                  <MapPin className={`w-5 h-5 ${activeStoreIdx === idx ? "text-red-500" : "text-zinc-500"}`} />
+                </div>
+                <h3 className="text-xl font-black mb-1 line-clamp-1">{store.name}</h3>
+                <p className="text-xs font-semibold text-zinc-400 line-clamp-2 leading-relaxed">{store.address}</p>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto grid max-w-7xl gap-8 px-4 py-10 lg:grid-cols-2">
           <div className="relative min-h-[620px] overflow-hidden rounded-[2.25rem] border border-white/10 bg-zinc-900 shadow-2xl shadow-black/30">
             <iframe
-              title="Muscleyn Vijay Nagar business location"
-              src="https://www.google.com/maps?q=22.7533,75.8937&z=16&output=embed"
+              key={activeStore.id}
+              title={`${activeStore.name} location`}
+              src={activeStore.mapUrl}
               className="absolute inset-0 h-full w-full border-0 grayscale-[15%] contrast-110"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -259,7 +328,7 @@ export default function ContactPage() {
                 <MapPin className="h-8 w-8 fill-white" />
               </div>
               <div className="mt-3 rounded-full bg-black/75 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white backdrop-blur">
-                Muscleyn HQ
+                {activeStore.name}
               </div>
             </div>
             <div className="absolute inset-x-5 bottom-5 rounded-[1.75rem] border border-white/15 bg-black/80 p-6 text-white shadow-2xl backdrop-blur-xl">
@@ -267,20 +336,20 @@ export default function ContactPage() {
                 Visit our support desk
               </p>
               <h3 className="mt-3 text-2xl font-black">
-                Muscleyn Experience Center
+                {activeStore.name}
               </h3>
               <p className="mt-3 leading-7 text-zinc-300">
-                Vijay Nagar, Indore, Madhya Pradesh 452010
+                {activeStore.address}
               </p>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
                   <p className="text-xs font-black uppercase tracking-[0.16em] text-zinc-400">
                     Pickup
                   </p>
-                  <p className="mt-1 font-bold">Mon-Sat, 10 AM - 7 PM</p>
+                  <p className="mt-1 font-bold">{activeStore.timings}</p>
                 </div>
                 <Link
-                  href="https://www.google.com/maps?q=22.7533,75.8937"
+                  href={activeStore.directionsUrl}
                   target="_blank"
                   className="flex items-center justify-center rounded-2xl bg-red-600 px-5 py-4 text-sm font-black uppercase tracking-[0.16em] transition hover:bg-white hover:text-zinc-950"
                 >

@@ -8,7 +8,7 @@ DB_HOST="${DB_HOST:-127.0.0.1}"
 DB_PORT="${DB_PORT:-3306}"
 DB_NAME="${DB_NAME:-muscleyn}"
 DB_USER="${DB_USER:-root}"
-DB_PASSWORD="${DB_PASSWORD:-Emor@123}"
+DB_PASSWORD="${DB_PASSWORD:-2g+bO+JwovPk}"
 
 echo "Seeding demo admin user into ${DB_NAME} at ${DB_HOST}:${DB_PORT}..."
 

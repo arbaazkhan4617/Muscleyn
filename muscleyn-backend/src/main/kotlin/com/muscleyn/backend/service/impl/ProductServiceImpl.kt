@@ -96,6 +96,10 @@ class ProductServiceImpl(
             brand = brand,
 
             imageUrl = request.imageUrl,
+
+            isBestSeller = request.isBestSeller ?: false,
+
+            isOffer = request.isOffer ?: false,
         )
 
         return productRepository.save(
@@ -132,58 +136,44 @@ class ProductServiceImpl(
     }
 
     override fun searchProducts(
-
         search: String?,
-
         category: String?,
-
         brand: String?,
-
+        isBestSeller: Boolean?,
+        isOffer: Boolean?,
+        minPrice: Double?,
+        maxPrice: Double?,
         page: Int,
-
         size: Int,
-
         sortBy: String,
-
-        direction: String,
-
-        ): Page<ProductResponse> {
-
-        val sort = if (
-            direction.equals(
-                "desc",
-                true
-            )
-        ) {
-
-            Sort.by(sortBy).descending()
-
+        direction: String
+    ): Page<ProductResponse> {
+        val mappedSortBy = when (sortBy) {
+            "price" -> "variants.price"
+            "popularity" -> "id"
+            "latest" -> "createdAt"
+            else -> sortBy
+        }
+        val sort = if (direction.equals("desc", true)) {
+            Sort.by(mappedSortBy).descending()
         } else {
-
-            Sort.by(sortBy).ascending()
+            Sort.by(mappedSortBy).ascending()
         }
 
-        val pageable =
-            PageRequest.of(
-                page,
-                size,
-                sort
-            )
+        val pageable = PageRequest.of(page, size, sort)
 
-        return productRepository
-            .searchProducts(
-
-                search,
-
-                category,
-
-                brand,
-
-                pageable
-            ).map {
-
-                it.toResponse()
-            }
+        return productRepository.searchProducts(
+            search,
+            category,
+            brand,
+            isBestSeller,
+            isOffer,
+            minPrice,
+            maxPrice,
+            pageable
+        ).map {
+            it.toResponse()
+        }
     }
 
     override fun getProductById(
@@ -269,6 +259,12 @@ class ProductServiceImpl(
 
         product.imageUrl =
             request.imageUrl
+
+        product.isBestSeller = request.isBestSeller ?: false
+
+        product.isOffer = request.isOffer ?: false
+
+        product.updatedAt = java.time.LocalDateTime.now()
 
         return productRepository.save(
             product
@@ -361,6 +357,10 @@ class ProductServiceImpl(
         product.benefits =
             request.benefits
 
+        product.isBestSeller = request.isBestSeller ?: false
+
+        product.isOffer = request.isOffer ?: false
+
         // IMAGE
         if (image != null) {
 
@@ -374,7 +374,7 @@ class ProductServiceImpl(
                         image.originalFilename
 
             val uploadDir =
-                File(  uploadDirPath)
+                File(  uploadDirPath).absoluteFile
 
             if (!uploadDir.exists()) {
 
@@ -413,7 +413,7 @@ class ProductServiceImpl(
                             image1.originalFilename
 
                 val uploadDir =
-                    File(  uploadDirPath)
+                    File(  uploadDirPath).absoluteFile
 
                 if (!uploadDir.exists()) {
 
@@ -517,6 +517,12 @@ class ProductServiceImpl(
         product.benefits =
             request.benefits
 
+        product.isBestSeller = request.isBestSeller ?: false
+
+        product.isOffer = request.isOffer ?: false
+
+        product.updatedAt = java.time.LocalDateTime.now()
+
         // IMAGE UPDATE
         if (image != null) {
 
@@ -530,7 +536,7 @@ class ProductServiceImpl(
                         image.originalFilename
 
             val uploadDir =
-                File(  uploadDirPath)
+                File(  uploadDirPath).absoluteFile
 
             if (!uploadDir.exists()) {
 
@@ -568,7 +574,7 @@ class ProductServiceImpl(
                             image1.originalFilename
 
                 val uploadDir =
-                    File(  uploadDirPath)
+                    File(  uploadDirPath).absoluteFile
 
                 if (!uploadDir.exists()) {
 
@@ -601,5 +607,21 @@ class ProductServiceImpl(
 
     override fun deleteProductImage(imageId: Long) {
         productImagesRepository.deleteById(imageId)
+    }
+
+    override fun toggleBestSeller(productId: Long): ProductResponse {
+        val product = productRepository.findById(productId)
+            .orElseThrow { RuntimeException("Product not found") }
+        product.isBestSeller = !(product.isBestSeller ?: false)
+        product.updatedAt = java.time.LocalDateTime.now()
+        return productRepository.save(product).toResponse()
+    }
+
+    override fun toggleOffer(productId: Long): ProductResponse {
+        val product = productRepository.findById(productId)
+            .orElseThrow { RuntimeException("Product not found") }
+        product.isOffer = !(product.isOffer ?: false)
+        product.updatedAt = java.time.LocalDateTime.now()
+        return productRepository.save(product).toResponse()
     }
 }

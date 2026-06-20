@@ -19,5 +19,9 @@ data class CreateProductRequest(
 
     val nutrition: String? = null,
 
-    val benefits: String? = null
+    val benefits: String? = null,
+
+    val isBestSeller: Boolean? = false,
+
+    val isOffer: Boolean? = false
 )

@@ -17,6 +17,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import Image from "next/image";
+import { getBackendImageUrl } from "@/lib/commerce";
 
 export default function AdminProductsPage() {
   const [search, setSearch] = useState("");
@@ -55,6 +56,30 @@ export default function AdminProductsPage() {
     } catch (error) {
       console.log(error);
       toast.error("Failed to delete product");
+    }
+  };
+
+  // TOGGLE BEST SELLER
+  const handleToggleBestSeller = async (id: number, currentStatus: boolean) => {
+    try {
+      await api.put(`/products/${id}/toggle-best-seller`);
+      setProducts(products.map(p => p.id === id ? { ...p, isBestSeller: !currentStatus } : p));
+      toast.success("Best seller status updated");
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to toggle best seller status");
+    }
+  };
+
+  // TOGGLE OFFER
+  const handleToggleOffer = async (id: number, currentStatus: boolean) => {
+    try {
+      await api.put(`/products/${id}/toggle-offer`);
+      setProducts(products.map(p => p.id === id ? { ...p, isOffer: !currentStatus } : p));
+      toast.success("Offer status updated");
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to toggle offer status");
     }
   };
 
@@ -134,6 +159,8 @@ export default function AdminProductsPage() {
                   <th className="p-6 font-bold">Product Details</th>
                   <th className="p-6 font-bold">Category</th>
                   <th className="p-6 font-bold">Status</th>
+                  <th className="p-6 font-bold">Best Seller</th>
+                  <th className="p-6 font-bold">Offers</th>
                   <th className="p-6 font-bold">Inventory</th>
                   <th className="p-6 font-bold text-right">Actions</th>
                 </tr>
@@ -155,7 +182,13 @@ export default function AdminProductsPage() {
                     <td className="p-6">
                       <div className="relative w-16 h-16 rounded-xl bg-black border border-white/10 overflow-hidden">
                         <img
-                          src={product.imageUrl || "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?q=80&w=2670&auto=format&fit=crop"}
+                          src={
+                            (() => {
+                              const galleryImages = product.productImages?.map((img: any) => img.imageUrl) || [];
+                              const rawUrl = galleryImages.length > 0 ? galleryImages[0] : product.imageUrl;
+                              return getBackendImageUrl(rawUrl);
+                            })()
+                          }
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
@@ -189,6 +222,32 @@ export default function AdminProductsPage() {
                         <span className={`w-1.5 h-1.5 rounded-full ${product.active ? 'bg-green-500' : 'bg-red-500'}`}></span>
                         {product.active ? "Active" : "Inactive"}
                       </span>
+                    </td>
+
+                    {/* BEST SELLER */}
+                    <td className="p-6">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={product.isBestSeller || false}
+                          onChange={() => handleToggleBestSeller(product.id, product.isBestSeller)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-zinc-750 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-650"></div>
+                      </label>
+                    </td>
+
+                    {/* OFFERS */}
+                    <td className="p-6">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={product.isOffer || false}
+                          onChange={() => handleToggleOffer(product.id, product.isOffer)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-zinc-750 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-650"></div>
+                      </label>
                     </td>
 
                     {/* INVENTORY / VARIANTS */}

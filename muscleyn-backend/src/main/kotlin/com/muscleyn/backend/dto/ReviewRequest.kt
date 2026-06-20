@@ -35,4 +35,6 @@ data class ReviewRequest(
     val rating: Double?,
 
     val reviewText: String?,
+
+    val mediaUrls: String? = null,
 )

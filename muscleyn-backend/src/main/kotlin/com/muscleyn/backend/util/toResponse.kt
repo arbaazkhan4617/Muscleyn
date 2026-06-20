@@ -77,9 +77,13 @@ fun Product.toResponse():
 
                 it.toResponse()
             },
-                    isActive = isActive,
+        isActive = isActive,
         productImages = productImages.map { ProductImageResponse(it.id, it.imageUrl, it.sequenceNumber) },
         nutrition = nutrition,
-        benefits = benefits
+        benefits = benefits,
+        isBestSeller = isBestSeller,
+        isOffer = isOffer,
+        createdAt = createdAt,
+        updatedAt = updatedAt
     )
 }

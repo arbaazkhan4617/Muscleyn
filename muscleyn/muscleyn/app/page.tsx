@@ -22,12 +22,19 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PremiumProductCard from "@/components/product/PremiumProductCard";
 import Skeleton from "@/components/ui/Skeleton";
+import DealOfTheDay from "@/components/home/DealOfTheDay";
+import RealReviews from "@/components/home/RealReviews";
+import BlogSection from "@/components/home/BlogSection";
+import NewsSection from "@/components/home/NewsSection";
 import {
   categories,
   formatPrice,
-  products,
   testimonials,
+  CommerceProduct,
+  mapBackendProductToCommerce,
+  getBackendImageUrl,
 } from "@/lib/commerce";
+import api from "@/services/api";
 
 const heroSlides = [
   {
@@ -82,15 +89,120 @@ const trustCards: Array<{
 
 export default function Home() {
   const [activeSlide, setActiveSlide] = useState(0);
-  const featuredProducts = products.slice(0, 3);
-  const bestSellers = [...products]
-    .sort((a, b) => b.popularity - a.popularity)
-    .slice(0, 4);
-  const currentSlide = heroSlides[activeSlide];
-  const nextSlide = heroSlides[(activeSlide + 1) % heroSlides.length];
+  const [featuredProducts, setFeaturedProducts] = useState<CommerceProduct[]>([]);
+  const [bestSellers, setBestSellers] = useState<CommerceProduct[]>([]);
+  const [socialProducts, setSocialProducts] = useState<CommerceProduct[]>([]);
+  const [banners, setBanners] = useState<any[]>(heroSlides);
+
+  const [goalsList, setGoalsList] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchHomeProducts = async () => {
+      try {
+        const response = await api.get("/products");
+        if (response.data && response.data.status) {
+          const items = response.data.data.content || response.data.data || [];
+          const mapped = items.map(mapBackendProductToCommerce);
+          setFeaturedProducts(mapped.slice(0, 3));
+          
+          const bestSellersList = mapped.filter((p: any) => p.isBestSeller);
+          if (bestSellersList.length > 0) {
+            setBestSellers(bestSellersList.slice(0, 4));
+          } else {
+            setBestSellers([...mapped].sort((a, b) => b.popularity - a.popularity).slice(0, 4));
+          }
+          setSocialProducts(mapped.slice(0, 4));
+        }
+      } catch (err) {
+        console.error("Failed to load products for homepage:", err);
+      }
+    };
+
+    const fetchBanners = async () => {
+      try {
+        const response = await api.get("/banners/active");
+        if (response.data && response.data.status && response.data.data?.length > 0) {
+          const mappedBanners = response.data.data.map((b: any) => ({
+            eyebrow: "EXCLUSIVE ANNOUNCEMENT",
+            title: b.title || "Premium Supplement Drop",
+            copy: "Formulated for performance, clinically tested, and athlete approved.",
+            image: b.imageUrl ? getBackendImageUrl(b.imageUrl) : "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1800&auto=format&fit=crop",
+            redirectUrl: b.redirectUrl || "/shop"
+          }));
+          setBanners(mappedBanners);
+        }
+      } catch (err) {
+        console.error("Failed to load active banners:", err);
+      }
+    };
+
+    const fetchGoals = async () => {
+      try {
+        const res = await api.get("/cms/goals-list");
+        if (res.data.data && res.data.data.cmsValue) {
+          const parsed = JSON.parse(res.data.data.cmsValue);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setGoalsList(parsed);
+            return;
+          }
+        }
+      } catch (err) {
+        console.log("No dynamic goals configured", err);
+      }
+      setGoalsList([
+        { title: "Muscle Gain", copy: "Heavy calorie stacks for lean bulking", img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=800&auto=format&fit=crop" },
+        { title: "Fat Loss", copy: "Clean energy and cutting support", img: "https://images.unsplash.com/photo-1546483875-ad9014c88eba?q=80&w=800&auto=format&fit=crop" },
+        { title: "Recovery", copy: "Protein and sleep-friendly nutrition", img: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=800&auto=format&fit=crop" }
+      ]);
+    };
+
+    fetchHomeProducts();
+    fetchBanners();
+    fetchGoals();
+  }, []);
+
+  const currentSlide = banners[activeSlide] || heroSlides[0];
+  const nextSlide = banners[(activeSlide + 1) % banners.length] || heroSlides[0];
+
+  // Dynamic Flash Sale Offer Settings
+  const [flashSale, setFlashSale] = useState({
+    active: true,
+    title: "Flash Sale Active",
+    subtitle: "Up to 40% off on all whey proteins.",
+    hours: 12,
+    minutes: 45,
+    seconds: 30
+  });
+
+  useEffect(() => {
+    const fetchFlashSale = async () => {
+      try {
+        const res = await api.get("/cms/flash-sale-offer");
+        if (res.data.data && res.data.data.cmsValue) {
+          const parsed = JSON.parse(res.data.data.cmsValue);
+          setFlashSale(prev => ({
+            ...prev,
+            ...parsed
+          }));
+        }
+      } catch (err) {
+        console.log("No dynamic flash sale configured", err);
+      }
+    };
+    fetchFlashSale();
+  }, []);
 
   // Flash Sale Timer
   const [timeLeft, setTimeLeft] = useState({ h: 12, m: 45, s: 30 });
+
+  useEffect(() => {
+    setTimeLeft({
+      h: flashSale.hours,
+      m: flashSale.minutes,
+      s: flashSale.seconds
+    });
+  }, [flashSale]);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft(prev => {
@@ -112,11 +224,11 @@ export default function Home() {
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setActiveSlide((current) => (current + 1) % heroSlides.length);
+      setActiveSlide((current) => (current + 1) % banners.length);
     }, 5000);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [banners]);
 
   return (
     <main className="bg-zinc-950 text-white min-h-screen selection:bg-red-600 selection:text-white">
@@ -185,7 +297,7 @@ export default function Home() {
             </AnimatePresence>
 
             <div className="mt-16 flex items-center gap-3">
-              {heroSlides.map((slide, index) => (
+              {banners.map((slide, index) => (
                 <button
                   key={slide.title}
                   type="button"
@@ -250,37 +362,41 @@ export default function Home() {
       </section>
 
       {/* Flash Sale Banner */}
-      <section className="relative overflow-hidden border-b border-white/10">
-        <div className="absolute inset-0 bg-gradient-to-r from-red-950 via-red-900 to-black opacity-40" />
-        <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-8 md:flex-row">
-          <div className="flex items-center gap-6">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-600 text-white shadow-[0_0_30px_rgba(220,38,38,0.4)]">
-              <Zap className="h-8 w-8" />
+      {flashSale.active && (
+        <section className="relative overflow-hidden border-b border-white/10">
+          <div className="absolute inset-0 bg-gradient-to-r from-red-950 via-red-900 to-black opacity-40" />
+          <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-8 md:flex-row">
+            <div className="flex items-center gap-6">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-600 text-white shadow-[0_0_30px_rgba(220,38,38,0.4)]">
+                <Zap className="h-8 w-8" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-black uppercase tracking-tight text-white">{flashSale.title}</h3>
+                <p className="text-zinc-400 font-medium">{flashSale.subtitle}</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-2xl font-black uppercase tracking-tight text-white">Flash Sale Active</h3>
-              <p className="text-zinc-400 font-medium">Up to 40% off on all whey proteins.</p>
+            <div className="flex items-center gap-4">
+              <div className="flex gap-2 text-center">
+                {[
+                  { label: "HRS", val: timeLeft.h },
+                  { label: "MIN", val: timeLeft.m },
+                  { label: "SEC", val: timeLeft.s }
+                ].map(t => (
+                  <div key={t.label} className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-white/5 w-16 h-16 backdrop-blur-md">
+                    <span className="text-xl font-black text-white">{String(t.val).padStart(2, '0')}</span>
+                    <span className="text-[10px] font-bold text-red-500 tracking-wider">{t.label}</span>
+                  </div>
+                ))}
+              </div>
+              <Link href="/shop" className="hidden md:flex h-16 items-center justify-center rounded-xl bg-white px-8 text-sm font-black uppercase tracking-widest text-black hover:bg-zinc-200 transition">
+                Shop Now
+              </Link>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex gap-2 text-center">
-              {[
-                { label: "HRS", val: timeLeft.h },
-                { label: "MIN", val: timeLeft.m },
-                { label: "SEC", val: timeLeft.s }
-              ].map(t => (
-                <div key={t.label} className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-white/5 w-16 h-16 backdrop-blur-md">
-                  <span className="text-xl font-black text-white">{String(t.val).padStart(2, '0')}</span>
-                  <span className="text-[10px] font-bold text-red-500 tracking-wider">{t.label}</span>
-                </div>
-              ))}
-            </div>
-            <Link href="/shop" className="hidden md:flex h-16 items-center justify-center rounded-xl bg-white px-8 text-sm font-black uppercase tracking-widest text-black hover:bg-zinc-200 transition">
-              Shop Now
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
+
+      <DealOfTheDay />
 
       {/* Shop by Goal */}
       <section className="mx-auto max-w-7xl px-4 py-24">
@@ -293,13 +409,9 @@ export default function Home() {
           </h2>
         </div>
         <div className="grid gap-6 md:grid-cols-3">
-          {[
-            { title: "Muscle Gain", copy: "Heavy calorie stacks for lean bulking", img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=800&auto=format&fit=crop" },
-            { title: "Fat Loss", copy: "Clean energy and cutting support", img: "https://images.unsplash.com/photo-1546483875-ad9014c88eba?q=80&w=800&auto=format&fit=crop" },
-            { title: "Recovery", copy: "Protein and sleep-friendly nutrition", img: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=800&auto=format&fit=crop" },
-          ].map((goal) => (
+          {goalsList.map((goal) => (
             <Link
-              href="/shop"
+              href={`/shop?goal=${encodeURIComponent(goal.title)}`}
               key={goal.title}
               className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-900 aspect-[4/5]"
             >
@@ -345,6 +457,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <RealReviews />
 
       {/* Why Choose Us */}
       <section className="bg-black py-32 text-white relative overflow-hidden">
@@ -462,6 +576,10 @@ export default function Home() {
         </div>
       </section>
 
+      <BlogSection />
+
+      <NewsSection />
+
       {/* Social Proof */}
       <section className="bg-black py-32 text-white">
         <div className="mx-auto max-w-7xl px-4">
@@ -474,7 +592,7 @@ export default function Home() {
             </h2>
           </div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {products.slice(0, 4).map((product) => (
+            {socialProducts.map((product) => (
               <div
                 key={product.id}
                 className="group relative aspect-square overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900"
