@@ -7,53 +7,7 @@ import Link from "next/link";
 import { ArrowLeft, Newspaper, Award, TrendingUp, Star, HelpCircle, ArrowRight } from "lucide-react";
 import api from "@/services/api";
 
-const newsArticles = [
-  {
-    id: 1,
-    publisher: "ET Industry Changemakers (North 2026)",
-    date: "June 15, 2026",
-    headline: "Prabha Pharma Honored with the Northern Region Industry Changemaker Award 2026",
-    summary: "Recognized for disruptive clean formulations and supply chain integrity in the sports nutrition sector.",
-    detail: "Prabha Pharma has been awarded the prestigious 'ET Industry Changemakers Award 2026' for the Northern Region. The award committee cited our commitment to absolute ingredient transparency, third-party batch testing, and removing proprietary blends from fitness supplements as key factors. By creating clean, high-efficacy options under the Muscleyn line, Prabha Pharma is raising the bar for the entire Indian supplements industry.",
-    icon: Award,
-  },
-  {
-    id: 2,
-    publisher: "ET Brand Equity",
-    date: "May 22, 2026",
-    headline: "Marketing Authenticity: How Prabha Pharma Replaced Gym-Bro Noise with Clinical Standards",
-    summary: "A deep dive into how transparency and batch certificates became our primary marketing campaign.",
-    detail: "In an industry historically driven by aggressive and misleading claims, Prabha Pharma's 'Authenticity First' approach is carving a new path. Brand Equity analyzes how launching public-access lab certificates and Labdoor certifications built a strong foundation of trust among gen-z and millennial athletes, leading to a 40% year-on-year growth.",
-    icon: TrendingUp,
-  },
-  {
-    id: 3,
-    publisher: "afaqs!",
-    date: "April 18, 2026",
-    headline: "Prabha Pharma Launches #GenuinePerformers Campaign for Muscleyn Series",
-    summary: "The marketing push includes QR code verifications and partnerships with elite IFBB coaches.",
-    detail: "Afaqs reports on Prabha Pharma's new marketing roadmap for the Muscleyn product stack. The campaign highlights double-blind lab testing and unique QR scanning on each bottle to verify authentic packaging and content. With fitness influencers like Aarush Bhola on board, the campaign is setting records for direct-to-consumer engagement.",
-    icon: Newspaper,
-  },
-  {
-    id: 4,
-    publisher: "THE WEEK",
-    date: "March 10, 2026",
-    headline: "Supplements Audit: How Sourcing Dictates Fitness Progress",
-    summary: "The Week investigates how Prabha Pharma isolates components to maintain pharmaceutical grade quality.",
-    detail: "Sourcing ingredients of raw whey, creatine, and amino acids is notorious for quality fluctuation. The Week's investigative team audits Prabha Pharma's sourcing nodes in Germany and Ireland, confirming that their pharmaceutical standards avoid bulk fillers and heavy metals, resulting in a cleaner product stack.",
-    icon: Newspaper,
-  },
-  {
-    id: 5,
-    publisher: "GQ",
-    date: "February 24, 2026",
-    headline: "The Elite Fitness Stack: Why Athletes are Swapping to Prabha Pharma's Formulas",
-    summary: "GQ editors test the premium isolates and pre-workout stacks designed for high performance.",
-    detail: "Our GQ editors tested the Muscleyn Elite Whey Isolate and Pre-Workout stack for 6 weeks. The results are clear: the clean mixability and caffeine-tea-extract ratio deliver high performance outputs without the digestive discomfort or energy crashes typical of competitor formulas.",
-    icon: StarIcon,
-  },
-];
+// Static fallbacks removed
 
 // Helper mock icon for GQ
 function StarIcon(props: any) {
@@ -90,27 +44,24 @@ export default function NewsPage() {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const res = await api.get("/cms/news-list");
-        let loaded = false;
+        const res = await api.get(`/cms/news-list?t=${Date.now()}`);
         if (res.data.data && res.data.data.cmsValue) {
           const parsed = JSON.parse(res.data.data.cmsValue);
           if (Array.isArray(parsed) && parsed.length > 0) {
             setArticles(parsed);
-            loaded = true;
+            return;
           }
         }
-        if (!loaded) {
-          setArticles(newsArticles);
-        }
+        setArticles([]);
       } catch (err) {
         console.log("No dynamic news configured in CMS", err);
-        setArticles(newsArticles);
+        setArticles([]);
       }
     };
 
     const fetchHeader = async () => {
       try {
-        const res = await api.get("/cms/news-page-header");
+        const res = await api.get(`/cms/news-page-header?t=${Date.now()}`);
         if (res.data.data && res.data.data.cmsValue) {
           const parsed = JSON.parse(res.data.data.cmsValue);
           if (parsed.title) setHeaderTitle(parsed.title);

@@ -6,41 +6,6 @@ import { ArrowLeft, ArrowRight, ChevronRight } from "lucide-react";
 import api from "@/services/api";
 import { getBackendImageUrl } from "@/lib/commerce";
 
-const defaultReviews = [
-  {
-    id: 1,
-    name: "Aarush Bhola",
-    role: "Fitness Influencer",
-    title: "My Go-To Protein Supplement",
-    image: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=600&auto=format&fit=crop",
-    quote: "Prabha Pharma's Muscleyn Whey is easily the most mixable and clean protein I've used. Sourced premium, zero bloat, and the performance gains are real.",
-  },
-  {
-    id: 2,
-    name: "GIJO JOHN",
-    role: "IFBB PRO",
-    title: "The Pre-Workout Trust",
-    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop",
-    quote: "When you are prepping for a pro show, you cannot risk proprietary blends. Muscleyn pre-workout gives me clean focus and explosive pumps every session.",
-  },
-  {
-    id: 3,
-    name: "Mannu Chaudhary",
-    role: "Power Lifter",
-    title: "My Source for Unmatched Energy",
-    image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=600&auto=format&fit=crop",
-    quote: "Heavy squats demand maximum creatine efficiency. Muscleyn Lab series creatine has been my staple for strength progression and cell volume.",
-  },
-  {
-    id: 4,
-    name: "Sunny Sharma",
-    role: "IFBB PRO",
-    title: "Power-Packed Protein for Peak Performance",
-    image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=600&auto=format&fit=crop",
-    quote: "Recovery is everything in bodybuilding. Muscleyn Isolate provides the rapid-acting amino acids I need immediately after intense hypertrophy sessions.",
-  },
-];
-
 export default function RealReviews() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [reviewsList, setReviewsList] = useState<any[]>([]);
@@ -52,7 +17,7 @@ export default function RealReviews() {
         if (response.data && response.data.status && response.data.data?.length > 0) {
           const mapped = response.data.data.map((r: any) => {
             const mediaList = r.mediaUrls ? r.mediaUrls.split(",").filter(Boolean) : [];
-            const rImage = mediaList.length > 0 ? getBackendImageUrl(mediaList[0]) : "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=600&auto=format&fit=crop";
+            const rImage = mediaList.length > 0 ? getBackendImageUrl(mediaList[0]) : getBackendImageUrl("");
             return {
               id: r.id,
               name: r.userName || "Verified Buyer",
@@ -68,7 +33,7 @@ export default function RealReviews() {
       } catch (error) {
         console.error("No custom dashboard reviews found", error);
       }
-      setReviewsList(defaultReviews);
+      setReviewsList([]);
     };
     fetchDashboardReviews();
   }, []);
@@ -84,6 +49,10 @@ export default function RealReviews() {
       scrollContainerRef.current.scrollBy({ left: 320, behavior: "smooth" });
     }
   };
+
+  if (reviewsList.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-24 bg-zinc-950 border-b border-white/5 relative overflow-hidden">

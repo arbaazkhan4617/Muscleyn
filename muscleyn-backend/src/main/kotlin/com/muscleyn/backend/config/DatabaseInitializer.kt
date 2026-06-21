@@ -191,6 +191,153 @@ class DatabaseInitializer(
             "answer": "COD can be enabled based on delivery location and order value. The checkout flow is structured for this support."
           }
         ]""")
+
+        seedCmsKey("authenticity-hero", """{
+          "tagline": "Authenticity & Testing",
+          "subtitle": "Manufactured In",
+          "title": "WORLD CLASS FACILITY",
+          "bgImage": "",
+          "badges": [
+            { "code": "cGMP", "title": "cGMP Certified", "subtitle": "Current Practice", "color": "yellow" },
+            { "code": "HACCP", "title": "HACCP Safety", "subtitle": "Food Safety Certified", "color": "blue" },
+            { "code": "fssai", "title": "fssai approved", "subtitle": "Standard Compliance", "color": "green" },
+            { "code": "KOSHER", "title": "Kosher Food", "subtitle": "Pure Ingredients", "color": "emerald" },
+            { "code": "FSSC", "title": "FSSC 22000", "subtitle": "Sustained Quality", "color": "teal" },
+            { "code": "100%", "title": "Third Party", "subtitle": "Independent Lab Tested", "color": "red" }
+          ]
+        }""")
+
+        seedCmsKey("footer-config", """{
+          "whyChoose": [
+            { "value": "16 YEARS", "label": "Leading Sports Nutrition Brand", "style": "default" },
+            { "value": "10M+", "label": "Happy Customers", "style": "red" },
+            { "value": "100+", "label": "Genuine Products", "style": "default" },
+            { "value": "100%", "label": "Genuine Products", "style": "default" },
+            { "value": "FREE", "label": "Fast Shipping", "style": "grey" }
+          ],
+          "newsletter": {
+            "title": "Newsletter",
+            "description": "Subscribe to get early access to early access exclusive drops, new formulations, and members-only deals."
+          },
+          "socials": {
+            "fb": "#",
+            "ig": "#",
+            "tw": "#",
+            "yt": "#"
+          }
+        }""")
+
+        seedCmsKey("authenticity-page-config", """{
+          "hero": {
+            "eyebrow": "Authenticity Guaranteed",
+            "title": "Quality Meets Authenticity",
+            "description": "Our guarantee stands strong. Every product sold on Prabha Pharma carries a Trust Seal — scan it to verify authenticity and access NABL-certified lab reports instantly.",
+            "bgImage": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1800&auto=format&fit=crop"
+          },
+          "explainer": {
+            "eyebrow": "What is a Trust Seal?",
+            "title": "Trust Seal for Protein Authenticity & Report",
+            "description": "The Trust Seal is used to authenticate and verify your product. Additionally, you can check the lab reports tested by NABL-accredited labs which showcase the protein content, heavy metal profile, amino acid profiles, and more.",
+            "scratchCode": "BM-AAX5010",
+            "scanText": "Scan for labs & use the scratch code for authentication",
+            "points": [
+              "NABL-accredited third-party lab testing",
+              "Protein content verification",
+              "Heavy metal profiling",
+              "Amino acid profile analysis",
+              "Holographic scratch-code anti-counterfeit"
+            ]
+          },
+          "process": {
+            "eyebrow": "Simple Process",
+            "title": "Product Authentication Tips",
+            "description": "Three easy steps to verify that what you're consuming is genuine, tested, and safe.",
+            "steps": [
+              {
+                "step": "01",
+                "title": "Scan the Trust Seal",
+                "description": "Find the holographic Trust Seal sticker on your product packaging and scan the QR code using any smartphone camera.",
+                "iconName": "ScanLine"
+              },
+              {
+                "step": "02",
+                "title": "You're on Our Website",
+                "description": "The QR code lands you directly on our official Prabha Pharma verification portal — no third-party redirects.",
+                "iconName": "ShieldCheck"
+              },
+              {
+                "step": "03",
+                "title": "View Lab Test Report",
+                "description": "Access the full NABL-accredited third-party lab report showing protein content, heavy metal profile, and amino acid analysis.",
+                "iconName": "FlaskConical"
+              }
+            ]
+          },
+          "certification": {
+            "eyebrow": "Third-Party Certified",
+            "title": "Every Batch. Every Test.",
+            "description": "Our products are independently tested by NABL-accredited laboratories. The results are published and accessible to every customer through the Trust Seal QR code on the product.",
+            "sampleReportTitle": "Lab Report — Sample Result",
+            "sampleReportFooter": "Tested by SGS India Pvt. Ltd. | NABL Accredited | Certificate No. TC-7721",
+            "sampleResults": [
+              { "label": "Protein Percentage", "result": "Pass" },
+              { "label": "Heavy Metal", "result": "Pass" },
+              { "label": "Amino Acid Profile", "result": "Pass" },
+              { "label": "Microbial Safety", "result": "Pass" }
+            ],
+            "badges": [
+              { "label": "NABL Accredited", "sub": "Third-party lab tested", "iconName": "Award" },
+              { "label": "100% Authentic", "sub": "Verified with Trust Seal", "iconName": "ShieldCheck" },
+              { "label": "Protein Verified", "sub": "Clinically validated dosage", "iconName": "FlaskConical" },
+              { "label": "Heavy Metal Safe", "sub": "Within permissible limits", "iconName": "CheckCircle2" }
+            ]
+          },
+          "cta": {
+            "title": "Shop with Complete Confidence",
+            "description": "Every product on Prabha Pharma is backed by third-party lab testing and the Trust Seal guarantee. Your health deserves nothing less.",
+            "btnPrimaryText": "Shop Now",
+            "btnPrimaryLink": "/shop",
+            "btnSecondaryText": "Contact Support",
+            "btnSecondaryLink": "/contact"
+          }
+        }""")
+
+        seedCmsKey("business-enquiry-config", """{
+          "hero": {
+            "eyebrow": "B2B Partnerships",
+            "title": "Sell Muscleyn",
+            "description": "Expand your business by partnering with India's premium, NABL-certified, and third-party tested fitness supplement brand. Become a distributor today."
+          },
+          "benefits": [
+            { "iconName": "ShieldAlert", "title": "100% Genuine Catalog", "desc": "Every supplement is third-party tested with QR code authenticity tags and lab report lookups." },
+            { "iconName": "Percent", "title": "Competitive Margins", "desc": "Access bulk wholesale pricing tiers that leave you with industry-leading profit margins." },
+            { "iconName": "Truck", "title": "Priority Fulfillment", "desc": "B2B orders are processed and shipped via express courier nodes directly to your business address." },
+            { "iconName": "TrendingUp", "title": "Marketing Assets", "desc": "Receive premium in-store branding, shaker bottles, gym posters, and official merchandise." }
+          ],
+          "contact": {
+            "email": "partners@muscleyn.com",
+            "phone": "+91 98765 43210"
+          }
+        }""")
+
+        seedCmsKey("home-brand-film", """{
+          "eyebrow": "The Standard",
+          "title": "Built for lifters who respect the work",
+          "description": "Watch our latest campaign featuring IFBB Pro athletes pushing their limits. We formulate products for those who demand more from themselves and their nutrition.",
+          "imageUrl": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1400&auto=format&fit=crop"
+        }""")
+
+        seedCmsKey("home-why-choose-us", """{
+          "eyebrow": "Why Choose Us",
+          "title": "Premium quality without the gym-bro noise",
+          "description": "We believe in full transparency. No proprietary blends, no cheap fillers. Just clinically dosed, scientifically backed nutrition for real athletes.",
+          "cards": [
+            { "iconName": "ShieldCheck", "title": "Batch Tested", "copy": "Every batch is quality checked for consistency and purity by independent labs." },
+            { "iconName": "Truck", "title": "Fast Fulfillment", "copy": "Optimized delivery flow and clear order updates. Next-day delivery on elite stacks." },
+            { "iconName": "BadgeCheck", "title": "Authentic Formulas", "copy": "Transparent nutrition and premium sourcing. No proprietary blends or hidden fillers." },
+            { "iconName": "Dumbbell", "title": "Athlete Focused", "copy": "Built around real training goals and routines, trusted by IFBB pros." }
+          ]
+        }""")
     }
 
     private fun seedCmsKey(key: String, value: String) {

@@ -93,7 +93,25 @@ class AdminProductServiceImpl(
                         product.isBestSeller,
 
                     isOffer =
-                        product.isOffer
+                        product.isOffer,
+
+                    productReportUrl =
+                        product.productReportUrl,
+
+                    reportProteinPercentage =
+                        product.reportProteinPercentage,
+
+                    reportHeavyMetal =
+                        product.reportHeavyMetal,
+
+                    reportAminoAcidProfile =
+                        product.reportAminoAcidProfile,
+
+                    reportMicrobialSafety =
+                        product.reportMicrobialSafety,
+
+                    reportTestDetails =
+                        product.reportTestDetails
                 )
             }
     }

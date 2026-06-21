@@ -61,7 +61,9 @@ interface ProductService {
         image:
         MultipartFile?,
 
-        images: List<MultipartFile>?
+        images: List<MultipartFile>?,
+
+        productReport: MultipartFile?
 
     ): Product
 
@@ -73,7 +75,9 @@ interface ProductService {
 
         image: MultipartFile?,
 
-        images: List<MultipartFile>?
+        images: List<MultipartFile>?,
+
+        productReport: MultipartFile?
 
     ): Product
 
@@ -82,4 +86,16 @@ interface ProductService {
     fun toggleBestSeller(productId: Long): ProductResponse
 
     fun toggleOffer(productId: Long): ProductResponse
+
+    fun updateProductReport(
+        productId: Long,
+        productReport: MultipartFile,
+        reportProteinPercentage: String?,
+        reportHeavyMetal: String?,
+        reportAminoAcidProfile: String?,
+        reportMicrobialSafety: String?,
+        reportTestDetails: String?
+    ): ProductResponse
+
+    fun deleteProductReport(productId: Long): ProductResponse
 }

@@ -8,42 +8,6 @@ import Footer from "@/components/layout/Footer";
 import { ArrowLeft, Clock, Calendar, User, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import api from "@/services/api";
 
-const defaultBlogPosts = [
-  {
-    id: 1,
-    tag: "Nutrition & Foods",
-    date: "November 28, 2024",
-    author: "Dr. Manish Kumar, R.D.",
-    readTime: "5 min read",
-    title: "Top Foods for High-Protein Meals",
-    summary: "Protein is described as the building block of a diet which makes it an essential element in a well-balanced diet. Discover the ultimate protein sources to fuel muscle hypertrophy and daily recovery.",
-    content: "When it comes to building muscle, protein is the single most critical macronutrient. However, not all proteins are created equal. Biological value (BV) and amino acid profile dictate how effectively your body utilizes protein. To maximize hypertrophy, athletes should prioritize whole food sources rich in leucine and essential amino acids (EAAs).\n\nTop sources include chicken breast, egg whites, lean beef, wild-caught salmon, and Greek yogurt. Plant-based lifters can rely on organic tofu, tempeh, lentils, and premium pea-rice isolate blends. Incorporating these foods consistently into your meals provides a sustained release of amino acids, maintaining an anabolic state throughout the day.",
-    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: 2,
-    tag: "Whey Science",
-    date: "November 27, 2024",
-    author: "Prabha Research Lab",
-    readTime: "7 min read",
-    title: "Whey Protein Isolate: Benefits, Usage, and Myths Debunked",
-    summary: "Whey Protein Isolate (WPI) has a higher protein concentration, usually over 90%. Learn the production science and how to maximize muscle protein synthesis.",
-    content: "Whey Protein Isolate undergoes cross-flow microfiltration to strip out almost all fats, cholesterol, and lactose. What remains is a pure, rapidly absorbing protein source containing over 90% protein by weight. This makes WPI ideal for post-workout consumption, as it triggers a fast insulin response to kickstart recovery.\n\nA common myth is that isolate is only for cutting phases. In reality, isolate is beneficial for any phase because it digests easily and does not cause gastrointestinal distress, unlike low-grade concentrates. Consuming WPI within 30-45 minutes post-training guarantees optimal delivery of amino acids to damaged muscle fibers.",
-    image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: 3,
-    tag: "Fitness Myths",
-    date: "November 19, 2024",
-    author: "Coach Kartik",
-    readTime: "6 min read",
-    title: "7 Common Whey Protein Myths Vs Realities",
-    summary: "Protein is one of the essential macronutrients needed for overall health. We break down the top 7 myths surrounding whey consumption and clarify real scientific guidelines.",
-    content: "Myth 1: Whey protein damages kidneys. Reality: In healthy individuals, high protein intake does not harm renal function.\nMyth 2: Whey makes women bulky. Reality: Bulking requires a significant caloric surplus and high testosterone levels. Whey simply supports recovery.\nMyth 3: Whey is loaded with steroids. Reality: Genuine supplements, like Prabha Pharma's Muscleyn, undergo rigid third-party testing and contain no illegal contaminants.\nMyth 4: You must consume whey immediately post-workout or lose gains. Reality: The anabolic window is wider than once thought, though post-workout protein is still optimal.\nMyth 5: Cooking whey destroys its protein quality. Reality: Heat denatures the shape of the proteins but does not affect the amino acid absorption.\nMyth 6: Whey causes severe acne. Reality: While dairy can impact skin in sensitive individuals, pure isolate has negligible lactose and fats.\nMyth 7: Supplements are only for bodybuilders. Reality: Anyone looking to meet daily protein goals can safely use clean whey supplements.",
-    image: "https://images.unsplash.com/photo-1579758629938-03607ccdbaba?q=80&w=800&auto=format&fit=crop",
-  },
-];
-
 export default function BlogDetailsPage({
   params,
 }: {
@@ -59,8 +23,8 @@ export default function BlogDetailsPage({
     const fetchBlogDetails = async () => {
       try {
         setLoading(true);
-        const res = await api.get("/cms/blogs-list");
-        let allBlogs = defaultBlogPosts;
+        const res = await api.get(`/cms/blogs-list?t=${Date.now()}`);
+        let allBlogs = [];
         if (res.data.data && res.data.data.cmsValue) {
           const parsed = JSON.parse(res.data.data.cmsValue);
           if (Array.isArray(parsed) && parsed.length > 0) {
@@ -77,14 +41,6 @@ export default function BlogDetailsPage({
         }
       } catch (err) {
         console.error("Failed to load blog details:", err);
-        // Fallback using static data
-        const targetId = Number(blogIdStr);
-        const matchedBlog = defaultBlogPosts.find((b) => b.id === targetId);
-        if (matchedBlog) {
-          setBlog(matchedBlog);
-          const others = defaultBlogPosts.filter((b) => b.id !== targetId).slice(0, 2);
-          setRelatedBlogs(others);
-        }
       } finally {
         setLoading(false);
       }

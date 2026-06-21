@@ -30,6 +30,11 @@ class SecurityConfig(
 
                 it.disable()
             }
+            .headers {
+                it.frameOptions { frame ->
+                    frame.disable()
+                }
+            }
 
             .sessionManagement {
 

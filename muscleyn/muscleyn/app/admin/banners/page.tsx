@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import api from "@/services/api";
-import { Image as ImageIcon, Plus, Pencil, Trash2, CheckCircle2, Ban, Link as LinkIcon, SortAsc } from "lucide-react";
+import { Image as ImageIcon, Plus, Pencil, Trash2, CheckCircle2, Ban, Link as LinkIcon, SortAsc, Upload } from "lucide-react";
 import Image from "next/image";
 
 export default function AdminBannersPage() {
@@ -11,6 +11,7 @@ export default function AdminBannersPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   // Form State
   const [title, setTitle] = useState("");
@@ -68,10 +69,32 @@ export default function AdminBannersPage() {
     }
   };
 
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await api.post("/files/upload-product-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      if (response.data && response.data.status && response.data.data.imageUrl) {
+        setImageUrl(response.data.data.imageUrl);
+        toast.success("Image uploaded successfully!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !imageUrl) {
-      toast.error("Title and Image URL are required");
+      toast.error("Title and Image are required");
       return;
     }
 
@@ -141,14 +164,29 @@ export default function AdminBannersPage() {
                 />
             </div>
             <div>
-                <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Image URL</label>
-                <input
-                    type="text"
-                    placeholder="e.g. https://images.unsplash.com/photo-..."
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-5 py-3 outline-none text-white transition-colors"
-                />
+                <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Banner Image</label>
+                <div className="flex gap-3 items-center">
+                    <label className="flex items-center gap-2 cursor-pointer bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">
+                        {uploading ? (
+                          <span className="animate-pulse">Uploading...</span>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4" />
+                            Choose Image
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleUploadImage}
+                          disabled={uploading}
+                        />
+                    </label>
+                    {imageUrl && (
+                      <span className="text-zinc-400 text-xs truncate max-w-xs">{imageUrl}</span>
+                    )}
+                </div>
             </div>
             <div>
                 <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2 flex items-center gap-2"><LinkIcon className="w-3 h-3" /> Redirect Link</label>

@@ -29,6 +29,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useCartStore } from "@/store/cartStore";
 import api from "@/services/api";
 
+interface DropdownItem {
+  id: number | string;
+  name: string;
+}
+
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
@@ -44,30 +49,18 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [websiteName, setWebsiteName] = useState("PRABHA PHARMA");
+  const [whatsappNumber, setWhatsappNumber] = useState("919876543210");
   
   // Dropdown states
   const [productsHovered, setProductsHovered] = useState(false);
   const [authenticityHovered, setAuthenticityHovered] = useState(false);
-  const [authLinks, setAuthLinks] = useState<any[]>([]);
-  const [categoriesList, setCategoriesList] = useState<any[]>([]);
-  const [brandsList, setBrandsList] = useState<any[]>([]);
-  const [subCategoriesList, setSubCategoriesList] = useState<any[]>([]);
+  const [categoriesList, setCategoriesList] = useState<DropdownItem[]>([]);
+  const [brandsList, setBrandsList] = useState<DropdownItem[]>([]);
+  const [subCategoriesList, setSubCategoriesList] = useState<DropdownItem[]>([]);
 
   useEffect(() => {
-    const fetchAuthLinks = async () => {
-      try {
-        const res = await api.get("/cms/authenticity-links");
-        if (res.data.data && res.data.data.cmsValue) {
-          const parsed = JSON.parse(res.data.data.cmsValue);
-          if (Array.isArray(parsed)) {
-            setAuthLinks(parsed);
-          }
-        }
-      } catch (err) {
-        console.log("No authenticity links configured in CMS", err);
-      }
-    };
-
     const fetchDropdownData = async () => {
       try {
         const [catsRes, brandsRes, subsRes] = await Promise.all([
@@ -89,8 +82,51 @@ export default function Navbar() {
       }
     };
 
-    fetchAuthLinks();
     fetchDropdownData();
+  }, []);
+
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const res = await api.get(`/cms/website-logo?t=${Date.now()}`);
+        if (res.data && res.data.status && res.data.data && res.data.data.cmsValue) {
+          const val = res.data.data.cmsValue;
+          try {
+            const parsed = JSON.parse(val);
+            setLogoUrl(parsed.logoUrl || "");
+            setWebsiteName(parsed.websiteName || "PRABHA PHARMA");
+            if (typeof window !== "undefined" && parsed.logoUrl) {
+              localStorage.setItem("websiteLogo", parsed.logoUrl);
+            }
+          } catch (e) {
+            setLogoUrl(val);
+            setWebsiteName("PRABHA PHARMA");
+            if (typeof window !== "undefined" && val) {
+              localStorage.setItem("websiteLogo", val);
+            }
+          }
+        }
+      } catch (err) {
+        console.log("No custom logo found, using default");
+      }
+    };
+
+    const fetchContact = async () => {
+      try {
+        const res = await api.get(`/cms/contact-header?t=${Date.now()}`);
+        if (res.data && res.data.status && res.data.data && res.data.data.cmsValue) {
+          const parsed = JSON.parse(res.data.data.cmsValue);
+          if (parsed.whatsapp) {
+            setWhatsappNumber(parsed.whatsapp);
+          }
+        }
+      } catch (err) {
+        console.log("No custom whatsapp support number found, using default");
+      }
+    };
+
+    fetchLogo();
+    fetchContact();
   }, []);
 
   const cartItems = useCartStore((state) => state.cartItems);
@@ -136,17 +172,37 @@ export default function Navbar() {
             {/* Logo: Prabha Pharma */}
             <div className="flex items-center gap-8">
               <Link href="/" className="group flex items-center gap-2.5">
-                <span className="grid h-8.5 w-8.5 place-items-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 text-sm font-black text-white shadow-[0_0_15px_rgba(220,38,38,0.4)] transition group-hover:scale-105 group-hover:from-white group-hover:to-white group-hover:text-red-600">
-                  P
-                </span>
-                <span>
-                  <span className="block text-lg font-black tracking-tight text-white group-hover:text-red-500 transition-colors leading-none mb-0.5">
-                    PRABHA PHARMA
-                  </span>
-                  <span className="block text-[8px] font-extrabold uppercase tracking-[0.18em] text-zinc-500">
-                    Healthcare & Nutrition
-                  </span>
-                </span>
+                {logoUrl ? (
+                  <div className="flex items-center gap-2.5">
+                    <img
+                      src={logoUrl}
+                      alt={websiteName}
+                      className="h-9 w-9 object-contain transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div>
+                      <span className="block text-lg font-black tracking-tight text-white group-hover:text-red-500 transition-colors leading-none mb-0.5">
+                        {websiteName}
+                      </span>
+                      <span className="block text-[8px] font-extrabold uppercase tracking-[0.18em] text-zinc-500">
+                        Healthcare & Nutrition
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <span className="grid h-8.5 w-8.5 place-items-center rounded-lg bg-gradient-to-br from-red-600 to-red-700 text-sm font-black text-white shadow-[0_0_15px_rgba(220,38,38,0.4)] transition group-hover:scale-105 group-hover:from-white group-hover:to-white group-hover:text-red-600">
+                      {websiteName ? websiteName[0].toUpperCase() : "P"}
+                    </span>
+                    <span>
+                      <span className="block text-lg font-black tracking-tight text-white group-hover:text-red-500 transition-colors leading-none mb-0.5">
+                        {websiteName}
+                      </span>
+                      <span className="block text-[8px] font-extrabold uppercase tracking-[0.18em] text-zinc-500">
+                        Healthcare & Nutrition
+                      </span>
+                    </span>
+                  </>
+                )}
               </Link>
 
               {/* Main Nav Items (Text size reduced to xs/sm) */}
@@ -334,7 +390,7 @@ export default function Navbar() {
                         </h4>
                         <ul className="space-y-1.5 text-[11px] text-zinc-400 font-bold font-medium">
                           {subCategoriesList.length > 0 ? (
-                            subCategoriesList.slice(0, 6).map((sub: any) => (
+                            subCategoriesList.slice(0, 6).map((sub) => (
                               <li key={sub.id}>
                                 <Link href={`/shop?subCategory=${encodeURIComponent(sub.name)}`} className="hover:text-white transition-colors">
                                   {sub.name}
@@ -370,7 +426,7 @@ export default function Navbar() {
                         </h4>
                         <ul className="space-y-1.5 text-[11px] text-zinc-400 font-bold font-medium">
                           {categoriesList.length > 0 ? (
-                            categoriesList.slice(0, 6).map((cat: any) => (
+                            categoriesList.slice(0, 6).map((cat) => (
                               <li key={cat.id}>
                                 <Link href={`/shop?category=${encodeURIComponent(cat.name)}`} className="hover:text-white transition-colors">
                                   {cat.name}
@@ -411,7 +467,7 @@ export default function Navbar() {
                         </h4>
                         <ul className="space-y-1.5 text-[11px] text-zinc-400 font-bold font-medium">
                           {brandsList.length > 0 ? (
-                            brandsList.slice(0, 6).map((brand: any) => (
+                            brandsList.slice(0, 6).map((brand) => (
                               <li key={brand.id}>
                                 <Link href={`/shop?brand=${encodeURIComponent(brand.name)}`} className="hover:text-white transition-colors">
                                   {brand.name}
@@ -459,7 +515,7 @@ export default function Navbar() {
               {/* What's New */}
               <Link href="/shop?sort=latest" className="flex items-center gap-1 text-zinc-300 hover:text-white transition-colors uppercase tracking-wider">
                 <Sparkles className="w-3 h-3 text-yellow-500" />
-                What's New
+                What&apos;s New
               </Link>
 
               {/* Blogs page link in subheader */}
@@ -502,42 +558,18 @@ export default function Navbar() {
                       className="absolute right-0 top-full w-48 bg-zinc-900 border border-white/10 rounded-xl p-3.5 shadow-2xl z-50 backdrop-blur-xl"
                     >
                       <ul className="space-y-2.5 text-[11px] font-bold text-zinc-400">
-                        {authLinks.length > 0 ? (
-                          authLinks.map((link, idx) => (
-                            <li key={idx}>
-                              <a
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1.5 hover:text-white transition-colors"
-                              >
-                                <Award className="w-3.5 h-3.5 text-yellow-500" />
-                                {link.title}
-                              </a>
-                            </li>
-                          ))
-                        ) : (
-                          <>
-                            <li>
-                              <Link href="/authenticity" className="flex items-center gap-1.5 hover:text-white transition-colors">
-                                <Activity className="w-3.5 h-3.5 text-yellow-500" />
-                                Check Authenticity
-                              </Link>
-                            </li>
-                            <li>
-                              <Link href="/authenticity" className="flex items-center gap-1.5 hover:text-white transition-colors">
-                                <FileText className="w-3.5 h-3.5 text-yellow-500" />
-                                Protein Lab Certificate
-                              </Link>
-                            </li>
-                            <li>
-                              <Link href="/authenticity" className="flex items-center gap-1.5 hover:text-white transition-colors">
-                                <Award className="w-3.5 h-3.5 text-yellow-500" />
-                                Labdoor
-                              </Link>
-                            </li>
-                          </>
-                        )}
+                        <li>
+                          <Link href="/authenticity" className="flex items-center gap-1.5 hover:text-white transition-colors">
+                            <Activity className="w-3.5 h-3.5 text-yellow-500" />
+                            Check Authenticity
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/protein-lab-certificate" className="flex items-center gap-1.5 hover:text-white transition-colors">
+                            <FileText className="w-3.5 h-3.5 text-yellow-500" />
+                            Protein Lab Certificate
+                          </Link>
+                        </li>
                       </ul>
                     </motion.div>
                   )}
@@ -545,14 +577,14 @@ export default function Navbar() {
               </div>
 
               {/* Business Enquiry */}
-              <Link href="/contact" className="hover:text-white transition-colors flex items-center gap-0.5">
+              <Link href="/business-enquiry" className="hover:text-white transition-colors flex items-center gap-0.5">
                 <Briefcase className="w-3 h-3 text-zinc-500" />
                 Business Enquiry
               </Link>
 
               {/* Chat Support */}
               <a 
-                href="https://wa.me/919876543210" 
+                href={`https://wa.me/${whatsappNumber}`} 
                 target="_blank" 
                 rel="noreferrer" 
                 className="hover:text-white transition-colors flex items-center gap-0.5 text-green-500"
@@ -674,30 +706,22 @@ export default function Navbar() {
                   <span className="text-[10px] font-black text-red-500 uppercase tracking-widest px-4 mb-1">
                     Authenticity & Support
                   </span>
-                  {authLinks.length > 0 ? (
-                    authLinks.map((link, idx) => (
-                      <a
-                        key={idx}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded-lg px-4 py-2 text-sm font-bold text-zinc-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <Award className="w-4 h-4 text-yellow-500" />
-                        {link.title}
-                      </a>
-                    ))
-                  ) : (
-                    <Link
-                      href="/authenticity"
-                      className="rounded-lg px-4 py-2 text-sm font-bold text-zinc-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Activity className="w-4 h-4 text-yellow-500" />
-                      Check Authenticity
-                    </Link>
-                  )}
+                  <Link
+                    href="/authenticity"
+                    className="rounded-lg px-4 py-2 text-sm font-bold text-zinc-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Activity className="w-4 h-4 text-yellow-500" />
+                    Check Authenticity
+                  </Link>
+                  <Link
+                    href="/protein-lab-certificate"
+                    className="rounded-lg px-4 py-2 text-sm font-bold text-zinc-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <FileText className="w-4 h-4 text-yellow-500" />
+                    Protein Lab Certificate
+                  </Link>
                   <Link
                     href="/contact"
                     className="rounded-lg px-4 py-2 text-sm font-bold text-zinc-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
@@ -707,7 +731,7 @@ export default function Navbar() {
                     Our Stores
                   </Link>
                   <Link
-                    href="/contact"
+                    href="/business-enquiry"
                     className="rounded-lg px-4 py-2 text-sm font-bold text-zinc-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -715,7 +739,7 @@ export default function Navbar() {
                     Business Enquiry
                   </Link>
                   <a
-                    href="https://wa.me/919876543210"
+                    href={`https://wa.me/${whatsappNumber}`}
                     target="_blank"
                     rel="noreferrer"
                     className="rounded-lg px-4 py-2 text-sm font-bold text-green-500 hover:bg-white/5 flex items-center gap-2"

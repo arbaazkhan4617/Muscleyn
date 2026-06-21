@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import api from "@/services/api";
 import toast from "react-hot-toast";
-import { FileText, Save, ShieldCheck, Zap, Settings, Plus, Pencil, Trash2, Globe, Sparkles, Award, Phone, Mail, MapPin, Clock, Headphones, MessageCircle, Send, Image, Upload, ExternalLink, ToggleLeft, ToggleRight, XCircle } from "lucide-react";
+import { FileText, Save, ShieldCheck, Zap, Settings, Plus, Pencil, Trash2, Globe, Sparkles, Award, Phone, Mail, MapPin, Clock, Headphones, MessageCircle, Send, Image, Upload, ExternalLink, ToggleLeft, ToggleRight, XCircle, Briefcase } from "lucide-react";
 
 function CMSPageContent() {
   const searchParams = useSearchParams();
@@ -48,6 +48,25 @@ function CMSPageContent() {
   const [goalTitle, setGoalTitle] = useState("");
   const [goalCopy, setGoalCopy] = useState("");
   const [goalImg, setGoalImg] = useState("");
+  const [uploadingGoalImage, setUploadingGoalImage] = useState(false);
+
+  // Homepage Sections State
+  const [brandFilmEyebrow, setBrandFilmEyebrow] = useState("The Standard");
+  const [brandFilmTitle, setBrandFilmTitle] = useState("Built for lifters who respect the work");
+  const [brandFilmDesc, setBrandFilmDesc] = useState("Watch our latest campaign featuring IFBB Pro athletes pushing their limits. We formulate products for those who demand more from themselves and their nutrition.");
+  const [brandFilmImageUrl, setBrandFilmImageUrl] = useState("");
+  const [uploadingBrandFilmImage, setUploadingBrandFilmImage] = useState(false);
+  const [savingBrandFilm, setSavingBrandFilm] = useState(false);
+
+  const [whyChooseUsEyebrow, setWhyChooseUsEyebrow] = useState("Why Choose Us");
+  const [whyChooseUsTitle, setWhyChooseUsTitle] = useState("Premium quality without the gym-bro noise");
+  const [whyChooseUsDesc, setWhyChooseUsDesc] = useState("We believe in full transparency. No proprietary blends, no cheap fillers. Just clinically dosed, scientifically backed nutrition for real athletes.");
+  const [whyChooseUsCards, setWhyChooseUsCards] = useState<any[]>([]);
+  const [editingWhyChooseUsCardIdx, setEditingWhyChooseUsCardIdx] = useState<number | null>(null);
+  const [whyChooseUsCardIcon, setWhyChooseUsCardIcon] = useState("ShieldCheck");
+  const [whyChooseUsCardTitle, setWhyChooseUsCardTitle] = useState("");
+  const [whyChooseUsCardCopy, setWhyChooseUsCardCopy] = useState("");
+  const [savingWhyChooseUs, setSavingWhyChooseUs] = useState(false);
 
   // Blogs State
   const [blogsList, setBlogsList] = useState<any[]>([]);
@@ -94,6 +113,7 @@ function CMSPageContent() {
   const [contactHeaderTitle, setContactHeaderTitle] = useState("Need help with products, orders, or your stack?");
   const [contactHeaderSubtitle, setContactHeaderSubtitle] = useState("Reach the Muscleyn support team for product guidance, order questions, partnerships, or business enquiries.");
   const [contactHeaderBgImage, setContactHeaderBgImage] = useState("https://images.unsplash.com/photo-1549476464-37392f717541?q=80&w=1800&auto=format&fit=crop");
+  const [contactWhatsapp, setContactWhatsapp] = useState("919876543210");
   const [savingContactHeader, setSavingContactHeader] = useState(false);
 
   const [contactInfoCards, setContactInfoCards] = useState<any[]>([]);
@@ -137,10 +157,107 @@ function CMSPageContent() {
   const [uploadingBannerImage, setUploadingBannerImage] = useState(false);
   const [savingBanner, setSavingBanner] = useState(false);
 
+  // Website Logo state
+  const [logoUrl, setLogoUrl] = useState("");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [savingLogo, setSavingLogo] = useState(false);
+
+  // Authenticity Hero state
+  const [authTagline, setAuthTagline] = useState("Authenticity & Testing");
+  const [authSubtitle, setAuthSubtitle] = useState("Manufactured In");
+  const [authTitle, setAuthTitle] = useState("WORLD CLASS FACILITY");
+  const [authBgImage, setAuthBgImage] = useState("");
+  const [authBadges, setAuthBadges] = useState<any[]>([]);
+  const [savingAuthHero, setSavingAuthHero] = useState(false);
+  const [uploadingAuthBg, setUploadingAuthBg] = useState(false);
+  const [uploadingContactBg, setUploadingContactBg] = useState(false);
+
+  const [newBadgeCode, setNewBadgeCode] = useState("");
+  const [newBadgeTitle, setNewBadgeTitle] = useState("");
+  const [newBadgeSubtitle, setNewBadgeSubtitle] = useState("");
+  const [newBadgeColor, setNewBadgeColor] = useState("yellow");
+  const [editingBadgeIdx, setEditingBadgeIdx] = useState<number | null>(null);
+
+  // Footer state
+  const [footerStats, setFooterStats] = useState<any[]>([]);
+  const [statValue, setStatValue] = useState("");
+  const [statLabel, setStatLabel] = useState("");
+  const [statStyle, setStatStyle] = useState("default");
+  const [editingStatIdx, setEditingStatIdx] = useState<number | null>(null);
+
+  const [newsletterTitle, setNewsletterTitle] = useState("Newsletter");
+  const [newsletterDesc, setNewsletterDesc] = useState("Subscribe to get early access to exclusive drops, new formulations, and members-only deals.");
+
+  const [socialFb, setSocialFb] = useState("#");
+  const [socialIg, setSocialIg] = useState("#");
+  const [socialTw, setSocialTw] = useState("#");
+  const [socialYt, setSocialYt] = useState("#");
+
+  const [savingFooterStats, setSavingFooterStats] = useState(false);
+  const [savingNewsletter, setSavingNewsletter] = useState(false);
+  const [savingSocials, setSavingSocials] = useState(false);
+  const [savingFooterConfig, setSavingFooterConfig] = useState(false);
+
+  // Authenticity Explainer Page state
+  const [authExplainerHeroEyebrow, setAuthExplainerHeroEyebrow] = useState("Authenticity Guaranteed");
+  const [authExplainerHeroTitle, setAuthExplainerHeroTitle] = useState("Quality Meets Authenticity");
+  const [authExplainerHeroDesc, setAuthExplainerHeroDesc] = useState("");
+  const [authExplainerHeroBg, setAuthExplainerHeroBg] = useState("");
+  const [authExplainerEyebrow, setAuthExplainerEyebrow] = useState("What is a Trust Seal?");
+  const [authExplainerTitle, setAuthExplainerTitle] = useState("Trust Seal for Protein Authenticity & Report");
+  const [authExplainerDesc, setAuthExplainerDesc] = useState("");
+  const [authExplainerScratch, setAuthExplainerScratch] = useState("BM-AAX5010");
+  const [authExplainerScanText, setAuthExplainerScanText] = useState("Scan for labs & use the scratch code for authentication");
+  const [authExplainerPoints, setAuthExplainerPoints] = useState<string[]>([]);
+  const [authExplainerSteps, setAuthExplainerSteps] = useState<any[]>([]);
+  const [authExplainerCertEyebrow, setAuthExplainerCertEyebrow] = useState("Third-Party Certified");
+  const [authExplainerCertTitle, setAuthExplainerCertTitle] = useState("Every Batch. Every Test.");
+  const [authExplainerCertDesc, setAuthExplainerCertDesc] = useState("");
+  const [authExplainerSampleTitle, setAuthExplainerSampleTitle] = useState("Lab Report — Sample Result");
+  const [authExplainerSampleFooter, setAuthExplainerSampleFooter] = useState("");
+  const [authExplainerSampleResults, setAuthExplainerSampleResults] = useState<any[]>([]);
+  const [authExplainerBadges, setAuthExplainerBadges] = useState<any[]>([]);
+  const [authExplainerCtaTitle, setAuthExplainerCtaTitle] = useState("Shop with Complete Confidence");
+  const [authExplainerCtaDesc, setAuthExplainerCtaDesc] = useState("");
+  const [savingAuthExplainer, setSavingAuthExplainer] = useState(false);
+  const [uploadingAuthExplainerBg, setUploadingAuthExplainerBg] = useState(false);
+  const [newExplainerPoint, setNewExplainerPoint] = useState("");
+
+  // Website name state
+  const [websiteName, setWebsiteName] = useState("PRABHA PHARMA");
+
+  // Business Enquiry States
+  const [b2bHeroEyebrow, setB2bHeroEyebrow] = useState("B2B Partnerships");
+  const [b2bHeroTitle, setB2bHeroTitle] = useState("Sell Muscleyn");
+  const [b2bHeroDesc, setB2bHeroDesc] = useState("");
+  const [b2bContactEmail, setB2bContactEmail] = useState("");
+  const [b2bContactPhone, setB2bContactPhone] = useState("");
+  const [b2bBenefits, setB2bBenefits] = useState<any[]>([]);
+  const [savingB2bConfig, setSavingB2bConfig] = useState(false);
+  const [newB2bBenefitTitle, setNewB2bBenefitTitle] = useState("");
+  const [newB2bBenefitDesc, setNewB2bBenefitDesc] = useState("");
+  const [newB2bBenefitIcon, setNewB2bBenefitIcon] = useState("ShieldAlert");
+
+  // Section Visibility States
+  const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({
+    hero: true,
+    trustTicker: true,
+    dealOfTheDay: true,
+    shopByGoal: true,
+    featuredProducts: true,
+    realReviews: true,
+    whyChooseUs: true,
+    brandFilm: true,
+    bestSellers: true,
+    blogs: true,
+    news: true,
+  });
+  const [savingSectionVisibility, setSavingSectionVisibility] = useState(false);
+
   // Sync tab with URL search parameter
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab && ["flash", "terms", "privacy", "goals", "blogs", "news", "return", "contact"].includes(tab)) {
+    if (tab && ["flash", "terms", "privacy", "goals", "blogs", "news", "return", "contact", "authenticity", "footer", "auth-explainer", "business-enquiry", "visibility", "home-sections"].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -150,23 +267,31 @@ function CMSPageContent() {
     const loadConfigs = async () => {
       try {
         setLoading(true);
-        const [termsRes, privacyRes, returnRes, tickerRes, flashRes, goalsRes, blogsRes, newsRes, blogsHeaderRes, newsHeaderRes, contactHeaderRes, contactInfoRes, contactSupportRes, contactStoresRes, contactFaqsRes, bannersRes] = await Promise.allSettled([
-          api.get("/cms/terms-and-conditions"),
-          api.get("/cms/privacy-policy"),
-          api.get("/cms/return-refund-policy"),
-          api.get("/cms/trust-ticker-list"),
-          api.get("/cms/flash-sale-offer"),
-          api.get("/cms/goals-list"),
-          api.get("/cms/blogs-list"),
-          api.get("/cms/news-list"),
-          api.get("/cms/blogs-page-header"),
-          api.get("/cms/news-page-header"),
-          api.get("/cms/contact-header"),
-          api.get("/cms/contact-info-cards"),
-          api.get("/cms/contact-support-cards"),
-          api.get("/cms/contact-stores"),
-          api.get("/cms/contact-faqs"),
-          api.get("/banners")
+        const [termsRes, privacyRes, returnRes, tickerRes, flashRes, goalsRes, blogsRes, newsRes, blogsHeaderRes, newsHeaderRes, contactHeaderRes, contactInfoRes, contactSupportRes, contactStoresRes, contactFaqsRes, bannersRes, authHeroRes, footerConfigRes, logoRes, authExplainerRes, businessEnquiryRes, brandFilmRes, whyChooseUsRes, sectionVisibilityRes] = await Promise.allSettled([
+          api.get(`/cms/terms-and-conditions?t=${Date.now()}`),
+          api.get(`/cms/privacy-policy?t=${Date.now()}`),
+          api.get(`/cms/return-refund-policy?t=${Date.now()}`),
+          api.get(`/cms/trust-ticker-list?t=${Date.now()}`),
+          api.get(`/cms/flash-sale-offer?t=${Date.now()}`),
+          api.get(`/cms/goals-list?t=${Date.now()}`),
+          api.get(`/cms/blogs-list?t=${Date.now()}`),
+          api.get(`/cms/news-list?t=${Date.now()}`),
+          api.get(`/cms/blogs-page-header?t=${Date.now()}`),
+          api.get(`/cms/news-page-header?t=${Date.now()}`),
+          api.get(`/cms/contact-header?t=${Date.now()}`),
+          api.get(`/cms/contact-info-cards?t=${Date.now()}`),
+          api.get(`/cms/contact-support-cards?t=${Date.now()}`),
+          api.get(`/cms/contact-stores?t=${Date.now()}`),
+          api.get(`/cms/contact-faqs?t=${Date.now()}`),
+          api.get(`/banners?t=${Date.now()}`),
+          api.get(`/cms/authenticity-hero?t=${Date.now()}`),
+          api.get(`/cms/footer-config?t=${Date.now()}`),
+          api.get(`/cms/website-logo?t=${Date.now()}`),
+          api.get(`/cms/authenticity-page-config?t=${Date.now()}`),
+          api.get(`/cms/business-enquiry-config?t=${Date.now()}`),
+          api.get(`/cms/home-brand-film?t=${Date.now()}`),
+          api.get(`/cms/home-why-choose-us?t=${Date.now()}`),
+          api.get(`/cms/home-section-visibility?t=${Date.now()}`)
         ]);
 
         if (termsRes.status === "fulfilled" && termsRes.value.data.data) {
@@ -239,6 +364,7 @@ function CMSPageContent() {
             setContactHeaderTitle(parsed.title || "Need help with products, orders, or your stack?");
             setContactHeaderSubtitle(parsed.description || "Reach the Muscleyn support team for product guidance, order questions, partnerships, or business enquiries.");
             setContactHeaderBgImage(parsed.bgImage || "https://images.unsplash.com/photo-1549476464-37392f717541?q=80&w=1800&auto=format&fit=crop");
+            setContactWhatsapp(parsed.whatsapp || "919876543210");
           } catch (e) { }
         }
         if (contactInfoRes.status === "fulfilled" && contactInfoRes.value.data.data && contactInfoRes.value.data.data.cmsValue) {
@@ -327,6 +453,224 @@ function CMSPageContent() {
         if (bannersRes.status === "fulfilled" && bannersRes.value.data.data) {
           setBannersList(bannersRes.value.data.data);
         }
+        if (authHeroRes.status === "fulfilled" && authHeroRes.value.data.data && authHeroRes.value.data.data.cmsValue) {
+          try {
+            const parsed = JSON.parse(authHeroRes.value.data.data.cmsValue);
+            setAuthTagline(parsed.tagline || "Authenticity & Testing");
+            setAuthSubtitle(parsed.subtitle || "Manufactured In");
+            setAuthTitle(parsed.title || "WORLD CLASS FACILITY");
+            setAuthBgImage(parsed.bgImage || "");
+            setAuthBadges(parsed.badges || []);
+          } catch (e) {
+            console.log("Failed to parse authenticity-hero JSON");
+          }
+        } else {
+          setAuthTagline("Authenticity & Testing");
+          setAuthSubtitle("Manufactured In");
+          setAuthTitle("WORLD CLASS FACILITY");
+          setAuthBgImage("");
+          setAuthBadges([
+            { code: "cGMP", title: "cGMP Certified", subtitle: "Current Practice", color: "yellow" },
+            { code: "HACCP", title: "HACCP Safety", subtitle: "Food Safety Certified", color: "blue" },
+            { code: "fssai", title: "fssai approved", subtitle: "Standard Compliance", color: "green" },
+            { code: "KOSHER", title: "Kosher Food", subtitle: "Pure Ingredients", color: "emerald" },
+            { code: "FSSC", title: "FSSC 22000", subtitle: "Sustained Quality", color: "teal" },
+            { code: "100%", title: "Third Party", subtitle: "Independent Lab Tested", color: "red" }
+          ]);
+        }
+        if (footerConfigRes.status === "fulfilled" && footerConfigRes.value.data.data && footerConfigRes.value.data.data.cmsValue) {
+          try {
+            const parsed = JSON.parse(footerConfigRes.value.data.data.cmsValue);
+            setFooterStats(parsed.whyChoose || []);
+            setNewsletterTitle(parsed.newsletter?.title || "Newsletter");
+            setNewsletterDesc(parsed.newsletter?.description || "");
+            setSocialFb(parsed.socials?.fb || "#");
+            setSocialIg(parsed.socials?.ig || "#");
+            setSocialTw(parsed.socials?.tw || "#");
+            setSocialYt(parsed.socials?.yt || "#");
+          } catch (e) {
+            console.log("Failed to parse footer-config JSON");
+          }
+        } else {
+          setFooterStats([
+            { value: "16 YEARS", label: "Leading Sports Nutrition Brand", style: "default" },
+            { value: "10M+", label: "Happy Customers", style: "red" },
+            { value: "100+", label: "Genuine Products", style: "default" },
+            { value: "100%", label: "Genuine Products", style: "default" },
+            { value: "FREE", label: "Fast Shipping", style: "grey" }
+          ]);
+          setNewsletterTitle("Newsletter");
+          setNewsletterDesc("Subscribe to get early access to exclusive drops, new formulations, and members-only deals.");
+          setSocialFb("#");
+          setSocialIg("#");
+          setSocialTw("#");
+          setSocialYt("#");
+        }
+
+        if (logoRes.status === "fulfilled" && logoRes.value.data.data && logoRes.value.data.data.cmsValue) {
+          const val = logoRes.value.data.data.cmsValue;
+          try {
+            const parsed = JSON.parse(val);
+            setLogoUrl(parsed.logoUrl || "");
+            setWebsiteName(parsed.websiteName || "PRABHA PHARMA");
+          } catch (e) {
+            setLogoUrl(val);
+            setWebsiteName("PRABHA PHARMA");
+          }
+        } else {
+          setLogoUrl("");
+          setWebsiteName("PRABHA PHARMA");
+        }
+
+        if (authExplainerRes.status === "fulfilled" && authExplainerRes.value.data.data && authExplainerRes.value.data.data.cmsValue) {
+          try {
+            const parsed = JSON.parse(authExplainerRes.value.data.data.cmsValue);
+            if (parsed.hero) {
+              setAuthExplainerHeroEyebrow(parsed.hero.eyebrow || "Authenticity Guaranteed");
+              setAuthExplainerHeroTitle(parsed.hero.title || "Quality Meets Authenticity");
+              setAuthExplainerHeroDesc(parsed.hero.description || "");
+              setAuthExplainerHeroBg(parsed.hero.bgImage || "");
+            }
+            if (parsed.explainer) {
+              setAuthExplainerEyebrow(parsed.explainer.eyebrow || "What is a Trust Seal?");
+              setAuthExplainerTitle(parsed.explainer.title || "Trust Seal for Protein Authenticity & Report");
+              setAuthExplainerDesc(parsed.explainer.description || "");
+              setAuthExplainerScratch(parsed.explainer.scratchCode || "BM-AAX5010");
+              setAuthExplainerScanText(parsed.explainer.scanText || "Scan for labs & use the scratch code for authentication");
+              setAuthExplainerPoints(parsed.explainer.points || []);
+            }
+            if (parsed.process) {
+              setAuthExplainerSteps(parsed.process.steps || []);
+            }
+            if (parsed.certification) {
+              setAuthExplainerCertEyebrow(parsed.certification.eyebrow || "Third-Party Certified");
+              setAuthExplainerCertTitle(parsed.certification.title || "Every Batch. Every Test.");
+              setAuthExplainerCertDesc(parsed.certification.description || "");
+              setAuthExplainerSampleTitle(parsed.certification.sampleReportTitle || "Lab Report — Sample Result");
+              setAuthExplainerSampleFooter(parsed.certification.sampleReportFooter || "");
+              setAuthExplainerSampleResults(parsed.certification.sampleResults || []);
+              setAuthExplainerBadges(parsed.certification.badges || []);
+            }
+            if (parsed.cta) {
+              setAuthExplainerCtaTitle(parsed.cta.title || "Shop with Complete Confidence");
+              setAuthExplainerCtaDesc(parsed.cta.description || "");
+            }
+          } catch (e) {
+            console.log("Failed to parse authenticity-page-config JSON");
+          }
+        } else {
+          setAuthExplainerHeroEyebrow("Authenticity Guaranteed");
+          setAuthExplainerHeroTitle("Quality Meets Authenticity");
+          setAuthExplainerHeroDesc("Our guarantee stands strong. Every product sold on Prabha Pharma carries a Trust Seal — scan it to verify authenticity and access NABL-certified lab reports instantly.");
+          setAuthExplainerHeroBg("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1800&auto=format&fit=crop");
+          setAuthExplainerEyebrow("What is a Trust Seal?");
+          setAuthExplainerTitle("Trust Seal for Protein Authenticity & Report");
+          setAuthExplainerDesc("The Trust Seal is used to authenticate and verify your product. Additionally, you can check the lab reports tested by NABL-accredited labs which showcase the protein content, heavy metal profile, amino acid profiles, and more.");
+          setAuthExplainerScratch("BM-AAX5010");
+          setAuthExplainerScanText("Scan for labs & use the scratch code for authentication");
+          setAuthExplainerPoints([
+            "NABL-accredited third-party lab testing",
+            "Protein content verification",
+            "Heavy metal profiling",
+            "Amino acid profile analysis",
+            "Holographic scratch-code anti-counterfeit"
+          ]);
+          setAuthExplainerSteps([
+            { step: "01", title: "Scan the Trust Seal", description: "Find the holographic Trust Seal sticker on your product packaging and scan the QR code using any smartphone camera.", iconName: "ScanLine" },
+            { step: "02", title: "You're on Our Website", description: "The QR code lands you directly on our official Prabha Pharma verification portal — no third-party redirects.", iconName: "ShieldCheck" },
+            { step: "03", title: "View Lab Test Report", description: "Access the full NABL-accredited third-party lab report showing protein content, heavy metal profile, and amino acid analysis.", iconName: "FlaskConical" }
+          ]);
+          setAuthExplainerCertEyebrow("Third-Party Certified");
+          setAuthExplainerCertTitle("Every Batch. Every Test.");
+          setAuthExplainerCertDesc("Our products are independently tested by NABL-accredited laboratories. The results are published and accessible to every customer through the Trust Seal QR code on the product.");
+          setAuthExplainerSampleTitle("Lab Report — Sample Result");
+          setAuthExplainerSampleFooter("Tested by SGS India Pvt. Ltd. | NABL Accredited | Certificate No. TC-7721");
+          setAuthExplainerSampleResults([
+            { label: "Protein Percentage", result: "Pass" },
+            { label: "Heavy Metal", result: "Pass" },
+            { label: "Amino Acid Profile", result: "Pass" },
+            { label: "Microbial Safety", result: "Pass" }
+          ]);
+          setAuthExplainerBadges([
+            { label: "NABL Accredited", sub: "Third-party lab tested", iconName: "Award" },
+            { label: "100% Authentic", sub: "Verified with Trust Seal", iconName: "ShieldCheck" },
+            { label: "Protein Verified", sub: "Clinically validated dosage", iconName: "FlaskConical" },
+            { label: "Heavy Metal Safe", sub: "Within permissible limits", iconName: "CheckCircle2" }
+          ]);
+        }
+
+        if (businessEnquiryRes.status === "fulfilled" && businessEnquiryRes.value.data.data && businessEnquiryRes.value.data.data.cmsValue) {
+          try {
+            const parsed = JSON.parse(businessEnquiryRes.value.data.data.cmsValue);
+            setB2bHeroEyebrow(parsed.hero?.eyebrow || "B2B Partnerships");
+            setB2bHeroTitle(parsed.hero?.title || "Sell Muscleyn");
+            setB2bHeroDesc(parsed.hero?.description || "");
+            setB2bContactEmail(parsed.contact?.email || "");
+            setB2bContactPhone(parsed.contact?.phone || "");
+            setB2bBenefits(parsed.benefits || []);
+          } catch (e) {
+            console.log("Failed to parse business-enquiry-config JSON");
+          }
+        } else {
+          setB2bHeroEyebrow("B2B Partnerships");
+          setB2bHeroTitle("Sell Muscleyn");
+          setB2bHeroDesc("Expand your business by partnering with India's premium, NABL-certified, and third-party tested fitness supplement brand. Become a distributor today.");
+          setB2bContactEmail("partners@muscleyn.com");
+          setB2bContactPhone("+91 98765 43210");
+          setB2bBenefits([
+            { iconName: "ShieldAlert", title: "100% Genuine Catalog", desc: "Every supplement is third-party tested with QR code authenticity tags and lab report lookups." },
+            { iconName: "Percent", title: "Competitive Margins", desc: "Access bulk wholesale pricing tiers that leave you with industry-leading profit margins." },
+            { iconName: "Truck", title: "Priority Fulfillment", desc: "B2B orders are processed and shipped via express courier nodes directly to your business address." },
+            { iconName: "TrendingUp", title: "Marketing Assets", desc: "Receive premium in-store branding, shaker bottles, gym posters, and official merchandise." }
+          ]);
+        }
+
+        if (brandFilmRes.status === "fulfilled" && brandFilmRes.value.data.data && brandFilmRes.value.data.data.cmsValue) {
+          try {
+            const parsed = JSON.parse(brandFilmRes.value.data.data.cmsValue);
+            setBrandFilmEyebrow(parsed.eyebrow || "The Standard");
+            setBrandFilmTitle(parsed.title || "Built for lifters who respect the work");
+            setBrandFilmDesc(parsed.description || "");
+            setBrandFilmImageUrl(parsed.imageUrl || "");
+          } catch (e) {
+            console.log("Failed to parse home-brand-film JSON");
+          }
+        } else {
+          setBrandFilmEyebrow("The Standard");
+          setBrandFilmTitle("Built for lifters who respect the work");
+          setBrandFilmDesc("Watch our latest campaign featuring IFBB Pro athletes pushing their limits. We formulate products for those who demand more from themselves and their nutrition.");
+          setBrandFilmImageUrl("");
+        }
+
+        if (whyChooseUsRes.status === "fulfilled" && whyChooseUsRes.value.data.data && whyChooseUsRes.value.data.data.cmsValue) {
+          try {
+            const parsed = JSON.parse(whyChooseUsRes.value.data.data.cmsValue);
+            setWhyChooseUsEyebrow(parsed.eyebrow || "Why Choose Us");
+            setWhyChooseUsTitle(parsed.title || "Premium quality without the gym-bro noise");
+            setWhyChooseUsDesc(parsed.description || "");
+            setWhyChooseUsCards(parsed.cards || []);
+          } catch (e) {
+            console.log("Failed to parse home-why-choose-us JSON");
+          }
+        } else {
+          setWhyChooseUsEyebrow("Why Choose Us");
+          setWhyChooseUsTitle("Premium quality without the gym-bro noise");
+          setWhyChooseUsDesc("We believe in full transparency. No proprietary blends, no cheap fillers. Just clinically dosed, scientifically backed nutrition for real athletes.");
+          setWhyChooseUsCards([
+            { iconName: "ShieldCheck", title: "Batch Tested", copy: "Every batch is quality checked for consistency and purity by independent labs." },
+            { iconName: "Truck", title: "Fast Fulfillment", copy: "Optimized delivery flow and clear order updates. Next-day delivery on elite stacks." },
+            { iconName: "BadgeCheck", title: "Authentic Formulas", copy: "Transparent nutrition and premium sourcing. No proprietary blends or hidden fillers." },
+            { iconName: "Dumbbell", title: "Athlete Focused", copy: "Built around real training goals and routines, trusted by IFBB pros." }
+          ]);
+        }
+        if (sectionVisibilityRes.status === "fulfilled" && sectionVisibilityRes.value.data.data && sectionVisibilityRes.value.data.data.cmsValue) {
+          try {
+            const parsed = JSON.parse(sectionVisibilityRes.value.data.data.cmsValue);
+            setSectionVisibility((prev) => ({ ...prev, ...parsed }));
+          } catch (e) {
+            console.log("Failed to parse home-section-visibility JSON");
+          }
+        }
       } catch (err) {
         console.error("Failed to load CMS values", err);
         toast.error("Failed to load CMS configurations");
@@ -336,6 +680,23 @@ function CMSPageContent() {
     };
     loadConfigs();
   }, []);
+
+  // SAVE SECTION VISIBILITY
+  const handleSaveSectionVisibility = async () => {
+    try {
+      setSavingSectionVisibility(true);
+      await api.post("/cms", {
+        cmsKey: "home-section-visibility",
+        cmsValue: JSON.stringify(sectionVisibility),
+      });
+      toast.success("Section visibility saved successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save section visibility");
+    } finally {
+      setSavingSectionVisibility(false);
+    }
+  };
 
   // SAVE TERMS
   const handleSaveTerms = async (e: React.FormEvent) => {
@@ -365,6 +726,7 @@ function CMSPageContent() {
         title: contactHeaderTitle,
         description: contactHeaderSubtitle,
         bgImage: contactHeaderBgImage,
+        whatsapp: contactWhatsapp,
       };
       await api.post("/cms", {
         cmsKey: "contact-header",
@@ -469,6 +831,323 @@ function CMSPageContent() {
       toast.error("Failed to upload image");
     } finally {
       setUploadingBannerImage(false);
+    }
+  };
+
+  // UPLOAD SITE LOGO
+  const handleUploadLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    try {
+      setUploadingLogo(true);
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      const response = await api.post("/files/upload-product-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (response.data.status && response.data.data.imageUrl) {
+        setLogoUrl(response.data.data.imageUrl);
+        toast.success("Logo image uploaded successfully!");
+      } else {
+        toast.error("Failed to get image URL");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to upload logo");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  // SAVE SITE LOGO
+  const handleSaveLogo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setSavingLogo(true);
+      const payload = {
+        logoUrl,
+        websiteName
+      };
+      await api.post("/cms", {
+        cmsKey: "website-logo",
+        cmsValue: JSON.stringify(payload),
+      });
+      if (typeof window !== "undefined" && logoUrl) {
+        localStorage.setItem("websiteLogo", logoUrl);
+      }
+      toast.success("Website Logo & Name saved successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save Website Logo Settings");
+    } finally {
+      setSavingLogo(false);
+    }
+  };
+
+  // SAVE BUSINESS ENQUIRY CONFIG
+  const handleSaveB2bConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setSavingB2bConfig(true);
+      const payload = {
+        hero: {
+          eyebrow: b2bHeroEyebrow,
+          title: b2bHeroTitle,
+          description: b2bHeroDesc
+        },
+        benefits: b2bBenefits,
+        contact: {
+          email: b2bContactEmail,
+          phone: b2bContactPhone
+        }
+      };
+      await api.post("/cms", {
+        cmsKey: "business-enquiry-config",
+        cmsValue: JSON.stringify(payload)
+      });
+      toast.success("Business Enquiry page settings saved successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save Business Enquiry page settings");
+    } finally {
+      setSavingB2bConfig(false);
+    }
+  };
+
+  // UPLOAD BRAND FILM IMAGE
+  const handleUploadBrandFilmImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    try {
+      setUploadingBrandFilmImage(true);
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      const response = await api.post("/files/upload-product-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (response.data.status && response.data.data.imageUrl) {
+        setBrandFilmImageUrl(response.data.data.imageUrl);
+        toast.success("Brand film image uploaded successfully!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to upload brand film image");
+    } finally {
+      setUploadingBrandFilmImage(false);
+    }
+  };
+
+  const handleSaveBrandFilm = async () => {
+    try {
+      setSavingBrandFilm(true);
+      const payload = {
+        eyebrow: brandFilmEyebrow,
+        title: brandFilmTitle,
+        description: brandFilmDesc,
+        imageUrl: brandFilmImageUrl
+      };
+      const response = await api.post("/cms", {
+        cmsKey: "home-brand-film",
+        cmsValue: JSON.stringify(payload)
+      });
+      if (response.data && response.data.status) {
+        toast.success("Brand Film settings saved successfully!");
+      }
+    } catch (err) {
+      toast.error("Failed to save Brand Film settings");
+    } finally {
+      setSavingBrandFilm(false);
+    }
+  };
+
+  const handleSaveWhyChooseUs = async () => {
+    try {
+      setSavingWhyChooseUs(true);
+      const payload = {
+        eyebrow: whyChooseUsEyebrow,
+        title: whyChooseUsTitle,
+        description: whyChooseUsDesc,
+        cards: whyChooseUsCards
+      };
+      const response = await api.post("/cms", {
+        cmsKey: "home-why-choose-us",
+        cmsValue: JSON.stringify(payload)
+      });
+      if (response.data && response.data.status) {
+        toast.success("Why Choose Us settings saved successfully!");
+      }
+    } catch (err) {
+      toast.error("Failed to save Why Choose Us settings");
+    } finally {
+      setSavingWhyChooseUs(false);
+    }
+  };
+
+  const handleAddOrEditWhyChooseUsCard = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!whyChooseUsCardTitle.trim()) {
+      toast.error("Card title is required");
+      return;
+    }
+    const newCard = {
+      iconName: whyChooseUsCardIcon,
+      title: whyChooseUsCardTitle.trim(),
+      copy: whyChooseUsCardCopy.trim()
+    };
+    if (editingWhyChooseUsCardIdx !== null) {
+      const updated = [...whyChooseUsCards];
+      updated[editingWhyChooseUsCardIdx] = newCard;
+      setWhyChooseUsCards(updated);
+      setEditingWhyChooseUsCardIdx(null);
+      toast.success("Card updated in list (Save to persist database changes)");
+    } else {
+      setWhyChooseUsCards([...whyChooseUsCards, newCard]);
+      toast.success("Card added to list (Save to persist database changes)");
+    }
+    setWhyChooseUsCardTitle("");
+    setWhyChooseUsCardCopy("");
+    setWhyChooseUsCardIcon("ShieldCheck");
+  };
+
+  const handleStartEditWhyChooseUsCard = (idx: number) => {
+    const card = whyChooseUsCards[idx];
+    setEditingWhyChooseUsCardIdx(idx);
+    setWhyChooseUsCardIcon(card.iconName || "ShieldCheck");
+    setWhyChooseUsCardTitle(card.title || "");
+    setWhyChooseUsCardCopy(card.copy || "");
+  };
+
+  const handleDeleteWhyChooseUsCard = (idx: number) => {
+    const updated = whyChooseUsCards.filter((_, i) => i !== idx);
+    setWhyChooseUsCards(updated);
+    toast.success("Card deleted from list (Save to persist database changes)");
+    if (editingWhyChooseUsCardIdx === idx) {
+      setEditingWhyChooseUsCardIdx(null);
+      setWhyChooseUsCardTitle("");
+      setWhyChooseUsCardCopy("");
+      setWhyChooseUsCardIcon("ShieldCheck");
+    }
+  };
+
+  // UPLOAD GOAL IMAGE
+  const handleUploadGoalImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    try {
+      setUploadingGoalImage(true);
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      const response = await api.post("/files/upload-product-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (response.data.status && response.data.data.imageUrl) {
+        setGoalImg(response.data.data.imageUrl);
+        toast.success("Goal image uploaded successfully!");
+      } else {
+        toast.error("Failed to get image URL");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to upload goal image");
+    } finally {
+      setUploadingGoalImage(false);
+    }
+  };
+
+  // UPLOAD AUTHENTICITY EXPLAINER HERO BACKGROUND
+  const handleUploadAuthExplainerBg = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    try {
+      setUploadingAuthExplainerBg(true);
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      const response = await api.post("/files/upload-product-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (response.data.status && response.data.data.imageUrl) {
+        setAuthExplainerHeroBg(response.data.data.imageUrl);
+        toast.success("Background image uploaded successfully!");
+      } else {
+        toast.error("Failed to get image URL");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to upload background image");
+    } finally {
+      setUploadingAuthExplainerBg(false);
+    }
+  };
+
+  // SAVE AUTHENTICITY EXPLAINER PAGE CONFIG
+  const handleSaveAuthExplainer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setSavingAuthExplainer(true);
+      const payload = {
+        hero: {
+          eyebrow: authExplainerHeroEyebrow,
+          title: authExplainerHeroTitle,
+          description: authExplainerHeroDesc,
+          bgImage: authExplainerHeroBg
+        },
+        explainer: {
+          eyebrow: authExplainerEyebrow,
+          title: authExplainerTitle,
+          description: authExplainerDesc,
+          scratchCode: authExplainerScratch,
+          scanText: authExplainerScanText,
+          points: authExplainerPoints
+        },
+        process: {
+          eyebrow: "Simple Process",
+          title: "Product Authentication Tips",
+          description: "Three easy steps to verify that what you're consuming is genuine, tested, and safe.",
+          steps: authExplainerSteps.length > 0 ? authExplainerSteps : [
+            { step: "01", title: "Scan the Trust Seal", description: "Find the holographic Trust Seal sticker on your product packaging and scan the QR code using any smartphone camera.", iconName: "ScanLine" },
+            { step: "02", title: "You're on Our Website", description: "The QR code lands you directly on our official Prabha Pharma verification portal — no third-party redirects.", iconName: "ShieldCheck" },
+            { step: "03", title: "View Lab Test Report", description: "Access the full NABL-accredited third-party lab report showing protein content, heavy metal profile, and amino acid analysis.", iconName: "FlaskConical" }
+          ]
+        },
+        certification: {
+          eyebrow: authExplainerCertEyebrow,
+          title: authExplainerCertTitle,
+          description: authExplainerCertDesc,
+          sampleReportTitle: authExplainerSampleTitle,
+          sampleReportFooter: authExplainerSampleFooter,
+          sampleResults: authExplainerSampleResults.length > 0 ? authExplainerSampleResults : [
+            { label: "Protein Percentage", result: "Pass" },
+            { label: "Heavy Metal", result: "Pass" },
+            { label: "Amino Acid Profile", result: "Pass" },
+            { label: "Microbial Safety", result: "Pass" }
+          ],
+          badges: authExplainerBadges.length > 0 ? authExplainerBadges : [
+            { label: "NABL Accredited", sub: "Third-party lab tested", iconName: "Award" },
+            { label: "100% Authentic", sub: "Verified with Trust Seal", iconName: "ShieldCheck" },
+            { label: "Protein Verified", sub: "Clinically validated dosage", iconName: "FlaskConical" },
+            { label: "Heavy Metal Safe", sub: "Within permissible limits", iconName: "CheckCircle2" }
+          ]
+        },
+        cta: {
+          title: authExplainerCtaTitle,
+          description: authExplainerCtaDesc,
+          btnPrimaryText: "Shop Now",
+          btnPrimaryLink: "/shop",
+          btnSecondaryText: "Contact Support",
+          btnSecondaryLink: "/contact"
+        }
+      };
+
+      await api.post("/cms", {
+        cmsKey: "authenticity-page-config",
+        cmsValue: JSON.stringify(payload)
+      });
+      toast.success("Authenticity Explainer page saved successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save Authenticity Explainer page settings");
+    } finally {
+      setSavingAuthExplainer(false);
     }
   };
 
@@ -941,6 +1620,191 @@ function CMSPageContent() {
     toast.success("News removed from local list. Don't forget to save changes!");
   };
 
+  // Authenticity Hero helpers and save
+  const handleUploadAuthBgImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    try {
+      setUploadingAuthBg(true);
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      const response = await api.post("/files/upload-product-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (response.data.status && response.data.data.imageUrl) {
+        setAuthBgImage(response.data.data.imageUrl);
+        toast.success("Background image uploaded successfully!");
+      } else {
+        toast.error("Failed to get image URL");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to upload image");
+    } finally {
+      setUploadingAuthBg(false);
+    }
+  };
+
+  const handleUploadContactBgImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    try {
+      setUploadingContactBg(true);
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      const response = await api.post("/files/upload-product-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (response.data.status && response.data.data.imageUrl) {
+        setContactHeaderBgImage(response.data.data.imageUrl);
+        toast.success("Background image uploaded successfully!");
+      } else {
+        toast.error("Failed to get image URL");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to upload image");
+    } finally {
+      setUploadingContactBg(false);
+    }
+  };
+
+  const handleSaveAuthHero = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setSavingAuthHero(true);
+      const val = {
+        tagline: authTagline,
+        subtitle: authSubtitle,
+        title: authTitle,
+        bgImage: authBgImage,
+        badges: authBadges,
+      };
+      await api.post("/cms", {
+        cmsKey: "authenticity-hero",
+        cmsValue: JSON.stringify(val),
+      });
+      toast.success("Authenticity Hero settings saved successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save Authenticity Hero settings");
+    } finally {
+      setSavingAuthHero(false);
+    }
+  };
+
+  const handleAddOrEditBadge = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBadgeCode || !newBadgeTitle || !newBadgeSubtitle) {
+      toast.error("Please fill in badge code, title and subtitle");
+      return;
+    }
+    const badgeItem = {
+      code: newBadgeCode,
+      title: newBadgeTitle,
+      subtitle: newBadgeSubtitle,
+      color: newBadgeColor,
+    };
+    if (editingBadgeIdx !== null) {
+      const updated = [...authBadges];
+      updated[editingBadgeIdx] = badgeItem;
+      setAuthBadges(updated);
+      setEditingBadgeIdx(null);
+      toast.success("Badge updated in local list. Don't forget to save changes!");
+    } else {
+      setAuthBadges([...authBadges, badgeItem]);
+      toast.success("Badge added to local list. Don't forget to save changes!");
+    }
+    setNewBadgeCode("");
+    setNewBadgeTitle("");
+    setNewBadgeSubtitle("");
+    setNewBadgeColor("yellow");
+  };
+
+  const handleStartEditBadge = (idx: number) => {
+    const item = authBadges[idx];
+    setNewBadgeCode(item.code);
+    setNewBadgeTitle(item.title);
+    setNewBadgeSubtitle(item.subtitle || item.description || "");
+    setNewBadgeColor(item.color || "yellow");
+    setEditingBadgeIdx(idx);
+  };
+
+  const handleDeleteBadge = (idx: number) => {
+    setAuthBadges(authBadges.filter((_, i) => i !== idx));
+    toast.success("Badge removed from local list. Don't forget to save changes!");
+  };
+
+  // Footer Config helpers and save
+  const handleAddOrEditStat = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!statValue || !statLabel) {
+      toast.error("Please fill in stat value and label");
+      return;
+    }
+    const statItem = {
+      value: statValue,
+      label: statLabel,
+      style: statStyle,
+    };
+    if (editingStatIdx !== null) {
+      const updated = [...footerStats];
+      updated[editingStatIdx] = statItem;
+      setFooterStats(updated);
+      setEditingStatIdx(null);
+      toast.success("Stat updated in local list. Don't forget to save changes!");
+    } else {
+      setFooterStats([...footerStats, statItem]);
+      toast.success("Stat added to local list. Don't forget to save changes!");
+    }
+    setStatValue("");
+    setStatLabel("");
+    setStatStyle("default");
+  };
+
+  const handleStartEditStat = (idx: number) => {
+    const item = footerStats[idx];
+    setStatValue(item.value);
+    setStatLabel(item.label);
+    setStatStyle(item.style || "default");
+    setEditingStatIdx(idx);
+  };
+
+  const handleDeleteStat = (idx: number) => {
+    setFooterStats(footerStats.filter((_, i) => i !== idx));
+    toast.success("Stat removed from local list. Don't forget to save changes!");
+  };
+
+  const handleSaveFooterConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setSavingFooterConfig(true);
+      const val = {
+        whyChoose: footerStats,
+        newsletter: {
+          title: newsletterTitle,
+          description: newsletterDesc,
+        },
+        socials: {
+          fb: socialFb,
+          ig: socialIg,
+          tw: socialTw,
+          yt: socialYt,
+        },
+      };
+      await api.post("/cms", {
+        cmsKey: "footer-config",
+        cmsValue: JSON.stringify(val),
+      });
+      toast.success("Footer settings saved successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save Footer settings");
+    } finally {
+      setSavingFooterConfig(false);
+    }
+  };
+
   const switchTab = (tabId: string) => {
     const params = new URLSearchParams(window.location.search);
     params.set("tab", tabId);
@@ -976,13 +1840,19 @@ function CMSPageContent() {
       <div className="flex border-b border-white/10 gap-6 flex-wrap">
         {[
           { id: "flash", label: "Homepage Banner", icon: Zap },
+          { id: "visibility", label: "Section Visibility", icon: ToggleLeft },
           { id: "goals", label: "Homepage Goals", icon: Settings },
+          { id: "home-sections", label: "Homepage Sections", icon: Settings },
           { id: "blogs", label: "Blogs List", icon: FileText },
           { id: "news", label: "News List", icon: Globe },
           { id: "terms", label: "Terms & Conditions", icon: FileText },
           { id: "privacy", label: "Privacy Policy", icon: ShieldCheck },
           { id: "return", label: "Return & Refund Policy", icon: FileText },
           { id: "contact", label: "Contact Us Page", icon: Phone },
+          { id: "authenticity", label: "Authenticity Banner", icon: ShieldCheck },
+          { id: "auth-explainer", label: "Authenticity Page", icon: ShieldCheck },
+          { id: "business-enquiry", label: "Business Enquiry", icon: Briefcase },
+          { id: "footer", label: "Footer Settings", icon: Globe },
         ].map((t) => {
           const Icon = t.icon;
           const isActive = activeTab === t.id;
@@ -1004,8 +1874,160 @@ function CMSPageContent() {
 
       {/* ACTIVE TAB VIEW */}
       <div className="w-full">
+
+        {/* ===== SECTION VISIBILITY TAB ===== */}
+        {activeTab === "visibility" && (
+          <div className="space-y-6 max-w-3xl">
+            <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl space-y-6">
+              <div className="border-b border-white/5 pb-4">
+                <h2 className="text-lg font-black text-white flex items-center gap-2">
+                  <ToggleRight className="w-5 h-5 text-red-500" />
+                  Homepage Section Visibility
+                </h2>
+                <p className="text-zinc-400 text-sm mt-1">Toggle each section on or off. Disabled sections will be completely hidden from visitors.</p>
+              </div>
+
+              <div className="space-y-3">
+                {([
+                  { key: "hero", label: "Hero / Banner Slider", desc: "The main hero section with rotating banners" },
+                  { key: "trustTicker", label: "Trust Ticker Bar", desc: "The scrolling stats bar (50K+ Customers, etc.)" },
+                  { key: "dealOfTheDay", label: "Deal of the Day", desc: "Flash sale countdown with a featured product deal" },
+                  { key: "shopByGoal", label: "Shop by Goal", desc: "Goal-based product browsing section" },
+                  { key: "featuredProducts", label: "Featured Products", desc: "Featured product stack cards" },
+                  { key: "realReviews", label: "Real People. Real Reviews", desc: "Customer review cards section" },
+                  { key: "whyChooseUs", label: "Why Choose Us", desc: "Brand benefit cards section" },
+                  { key: "brandFilm", label: "Brand Film / The Standard", desc: "Video teaser section with brand story" },
+                  { key: "bestSellers", label: "Best Sellers", desc: "Top-selling product cards" },
+                  { key: "blogs", label: "Blog Section", desc: "Latest blog articles preview" },
+                  { key: "news", label: "News / Press Section", desc: "Latest press releases and news cards" },
+                ] as { key: string; label: string; desc: string }[]).map(({ key, label, desc }) => {
+                  const isOn = sectionVisibility[key] !== false;
+                  return (
+                    <div
+                      key={key}
+                      className={`flex items-center justify-between gap-4 rounded-2xl p-4 border transition-all ${
+                        isOn ? "bg-black/30 border-white/10" : "bg-black/10 border-white/5 opacity-60"
+                      }`}
+                    >
+                      <div>
+                        <p className="text-white font-bold text-sm">{label}</p>
+                        <p className="text-zinc-500 text-xs mt-0.5">{desc}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSectionVisibility((prev) => ({ ...prev, [key]: !isOn }))
+                        }
+                        className={`relative inline-flex h-7 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-200 ease-in-out focus:outline-none ${
+                          isOn ? "bg-red-600 border-red-600" : "bg-zinc-700 border-zinc-700"
+                        }`}
+                        aria-label={`Toggle ${label}`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition-transform duration-200 ease-in-out ${
+                            isOn ? "translate-x-7" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="border-t border-white/5 pt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleSaveSectionVisibility}
+                  disabled={savingSectionVisibility}
+                  className="bg-red-600 hover:bg-white hover:text-black text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-xs uppercase tracking-widest border border-white/5 disabled:opacity-50 cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  {savingSectionVisibility ? "Saving..." : "Save Visibility Settings"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === "flash" && (
           <div className="space-y-8 max-w-3xl">
+
+            {/* Website Logo Settings */}
+            <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl">
+              <form onSubmit={handleSaveLogo} className="space-y-6">
+                <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                  <Image className="w-5 h-5 text-red-500" />
+                  Website Logo Settings
+                </h2>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">
+                    Website Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={websiteName}
+                    onChange={(e) => setWebsiteName(e.target.value)}
+                    placeholder="e.g. Muscleyn"
+                    className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Upload Website Logo</label>
+                  <div className="flex gap-4 items-center">
+                    <label className="flex items-center gap-2 cursor-pointer bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">
+                      {uploadingLogo ? (
+                        <span className="animate-pulse">Uploading...</span>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          Choose Logo File
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleUploadLogo}
+                        disabled={uploadingLogo}
+                      />
+                    </label>
+                    {logoUrl && (
+                      <div className="relative group">
+                        <img
+                          src={logoUrl}
+                          alt="Logo preview"
+                          className="h-12 max-w-40 object-contain rounded-xl border border-white/10 bg-black/40 p-2"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setLogoUrl("")}
+                          className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                    {!logoUrl && (
+                      <span className="text-zinc-600 text-xs italic">No logo uploaded (falls back to default brand typography)</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="border-t border-white/5 pt-4 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={savingLogo || uploadingLogo}
+                    className="bg-red-600 hover:bg-white hover:text-black text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-xs uppercase tracking-widest border border-white/5 disabled:opacity-50 cursor-pointer"
+                  >
+                    <Save className="w-4 h-4" />
+                    {savingLogo ? "Saving Logo..." : "Save Website Logo"}
+                  </button>
+                </div>
+              </form>
+            </div>
 
             {/* Homepage Trust Ticker Settings */}
             <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl">
@@ -1383,15 +2405,47 @@ function CMSPageContent() {
                   />
                 </div>
 
+                {/* Image Upload */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Image URL</label>
-                  <input
-                    type="text"
-                    value={goalImg}
-                    onChange={(e) => setGoalImg(e.target.value)}
-                    placeholder="https://images.unsplash.com/..."
-                    className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
-                  />
+                  <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Goal Image</label>
+                  <div className="flex gap-3 items-center">
+                    <label className="flex items-center gap-2 cursor-pointer bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">
+                      {uploadingGoalImage ? (
+                        <span className="animate-pulse">Uploading...</span>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          Choose Image
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleUploadGoalImage}
+                        disabled={uploadingGoalImage}
+                      />
+                    </label>
+                    {goalImg && (
+                      <div className="relative group">
+                        <img
+                          src={goalImg}
+                          alt="Goal preview"
+                          className="h-16 w-16 object-cover rounded-xl border border-white/10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setGoalImg("")}
+                          className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity animate-none"
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                    {!goalImg && (
+                      <span className="text-zinc-600 text-xs italic">No image selected</span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="pt-2 flex justify-end gap-3">
@@ -2213,29 +3267,74 @@ function CMSPageContent() {
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">
-                        Background Image URL
+                        Background Image
                       </label>
-                      <input
-                        type="text"
-                        value={contactHeaderBgImage}
-                        onChange={(e) => setContactHeaderBgImage(e.target.value)}
-                        placeholder="Image URL"
-                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
-                      />
+                      <div className="flex gap-3 items-center">
+                        <label className="flex items-center gap-2 cursor-pointer bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">
+                          {uploadingContactBg ? (
+                            <span className="animate-pulse">Uploading...</span>
+                          ) : (
+                            <>
+                              <Upload className="w-4 h-4" />
+                              Choose Image
+                            </>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleUploadContactBgImage}
+                            disabled={uploadingContactBg}
+                          />
+                        </label>
+                        {contactHeaderBgImage && (
+                          <div className="relative group">
+                            <img
+                              src={contactHeaderBgImage}
+                              alt="Background preview"
+                              className="h-16 w-28 object-cover rounded-xl border border-white/10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setContactHeaderBgImage("")}
+                              className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                        {!contactHeaderBgImage && (
+                          <span className="text-zinc-600 text-xs italic">No image selected</span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">
-                      Hero Title
-                    </label>
-                    <input
-                      type="text"
-                      value={contactHeaderTitle}
-                      onChange={(e) => setContactHeaderTitle(e.target.value)}
-                      placeholder="E.g., Need help with products, orders, or your stack?"
-                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
-                    />
+                  <div className="grid gap-4 md:grid-cols-[2fr_1fr]">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">
+                        Hero Title
+                      </label>
+                      <input
+                        type="text"
+                        value={contactHeaderTitle}
+                        onChange={(e) => setContactHeaderTitle(e.target.value)}
+                        placeholder="E.g., Need help with products, orders, or your stack?"
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">
+                        WhatsApp Number (e.g. 919876543210)
+                      </label>
+                      <input
+                        type="text"
+                        value={contactWhatsapp}
+                        onChange={(e) => setContactWhatsapp(e.target.value)}
+                        placeholder="E.g., 919876543210"
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                      />
+                    </div>
                   </div>
 
                   <div>
@@ -2936,6 +4035,1289 @@ function CMSPageContent() {
                   </button>
                 </div>
               </form>
+            </div>
+          )
+        }
+
+        {
+          activeTab === "authenticity" && (
+            <div className="space-y-8 max-w-3xl w-full">
+              {/* Authenticity Hero Settings */}
+              <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl">
+                <form onSubmit={handleSaveAuthHero} className="space-y-6">
+                  <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                    <ShieldCheck className="w-5 h-5 text-red-500" />
+                    Authenticity Hero Settings
+                  </h2>
+
+                  {/* Eyebrow / Tagline */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">
+                      Eyebrow Tagline
+                    </label>
+                    <input
+                      type="text"
+                      value={authTagline}
+                      onChange={(e) => setAuthTagline(e.target.value)}
+                      placeholder="e.g. Authenticity & Testing"
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+
+                  {/* Subtitle */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">
+                      Subtitle
+                    </label>
+                    <input
+                      type="text"
+                      value={authSubtitle}
+                      onChange={(e) => setAuthSubtitle(e.target.value)}
+                      placeholder="e.g. Manufactured In"
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+
+                  {/* Title */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">
+                      Hero Title
+                    </label>
+                    <input
+                      type="text"
+                      value={authTitle}
+                      onChange={(e) => setAuthTitle(e.target.value)}
+                      placeholder="e.g. WORLD CLASS FACILITY"
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+
+                  {/* Background Image Upload */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">
+                      Background Image
+                    </label>
+                    <div className="flex gap-3 items-center">
+                      <label className="flex items-center gap-2 cursor-pointer bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">
+                        {uploadingAuthBg ? (
+                          <span className="animate-pulse">Uploading...</span>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4" />
+                            Choose Image
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleUploadAuthBgImage}
+                          disabled={uploadingAuthBg}
+                        />
+                      </label>
+                      {authBgImage && (
+                        <div className="relative group">
+                          <img
+                            src={authBgImage}
+                            alt="Background preview"
+                            className="h-16 w-28 object-cover rounded-xl border border-white/10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setAuthBgImage("")}
+                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                      {!authBgImage && (
+                        <span className="text-zinc-600 text-xs italic">No image selected (uses default gradient)</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-white/5 pt-4 flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={savingAuthHero}
+                      className="bg-red-600 hover:bg-white hover:text-black text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-xs uppercase tracking-widest border border-white/5 disabled:opacity-50 cursor-pointer"
+                    >
+                      <Save className="w-4 h-4" />
+                      {savingAuthHero ? "Saving..." : "Save Hero Section"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Badges List Section */}
+              <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl">
+                <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/5 pb-3 mb-6">
+                  <ShieldCheck className="w-5 h-5 text-red-500" />
+                  Facility Badges List
+                </h2>
+
+                {/* Add / Edit Badge Form */}
+                <form onSubmit={handleAddOrEditBadge} className="space-y-4 mb-8 bg-black/30 p-5 rounded-2xl border border-white/5">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">
+                    {editingBadgeIdx !== null ? "✏️ Edit Badge" : "➕ Add New Badge"}
+                  </h3>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Badge Code / Icon Text</label>
+                      <input
+                        type="text"
+                        value={newBadgeCode}
+                        onChange={(e) => setNewBadgeCode(e.target.value)}
+                        placeholder="e.g. cGMP, 100%, fssai"
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Glow Color / Theme</label>
+                      <select
+                        value={newBadgeColor}
+                        onChange={(e) => setNewBadgeColor(e.target.value)}
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors cursor-pointer"
+                      >
+                        <option value="yellow">Yellow (cGMP)</option>
+                        <option value="blue">Blue (HACCP)</option>
+                        <option value="green">Green (FSSAI)</option>
+                        <option value="emerald">Emerald (Kosher)</option>
+                        <option value="teal">Teal (FSSC)</option>
+                        <option value="red">Red (100% / Third Party)</option>
+                        <option value="purple">Purple</option>
+                        <option value="orange">Orange</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Badge Title</label>
+                    <input
+                      type="text"
+                      value={newBadgeTitle}
+                      onChange={(e) => setNewBadgeTitle(e.target.value)}
+                      placeholder="e.g. CGMP CERTIFIED"
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Badge Subtitle / Description</label>
+                    <input
+                      type="text"
+                      value={newBadgeSubtitle}
+                      onChange={(e) => setNewBadgeSubtitle(e.target.value)}
+                      placeholder="e.g. CURRENT PRACTICE"
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    {editingBadgeIdx !== null && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingBadgeIdx(null);
+                          setNewBadgeCode("");
+                          setNewBadgeTitle("");
+                          setNewBadgeSubtitle("");
+                          setNewBadgeColor("yellow");
+                        }}
+                        className="bg-zinc-800 hover:bg-zinc-700 text-white px-5 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-xs uppercase tracking-widest cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      className="bg-red-600 hover:bg-white hover:text-black text-white px-5 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-xs uppercase tracking-widest cursor-pointer"
+                    >
+                      {editingBadgeIdx !== null ? "Update Badge" : "Add Badge"}
+                    </button>
+                  </div>
+                </form>
+
+                {/* Badges List Table */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Active Badges ({authBadges.length})</h3>
+                  <div className="space-y-2">
+                    {authBadges.length === 0 ? (
+                      <p className="text-zinc-500 text-sm font-medium py-2">No badges added yet. Add your first badge above.</p>
+                    ) : (
+                      authBadges.map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between bg-black/40 rounded-xl p-4 border border-white/5 group">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-black uppercase bg-zinc-950 border border-white/10`}>
+                              <span style={{ color: item.color === 'yellow' ? '#EAB308' : item.color === 'blue' ? '#3B82F6' : item.color === 'green' ? '#22C55E' : item.color === 'emerald' ? '#10B981' : item.color === 'teal' ? '#14B8A6' : item.color === 'red' ? '#EF4444' : item.color === 'purple' ? '#A855F7' : '#F97316' }}>
+                                {item.code}
+                              </span>
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-bold text-white uppercase">{item.title}</h4>
+                              <p className="text-xs text-zinc-500 uppercase">{item.subtitle}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleStartEditBadge(idx)}
+                              className="text-zinc-400 hover:text-white p-2 rounded-lg bg-zinc-900 border border-white/5 hover:border-white/20 transition-all cursor-pointer"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteBadge(idx)}
+                              className="text-zinc-400 hover:text-red-500 p-2 rounded-lg bg-zinc-900 border border-white/5 hover:border-red-500/20 transition-all cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                <div className="border-t border-white/5 mt-6 pt-4 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        setSavingAuthHero(true);
+                        const val = {
+                          tagline: authTagline,
+                          subtitle: authSubtitle,
+                          title: authTitle,
+                          bgImage: authBgImage,
+                          badges: authBadges,
+                        };
+                        await api.post("/cms", {
+                          cmsKey: "authenticity-hero",
+                          cmsValue: JSON.stringify(val),
+                        });
+                        toast.success("Authenticity Hero settings and badges saved successfully!");
+                      } catch (err) {
+                        console.error(err);
+                        toast.error("Failed to save Authenticity Hero settings");
+                      } finally {
+                        setSavingAuthHero(false);
+                      }
+                    }}
+                    disabled={savingAuthHero}
+                    className="bg-red-600 hover:bg-white hover:text-black text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-xs uppercase tracking-widest border border-white/5 disabled:opacity-50 cursor-pointer"
+                  >
+                    <Save className="w-4 h-4" />
+                    {savingAuthHero ? "Saving All..." : "Save All Changes"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )
+        }
+
+        {
+          activeTab === "auth-explainer" && (
+            <div className="space-y-8 max-w-3xl w-full">
+              {/* Hero Settings */}
+              <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl space-y-6">
+                <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                  <ShieldCheck className="w-5 h-5 text-red-500" />
+                  Hero Section Settings
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Hero Eyebrow</label>
+                    <input
+                      type="text"
+                      value={authExplainerHeroEyebrow}
+                      onChange={(e) => setAuthExplainerHeroEyebrow(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Hero Title</label>
+                    <input
+                      type="text"
+                      value={authExplainerHeroTitle}
+                      onChange={(e) => setAuthExplainerHeroTitle(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Hero Description</label>
+                  <textarea
+                    value={authExplainerHeroDesc}
+                    onChange={(e) => setAuthExplainerHeroDesc(e.target.value)}
+                    rows={3}
+                    className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl p-4 outline-none text-white text-sm transition-colors resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Hero Background Image</label>
+                  <div className="flex gap-4 items-center">
+                    <label className="flex items-center gap-2 cursor-pointer bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">
+                      {uploadingAuthExplainerBg ? <span className="animate-pulse">Uploading...</span> : <><Upload className="w-4 h-4" /> Choose Background</>}
+                      <input type="file" accept="image/*" className="hidden" onChange={handleUploadAuthExplainerBg} />
+                    </label>
+                    {authExplainerHeroBg && (
+                      <img src={authExplainerHeroBg} alt="Hero BG Preview" className="h-12 w-20 object-cover rounded-xl border border-white/10" />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Explainer Block Settings */}
+              <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl space-y-6">
+                <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                  <ShieldCheck className="w-5 h-5 text-red-500" />
+                  Trust Seal Explainer Settings
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Explainer Eyebrow</label>
+                    <input
+                      type="text"
+                      value={authExplainerEyebrow}
+                      onChange={(e) => setAuthExplainerEyebrow(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Explainer Title</label>
+                    <input
+                      type="text"
+                      value={authExplainerTitle}
+                      onChange={(e) => setAuthExplainerTitle(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Explainer Description</label>
+                  <textarea
+                    value={authExplainerDesc}
+                    onChange={(e) => setAuthExplainerDesc(e.target.value)}
+                    rows={3}
+                    className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl p-4 outline-none text-white text-sm transition-colors resize-none"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Scratch Code Text Badge</label>
+                    <input
+                      type="text"
+                      value={authExplainerScratch}
+                      onChange={(e) => setAuthExplainerScratch(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Scan Text Guideline</label>
+                    <input
+                      type="text"
+                      value={authExplainerScanText}
+                      onChange={(e) => setAuthExplainerScanText(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* Explainer Bullet Points (CRUD) */}
+                <div className="border-t border-white/5 pt-6 space-y-4">
+                  <h3 className="text-sm font-black text-white">Trust Seal Core Features List</h3>
+                  <div className="space-y-2">
+                    {authExplainerPoints.map((pt, i) => (
+                      <div key={i} className="flex justify-between items-center bg-black/30 border border-white/5 px-4 py-2.5 rounded-xl">
+                        <span className="text-sm font-semibold text-zinc-300">{pt}</span>
+                        <button
+                          type="button"
+                          onClick={() => setAuthExplainerPoints(prev => prev.filter((_, idx) => idx !== i))}
+                          className="text-red-500 hover:text-white transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newExplainerPoint}
+                      onChange={(e) => setNewExplainerPoint(e.target.value)}
+                      placeholder="e.g. 100% heavy metals clean tested"
+                      className="flex-1 bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (newExplainerPoint.trim()) {
+                          setAuthExplainerPoints(prev => [...prev, newExplainerPoint.trim()]);
+                          setNewExplainerPoint("");
+                        }
+                      }}
+                      className="bg-red-600 hover:bg-white hover:text-black text-white px-5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all"
+                    >
+                      Add Point
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sample Report (Lab Fields) Settings */}
+              <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl space-y-6">
+                <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                  <ShieldCheck className="w-5 h-5 text-red-500" />
+                  NABL Sample Lab Results (Dynamic Fields)
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Report Heading Eyebrow</label>
+                    <input
+                      type="text"
+                      value={authExplainerCertEyebrow}
+                      onChange={(e) => setAuthExplainerCertEyebrow(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Report Heading Title</label>
+                    <input
+                      type="text"
+                      value={authExplainerCertTitle}
+                      onChange={(e) => setAuthExplainerCertTitle(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Report Section Description</label>
+                  <textarea
+                    value={authExplainerCertDesc}
+                    onChange={(e) => setAuthExplainerCertDesc(e.target.value)}
+                    rows={3}
+                    className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl p-4 outline-none text-white text-sm transition-colors resize-none"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Sample Report Card Title</label>
+                    <input
+                      type="text"
+                      value={authExplainerSampleTitle}
+                      onChange={(e) => setAuthExplainerSampleTitle(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Sample Report Card Footer Note</label>
+                    <input
+                      type="text"
+                      value={authExplainerSampleFooter}
+                      onChange={(e) => setAuthExplainerSampleFooter(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* Lab Fields In-line CRUD */}
+                <div className="border-t border-white/5 pt-6 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm font-black text-white font-sans">Lab Test Fields Configuration</h3>
+                    <button
+                      type="button"
+                      onClick={() => setAuthExplainerSampleResults(prev => [...prev, { label: "New Test", result: "Pass" }])}
+                      className="text-red-500 hover:text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Add Field
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {authExplainerSampleResults.map((res, i) => (
+                      <div key={i} className="flex gap-3 items-center bg-black/25 border border-white/5 p-4 rounded-2xl">
+                        <div className="flex-1">
+                          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Test Name / Label</label>
+                          <input
+                            type="text"
+                            value={res.label}
+                            onChange={(e) => {
+                              const updated = [...authExplainerSampleResults];
+                              updated[i].label = e.target.value;
+                              setAuthExplainerSampleResults(updated);
+                            }}
+                            className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-3 py-2 outline-none text-white text-xs font-semibold"
+                          />
+                        </div>
+                        <div className="w-32">
+                          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Test Result</label>
+                          <input
+                            type="text"
+                            value={res.result}
+                            onChange={(e) => {
+                              const updated = [...authExplainerSampleResults];
+                              updated[i].result = e.target.value;
+                              setAuthExplainerSampleResults(updated);
+                            }}
+                            className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-3 py-2 outline-none text-white text-xs font-semibold"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setAuthExplainerSampleResults(prev => prev.filter((_, idx) => idx !== i))}
+                          className="self-end text-red-500 hover:text-white p-2.5 bg-zinc-900 border border-white/5 rounded-xl transition-colors hover:bg-red-955"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA Section Settings */}
+              <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl space-y-6">
+                <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                  <ShieldCheck className="w-5 h-5 text-red-500" />
+                  Footer CTA Section Settings
+                </h2>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">CTA Heading Title</label>
+                  <input
+                    type="text"
+                    value={authExplainerCtaTitle}
+                    onChange={(e) => setAuthExplainerCtaTitle(e.target.value)}
+                    className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">CTA Description Copy</label>
+                  <textarea
+                    value={authExplainerCtaDesc}
+                    onChange={(e) => setAuthExplainerCtaDesc(e.target.value)}
+                    rows={3}
+                    className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl p-4 outline-none text-white text-sm transition-colors resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Global Save Button */}
+              <div className="flex justify-end pt-4">
+                <button
+                  type="button"
+                  onClick={handleSaveAuthExplainer}
+                  disabled={savingAuthExplainer || uploadingAuthExplainerBg}
+                  className="bg-red-600 hover:bg-white hover:text-black text-white px-8 py-4 rounded-xl flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs border border-white/5 transition-all shadow-[0_0_20px_rgba(220,38,38,0.3)] disabled:opacity-50 cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  {savingAuthExplainer ? "Saving Settings..." : "Save Authenticity Page"}
+                </button>
+              </div>
+            </div>
+          )
+        }
+
+        {
+          activeTab === "business-enquiry" && (
+            <div className="space-y-8 max-w-3xl w-full">
+              {/* Hero Settings */}
+              <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl space-y-6">
+                <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                  <Briefcase className="w-5 h-5 text-red-500" />
+                  Hero Header Settings
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Eyebrow Tagline</label>
+                    <input
+                      type="text"
+                      value={b2bHeroEyebrow}
+                      onChange={(e) => setB2bHeroEyebrow(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Hero Title</label>
+                    <input
+                      type="text"
+                      value={b2bHeroTitle}
+                      onChange={(e) => setB2bHeroTitle(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Hero Description</label>
+                  <textarea
+                    value={b2bHeroDesc}
+                    onChange={(e) => setB2bHeroDesc(e.target.value)}
+                    rows={3}
+                    className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl p-4 outline-none text-white text-sm transition-colors resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Contact Settings */}
+              <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl space-y-6">
+                <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                  <Briefcase className="w-5 h-5 text-red-500" />
+                  B2B Wholesale Contacts
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Wholesale Email</label>
+                    <input
+                      type="email"
+                      value={b2bContactEmail}
+                      onChange={(e) => setB2bContactEmail(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Wholesale Phone Number</label>
+                    <input
+                      type="text"
+                      value={b2bContactPhone}
+                      onChange={(e) => setB2bContactPhone(e.target.value)}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Benefits (CRUD) */}
+              <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl space-y-6">
+                <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                  <Briefcase className="w-5 h-5 text-red-500" />
+                  B2B Partnership Benefits
+                </h2>
+                <div className="space-y-4">
+                  {b2bBenefits.map((benefit, i) => (
+                    <div key={i} className="flex gap-3 items-start bg-black/25 border border-white/5 p-4 rounded-2xl">
+                      <div className="flex-1 space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Benefit Icon</label>
+                            <select
+                              value={benefit.iconName}
+                              onChange={(e) => {
+                                const updated = [...b2bBenefits];
+                                updated[i].iconName = e.target.value;
+                                setB2bBenefits(updated);
+                              }}
+                              className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-3 py-2 outline-none text-white text-xs font-semibold appearance-none"
+                            >
+                              <option value="ShieldAlert">ShieldAlert</option>
+                              <option value="Percent">Percent</option>
+                              <option value="Truck">Truck</option>
+                              <option value="TrendingUp">TrendingUp</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Benefit Title</label>
+                            <input
+                              type="text"
+                              value={benefit.title}
+                              onChange={(e) => {
+                                const updated = [...b2bBenefits];
+                                updated[i].title = e.target.value;
+                                setB2bBenefits(updated);
+                              }}
+                              className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-3 py-2 outline-none text-white text-xs font-semibold"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Benefit Description</label>
+                          <textarea
+                            value={benefit.desc}
+                            onChange={(e) => {
+                              const updated = [...b2bBenefits];
+                              updated[i].desc = e.target.value;
+                              setB2bBenefits(updated);
+                            }}
+                            rows={2}
+                            className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl p-3 outline-none text-white text-xs font-semibold resize-none"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setB2bBenefits(prev => prev.filter((_, idx) => idx !== i))}
+                        className="text-red-500 hover:text-white p-2.5 bg-zinc-900 border border-white/5 rounded-xl transition-colors hover:bg-red-955"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="border-t border-white/5 pt-6 space-y-4">
+                  <h3 className="text-sm font-bold text-zinc-400">➕ Add New Benefit Card</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Icon</label>
+                      <select
+                        value={newB2bBenefitIcon}
+                        onChange={(e) => setNewB2bBenefitIcon(e.target.value)}
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                      >
+                        <option value="ShieldAlert">ShieldAlert</option>
+                        <option value="Percent">Percent</option>
+                        <option value="Truck">Truck</option>
+                        <option value="TrendingUp">TrendingUp</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Title</label>
+                      <input
+                        type="text"
+                        value={newB2bBenefitTitle}
+                        onChange={(e) => setNewB2bBenefitTitle(e.target.value)}
+                        placeholder="e.g. Instant Wholesale Portal"
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Description</label>
+                    <textarea
+                      value={newB2bBenefitDesc}
+                      onChange={(e) => setNewB2bBenefitDesc(e.target.value)}
+                      placeholder="Details of the benefit card..."
+                      rows={2}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl p-4 outline-none text-white text-sm transition-colors resize-none"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newB2bBenefitTitle.trim() && newB2bBenefitDesc.trim()) {
+                        setB2bBenefits(prev => [...prev, {
+                          iconName: newB2bBenefitIcon,
+                          title: newB2bBenefitTitle.trim(),
+                          desc: newB2bBenefitDesc.trim()
+                        }]);
+                        setNewB2bBenefitTitle("");
+                        setNewB2bBenefitDesc("");
+                      } else {
+                        toast.error("Title and Description are required to add a benefit card.");
+                      }
+                    }}
+                    className="bg-red-600 hover:bg-white hover:text-black text-white px-5 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all"
+                  >
+                    Add Benefit Card
+                  </button>
+                </div>
+              </div>
+
+              {/* Global Save Button */}
+              <div className="flex justify-end pt-4">
+                <button
+                  type="button"
+                  onClick={handleSaveB2bConfig}
+                  disabled={savingB2bConfig}
+                  className="bg-red-600 hover:bg-white hover:text-black text-white px-8 py-4 rounded-xl flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs border border-white/5 transition-all shadow-[0_0_20px_rgba(220,38,38,0.3)] disabled:opacity-50 cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  {savingB2bConfig ? "Saving Settings..." : "Save Business Enquiry"}
+                </button>
+              </div>
+            </div>
+          )
+        }
+
+        {
+          activeTab === "home-sections" && (
+            <div className="space-y-8 max-w-5xl w-full">
+              {/* Brand Film Settings */}
+              <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl">
+                <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/5 pb-3 mb-6">
+                  <Sparkles className="w-5 h-5 text-red-500" />
+                  Homepage Brand Film Settings ("The Standard")
+                </h2>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Eyebrow Text</label>
+                      <input
+                        type="text"
+                        value={brandFilmEyebrow}
+                        onChange={(e) => setBrandFilmEyebrow(e.target.value)}
+                        placeholder="E.g., The Standard"
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Section Title</label>
+                      <input
+                        type="text"
+                        value={brandFilmTitle}
+                        onChange={(e) => setBrandFilmTitle(e.target.value)}
+                        placeholder="E.g., Built for lifters who respect the work"
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Description</label>
+                    <textarea
+                      value={brandFilmDesc}
+                      onChange={(e) => setBrandFilmDesc(e.target.value)}
+                      placeholder="Enter description..."
+                      rows={3}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Video Cover Image</label>
+                    <div className="flex gap-3 items-center">
+                      <label className="flex items-center gap-2 cursor-pointer bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">
+                        {uploadingBrandFilmImage ? (
+                          <span className="animate-pulse">Uploading...</span>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4" />
+                            Choose Image
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleUploadBrandFilmImage}
+                          disabled={uploadingBrandFilmImage}
+                        />
+                      </label>
+                      {brandFilmImageUrl && (
+                        <div className="relative group">
+                          <img
+                            src={brandFilmImageUrl}
+                            alt="Brand film preview"
+                            className="h-16 w-16 object-cover rounded-xl border border-white/10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setBrandFilmImageUrl("")}
+                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity animate-none"
+                          >
+                            <XCircle className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                      {!brandFilmImageUrl && (
+                        <span className="text-zinc-600 text-xs italic">No image selected (website logo will be shown as fallback)</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="pt-4 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleSaveBrandFilm}
+                      disabled={savingBrandFilm || uploadingBrandFilmImage}
+                      className="bg-red-600 hover:bg-white hover:text-black text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-xs uppercase tracking-widest border border-white/5 disabled:opacity-50 cursor-pointer"
+                    >
+                      <Save className="w-4 h-4" />
+                      {savingBrandFilm ? "Saving..." : "Save Brand Film settings"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Why Choose Us Settings */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* Form to Add Card */}
+                <div className="lg:col-span-5 bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl h-fit">
+                  <form onSubmit={handleAddOrEditWhyChooseUsCard} className="space-y-4">
+                    <h2 className="text-base font-black text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                      <Sparkles className="w-4 h-4 text-red-500" />
+                      {editingWhyChooseUsCardIdx !== null ? "Edit Why Choose Us Card" : "Add Why Choose Us Card"}
+                    </h2>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Card Icon (Lucide Icon Name)</label>
+                      <select
+                        value={whyChooseUsCardIcon}
+                        onChange={(e) => setWhyChooseUsCardIcon(e.target.value)}
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                      >
+                        <option value="ShieldCheck">ShieldCheck (Security / Batch Tested)</option>
+                        <option value="Truck">Truck (Delivery / Fulfillment)</option>
+                        <option value="BadgeCheck">BadgeCheck (Authenticity)</option>
+                        <option value="Dumbbell">Dumbbell (Athletes / Workout)</option>
+                        <option value="Clock">Clock (Hours)</option>
+                        <option value="Sparkles">Sparkles (Ingredients)</option>
+                        <option value="Zap">Zap (Energy)</option>
+                        <option value="Award">Award (Certificates)</option>
+                        <option value="TrendingUp">TrendingUp (Growth)</option>
+                        <option value="Newspaper">Newspaper (Media)</option>
+                        <option value="BookOpen">BookOpen (Education)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Card Title</label>
+                      <input
+                        type="text"
+                        value={whyChooseUsCardTitle}
+                        onChange={(e) => setWhyChooseUsCardTitle(e.target.value)}
+                        placeholder="E.g., Batch Tested"
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Card Description Copy</label>
+                      <textarea
+                        value={whyChooseUsCardCopy}
+                        onChange={(e) => setWhyChooseUsCardCopy(e.target.value)}
+                        placeholder="E.g., Quality checked for consistency and purity."
+                        rows={3}
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                      />
+                    </div>
+                    <div className="pt-2 flex justify-end gap-2">
+                      {editingWhyChooseUsCardIdx !== null && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingWhyChooseUsCardIdx(null);
+                            setWhyChooseUsCardTitle("");
+                            setWhyChooseUsCardCopy("");
+                            setWhyChooseUsCardIcon("ShieldCheck");
+                          }}
+                          className="px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                      <button
+                        type="submit"
+                        className="bg-red-600 hover:bg-white hover:text-black text-white px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-xs uppercase tracking-wider border border-white/5 cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4" />
+                        {editingWhyChooseUsCardIdx !== null ? "Update Card" : "Add Card to list"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                {/* List and Global Text */}
+                <div className="lg:col-span-7 bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl flex flex-col justify-between min-h-[400px]">
+                  <div className="space-y-6">
+                    <div className="border-b border-white/5 pb-3">
+                      <h2 className="text-lg font-black text-white flex items-center gap-2">
+                        <Settings className="w-5 h-5 text-red-500" />
+                        Why Choose Us Section settings
+                      </h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Section Eyebrow</label>
+                        <input
+                          type="text"
+                          value={whyChooseUsEyebrow}
+                          onChange={(e) => setWhyChooseUsEyebrow(e.target.value)}
+                          placeholder="Why Choose Us"
+                          className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Section Title</label>
+                        <input
+                          type="text"
+                          value={whyChooseUsTitle}
+                          onChange={(e) => setWhyChooseUsTitle(e.target.value)}
+                          placeholder="Premium quality without the gym-bro noise"
+                          className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Section Description</label>
+                      <textarea
+                        value={whyChooseUsDesc}
+                        onChange={(e) => setWhyChooseUsDesc(e.target.value)}
+                        placeholder="Description text..."
+                        rows={2}
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                      />
+                    </div>
+
+                    <div className="border-t border-white/5 pt-4">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-3">Cards List ({whyChooseUsCards.length})</h3>
+                      {whyChooseUsCards.length === 0 ? (
+                        <div className="text-center py-8 text-zinc-500 font-medium">
+                          No custom trust cards added yet.
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {whyChooseUsCards.map((item, idx) => (
+                            <div key={idx} className="bg-black/40 rounded-xl p-3 border border-white/5 flex gap-3 items-center group relative hover:border-red-500/20 transition-all">
+                              <div className="w-10 h-10 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center flex-shrink-0 font-bold border border-red-500/20 text-xs">
+                                {item.iconName ? item.iconName.substring(0, 3) : "Card"}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-xs font-black text-white truncate">{item.title}</h4>
+                                <p className="text-zinc-500 text-[10px] mt-0.5 truncate">{item.copy}</p>
+                              </div>
+                              <div className="flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEditWhyChooseUsCard(idx)}
+                                  className="w-6 h-6 rounded bg-zinc-800 hover:bg-blue-500/20 text-zinc-400 hover:text-blue-500 flex items-center justify-center border border-white/5 cursor-pointer"
+                                  title="Edit"
+                                >
+                                  <Pencil className="w-3 h-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteWhyChooseUsCard(idx)}
+                                  className="w-6 h-6 rounded bg-zinc-800 hover:bg-red-500/20 text-zinc-400 hover:text-red-500 flex items-center justify-center border border-white/5 cursor-pointer"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-white/5 pt-5 mt-6 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleSaveWhyChooseUs}
+                      disabled={savingWhyChooseUs}
+                      className="bg-red-600 hover:bg-white hover:text-black text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-xs uppercase tracking-widest border border-white/5 disabled:opacity-50 cursor-pointer"
+                    >
+                      <Save className="w-4 h-4" />
+                      {savingWhyChooseUs ? "Saving..." : "Save Why Choose Us to Database"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        }
+
+        {
+          activeTab === "footer" && (
+            <div className="space-y-8 max-w-3xl w-full">
+              {/* Why Choose Us Stats Settings */}
+              <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl">
+                <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/5 pb-3 mb-6">
+                  <Sparkles className="w-5 h-5 text-red-500" />
+                  Why Choose Us stats
+                </h2>
+
+                {/* Add / Edit Stat Form */}
+                <form onSubmit={handleAddOrEditStat} className="space-y-4 mb-8 bg-black/30 p-5 rounded-2xl border border-white/5">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">
+                    {editingStatIdx !== null ? "✏️ Edit Stat Card" : "➕ Add New Stat Card"}
+                  </h3>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Stat Value / Title</label>
+                      <input
+                        type="text"
+                        value={statValue}
+                        onChange={(e) => setStatValue(e.target.value)}
+                        placeholder="e.g. 16 YEARS, 10M+, FREE"
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Card Styling Style</label>
+                      <select
+                        value={statStyle}
+                        onChange={(e) => setStatStyle(e.target.value)}
+                        className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors cursor-pointer"
+                      >
+                        <option value="default">Default (Dark Glassmorphism)</option>
+                        <option value="red">Red Highlight (Gradient Fill)</option>
+                        <option value="grey">Grey Highlight (Solid Fill)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Stat Subtitle / Description Label</label>
+                    <input
+                      type="text"
+                      value={statLabel}
+                      onChange={(e) => setStatLabel(e.target.value)}
+                      placeholder="e.g. Happy Customers, Fast Shipping"
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    {editingStatIdx !== null && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingStatIdx(null);
+                          setStatValue("");
+                          setStatLabel("");
+                          setStatStyle("default");
+                        }}
+                        className="bg-zinc-800 hover:bg-zinc-700 text-white px-5 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-xs uppercase tracking-widest cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      className="bg-red-600 hover:bg-white hover:text-black text-white px-5 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-xs uppercase tracking-widest cursor-pointer"
+                    >
+                      {editingStatIdx !== null ? "Update Stat" : "Add Stat Card"}
+                    </button>
+                  </div>
+                </form>
+
+                {/* Stat List Table */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Active Stat Cards ({footerStats.length})</h3>
+                  <div className="space-y-2">
+                    {footerStats.length === 0 ? (
+                      <p className="text-zinc-500 text-sm font-medium py-2">No stat cards added yet. Add your first card above.</p>
+                    ) : (
+                      footerStats.map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between bg-black/40 rounded-xl p-4 border border-white/5 group">
+                          <div>
+                            <span className="text-sm font-black text-white">{item.value}</span>
+                            <p className="text-xs text-zinc-500 uppercase font-bold mt-0.5">{item.label}</p>
+                            <span className="inline-block text-[8px] font-black uppercase tracking-wider px-2 py-0.5 bg-white/5 border border-white/10 rounded-full mt-1.5 text-zinc-400">
+                              Style: {item.style === 'red' ? 'Red Highlight' : item.style === 'grey' ? 'Grey Solid' : 'Default'}
+                            </span>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleStartEditStat(idx)}
+                              className="text-zinc-400 hover:text-white p-2 rounded-lg bg-zinc-900 border border-white/5 hover:border-white/20 transition-all cursor-pointer"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteStat(idx)}
+                              className="text-zinc-400 hover:text-red-500 p-2 rounded-lg bg-zinc-900 border border-white/5 hover:border-red-500/20 transition-all cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Newsletter & Socials Settings */}
+              <div className="bg-zinc-900/50 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-xl">
+                <form onSubmit={handleSaveFooterConfig} className="space-y-6">
+                  <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                    <Globe className="w-5 h-5 text-red-500" />
+                    Newsletter & Social Links
+                  </h2>
+
+                  {/* Newsletter Title */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">
+                      Newsletter Title
+                    </label>
+                    <input
+                      type="text"
+                      value={newsletterTitle}
+                      onChange={(e) => setNewsletterTitle(e.target.value)}
+                      placeholder="e.g. Newsletter"
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                    />
+                  </div>
+
+                  {/* Newsletter Description */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">
+                      Newsletter Description Copy
+                    </label>
+                    <textarea
+                      value={newsletterDesc}
+                      onChange={(e) => setNewsletterDesc(e.target.value)}
+                      placeholder="Enter subscription description copy..."
+                      rows={3}
+                      className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors resize-none"
+                    />
+                  </div>
+
+                  {/* Social links grid */}
+                  <div className="border-t border-white/5 pt-4">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-4">Social Media Profile Links</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Facebook URL</label>
+                        <input
+                          type="text"
+                          value={socialFb}
+                          onChange={(e) => setSocialFb(e.target.value)}
+                          placeholder="#"
+                          className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Instagram URL</label>
+                        <input
+                          type="text"
+                          value={socialIg}
+                          onChange={(e) => setSocialIg(e.target.value)}
+                          placeholder="#"
+                          className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Twitter (X) URL</label>
+                        <input
+                          type="text"
+                          value={socialTw}
+                          onChange={(e) => setSocialTw(e.target.value)}
+                          placeholder="#"
+                          className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">YouTube URL</label>
+                        <input
+                          type="text"
+                          value={socialYt}
+                          onChange={(e) => setSocialYt(e.target.value)}
+                          placeholder="#"
+                          className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-4 py-3 outline-none text-white text-sm transition-colors"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-white/5 pt-4 flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={savingFooterConfig}
+                      className="bg-red-600 hover:bg-white hover:text-black text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-xs uppercase tracking-widest border border-white/5 disabled:opacity-50 cursor-pointer"
+                    >
+                      <Save className="w-4 h-4" />
+                      {savingFooterConfig ? "Saving..." : "Save Footer Configs"}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           )
         }

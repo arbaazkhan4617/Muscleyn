@@ -1,150 +1,136 @@
+"use client";
+
 import { useState, useEffect } from "react";
-import { Newspaper } from "lucide-react";
+import { Newspaper, ArrowRight, Award, TrendingUp, Star, Globe } from "lucide-react";
 import api from "@/services/api";
 import Link from "next/link";
 
-const defaultPublications = [
-  {
-    id: 1,
-    name: "ET INDUSTRY CHANGEMAKERS",
-    sub: "North 2026",
-    logoStyle: "font-black tracking-tighter text-sm md:text-base",
-    badge: "ET",
-    tagline: "Industry Leader Award",
-  },
-  {
-    id: 2,
-    name: "afaqs!",
-    sub: "Marketing News",
-    logoStyle: "font-black italic tracking-tight text-xl md:text-2xl text-blue-400",
-    badge: "a!",
-    tagline: "Featured In Media",
-  },
-  {
-    id: 3,
-    name: "ET BRAND EQUITY",
-    sub: "The Economic Times",
-    logoStyle: "font-bold tracking-tight text-sm uppercase text-red-500",
-    badge: "BE",
-    tagline: "Nutrition Tech Insights",
-  },
-  {
-    id: 4,
-    name: "THE WEEK",
-    sub: "National Coverage",
-    logoStyle: "font-black tracking-widest text-lg uppercase border-y border-white/20 py-0.5 px-2",
-    badge: "TW",
-    tagline: "Quality Standards Audit",
-  },
-  {
-    id: 5,
-    name: "GQ",
-    sub: "Gentlemen's Quarterly",
-    logoStyle: "font-black tracking-normal text-2xl md:text-3xl font-serif",
-    badge: "GQ",
-    tagline: "Elite Supplement Choice",
-  },
-];
+const iconMap: Record<string, any> = {
+  Award: Award,
+  TrendingUp: TrendingUp,
+  Newspaper: Newspaper,
+  Star: Star,
+  Globe: Globe,
+};
 
 export default function NewsSection() {
   const [newsList, setNewsList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const res = await api.get("/cms/news-list");
+        setLoading(true);
+        const res = await api.get(`/cms/news-list?t=${Date.now()}`);
         if (res.data.data && res.data.data.cmsValue) {
           const parsed = JSON.parse(res.data.data.cmsValue);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            // Map headline/publisher to the publication structure
-            const mapped = parsed.map((item: any, index: number) => ({
-              id: item.id || `custom-${index}`,
-              name: item.publisher || item.name,
-              sub: item.headline || item.sub,
-              logoStyle: "font-black tracking-tighter text-sm",
-              badge: (item.publisher || "News").substring(0, 3).toUpperCase(),
-              tagline: item.summary || item.tagline || "Press Coverage",
-            }));
-            setNewsList(mapped);
+            // Take the 3 latest news articles
+            setNewsList(parsed.slice(0, 3));
             return;
           }
         }
       } catch (err) {
         console.log("No dynamic news configured in CMS", err);
+      } finally {
+        setLoading(false);
       }
-      setNewsList(defaultPublications);
+      setNewsList([]);
     };
     fetchNews();
   }, []);
+
+  if (loading) {
+    return (
+      <section className="py-24 bg-zinc-950 border-b border-white/5 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <div className="animate-pulse flex flex-col items-center">
+            <div className="h-4 bg-zinc-800 w-32 rounded mb-4" />
+            <div className="h-8 bg-zinc-800 w-64 rounded mb-12" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="h-64 bg-zinc-900 border border-white/5 rounded-[2.5rem]" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (newsList.length === 0) {
+    return null; // Don't show news section if no news articles exist
+  }
+
   return (
     <section className="py-24 bg-zinc-950 border-b border-white/5 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(220,38,38,0.03),transparent_40%)] pointer-events-none" />
       
-      <div className="max-w-7xl mx-auto px-4 text-center">
+      <div className="max-w-7xl mx-auto px-4">
         {/* Section Header */}
-        <div className="mb-16">
-          <div className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.2em] text-red-500 mb-3 justify-center">
-            <Newspaper className="w-4 h-4 text-red-500" />
-            Media & Coverage
+        <div className="flex flex-col justify-between items-center md:items-end md:flex-row mb-16 gap-6">
+          <div className="text-center md:text-left">
+            <div className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.2em] text-red-500 mb-3">
+              <Newspaper className="w-4 h-4 text-red-500" />
+              Media & Coverage
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
+              News & Press Releases
+            </h2>
           </div>
-          <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white">
-            News
-          </h2>
+          <Link
+            href="/news"
+            className="inline-flex h-12 items-center gap-2 rounded-full border border-white/10 bg-white/[0.02] px-6 text-xs font-black uppercase tracking-wider text-zinc-300 hover:text-white hover:bg-white/[0.05] transition-all"
+          >
+            View All Press
+            <ArrowRight className="w-4 h-4 text-red-500" />
+          </Link>
         </div>
 
-        {/* Logos Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-6 justify-center items-center">
-          {newsList.map((pub) => (
-            <Link
-              href={`/news/${pub.id}`}
-              key={pub.id}
-              className="h-32 rounded-[2rem] border border-white/5 bg-white/[0.02] p-5 flex flex-col items-center justify-center hover:bg-white/[0.05] hover:border-white/10 hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer shadow-lg"
-            >
-              {/* Publisher Mock Logo */}
-              <div className="flex flex-col items-center justify-center h-16 w-full text-center">
-                {pub.id === 1 && (
-                  <div className="flex flex-col items-center">
-                    <span className="font-extrabold text-[10px] tracking-[0.2em] bg-red-600 px-2 py-0.5 rounded text-white mb-0.5">ET</span>
-                    <span className="font-black text-xs text-white tracking-tight leading-tight">CHANGEMAKERS</span>
-                    <span className="text-[7px] text-zinc-500 font-bold uppercase tracking-wider mt-0.5">North 2026</span>
+        {/* Dynamic News Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {newsList.map((article) => {
+            const Icon = iconMap[article.icon] || Newspaper;
+            return (
+              <article
+                key={article.id}
+                className="group bg-zinc-900 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl hover:border-red-500/30 transition-all duration-300 flex flex-col justify-between h-full"
+              >
+                <div>
+                  {/* Card Meta */}
+                  <div className="flex justify-between items-center gap-4 mb-5 pb-4 border-b border-white/5">
+                    <span className="text-[9px] font-black text-red-500 uppercase tracking-widest bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-xl flex items-center gap-1.5">
+                      <Icon className="w-3.5 h-3.5" />
+                      {article.publisher}
+                    </span>
+                    <span className="text-xs text-zinc-500 font-bold tracking-wider">
+                      {article.date}
+                    </span>
                   </div>
-                )}
-                {pub.id === 2 && (
-                  <div className="text-center font-extrabold italic text-2xl tracking-tighter text-blue-400 group-hover:text-blue-300 transition-colors">
-                    afaqs<span className="text-red-500 font-black">!</span>
-                  </div>
-                )}
-                {pub.id === 3 && (
-                  <div className="flex flex-col items-center">
-                    <span className="font-extrabold text-[9px] tracking-wide text-zinc-400">ET BRAND EQUITY</span>
-                    <span className="text-[7px] text-zinc-500 uppercase tracking-widest mt-0.5">From The Economic Times</span>
-                  </div>
-                )}
-                {pub.id === 4 && (
-                  <div className="font-black tracking-widest text-lg md:text-xl border-y-2 border-white/20 py-0.5 px-3 text-white">
-                    THEWEEK
-                  </div>
-                )}
-                {pub.id === 5 && (
-                  <div className="font-black tracking-tight text-2xl md:text-3xl font-serif text-white group-hover:text-red-500 transition-colors">
-                    GQ
-                  </div>
-                )}
-                {! [1, 2, 3, 4, 5].includes(pub.id) && (
-                  <div className="flex flex-col items-center">
-                    <span className="font-extrabold text-[10px] tracking-[0.2em] bg-red-600 px-2 py-0.5 rounded text-white mb-0.5">{pub.badge}</span>
-                    <span className="font-black text-xs text-white tracking-tight leading-tight uppercase line-clamp-1">{pub.name}</span>
-                    <span className="text-[7px] text-zinc-500 font-bold uppercase tracking-wider mt-0.5 line-clamp-1">{pub.sub}</span>
-                  </div>
-                )}
-              </div>
-              
-              {/* Little detail note */}
-              <span className="text-[9px] text-zinc-500 group-hover:text-zinc-400 font-bold uppercase tracking-wider transition-colors">
-                {pub.tagline}
-              </span>
-            </Link>
-          ))}
+
+                  {/* Headline & Summary */}
+                  <Link href={`/news/${article.id}`}>
+                    <h3 className="text-xl font-black text-white group-hover:text-red-500 transition-colors leading-snug mb-3">
+                      {article.headline}
+                    </h3>
+                  </Link>
+                  <p className="text-zinc-400 text-xs leading-relaxed font-semibold line-clamp-3">
+                    {article.summary}
+                  </p>
+                </div>
+
+                <div className="mt-8 pt-5 border-t border-white/5">
+                  <Link
+                    href={`/news/${article.id}`}
+                    className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-red-500 hover:text-white transition-colors cursor-pointer group/btn"
+                  >
+                    Read Press Release
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-0.5" />
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>

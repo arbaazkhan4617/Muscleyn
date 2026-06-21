@@ -23,5 +23,7 @@ data class CreateProductRequest(
 
     val isBestSeller: Boolean? = false,
 
-    val isOffer: Boolean? = false
+    val isOffer: Boolean? = false,
+
+    val productReportUrl: String? = null
 )

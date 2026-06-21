@@ -84,6 +84,12 @@ fun Product.toResponse():
         isBestSeller = isBestSeller,
         isOffer = isOffer,
         createdAt = createdAt,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
+        productReportUrl = productReportUrl,
+        reportProteinPercentage = reportProteinPercentage,
+        reportHeavyMetal = reportHeavyMetal,
+        reportAminoAcidProfile = reportAminoAcidProfile,
+        reportMicrobialSafety = reportMicrobialSafety,
+        reportTestDetails = reportTestDetails
     )
 }

@@ -41,6 +41,12 @@ export type CommerceProduct = {
   customBenefits?: string[];
   richDetails?: any;
   variants?: any[];
+  productReportUrl?: string | null;
+  reportProteinPercentage?: string;
+  reportHeavyMetal?: string;
+  reportAminoAcidProfile?: string;
+  reportMicrobialSafety?: string;
+  reportTestDetails?: string | null;
 };
 
 
@@ -48,29 +54,25 @@ export const categories = [
   {
     name: "Whey Protein",
     slug: "whey-protein",
-    image:
-      "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?q=80&w=1200&auto=format&fit=crop",
+    image: "",
     description: "Lean muscle recovery blends",
   },
   {
     name: "Mass Gainer",
     slug: "mass-gainer",
-    image:
-      "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1200&auto=format&fit=crop",
+    image: "",
     description: "Calorie dense bulking stacks",
   },
   {
     name: "Creatine",
     slug: "creatine",
-    image:
-      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1200&auto=format&fit=crop",
+    image: "",
     description: "Strength and power essentials",
   },
   {
     name: "Pre Workout",
     slug: "pre-workout",
-    image:
-      "https://images.unsplash.com/photo-1579758629938-03607ccdbaba?q=80&w=1200&auto=format&fit=crop",
+    image: "",
     description: "Energy, pump and focus",
   },
 ];
@@ -83,11 +85,8 @@ export const products: CommerceProduct[] = [
     category: "Whey Protein",
     brand: "Muscleyn Elite",
     goal: "Protein",
-    image: "/images/products/1.jpeg",
-    gallery: [
-      "/images/products/1.jpeg",
-      "/images/products/1.jpeg",
-    ],
+    image: "",
+    gallery: [],
     price: 2499,
     oldPrice: 3499,
     discount: "30% OFF",
@@ -114,11 +113,8 @@ export const products: CommerceProduct[] = [
     category: "Mass Gainer",
     brand: "Muscleyn Bulk",
     goal: "Muscle Gain",
-    image: "/images/products/2.jpeg",
-    gallery: [
-      "/images/products/2.jpeg",
-      "/images/products/2.jpeg",
-    ],
+    image: "",
+    gallery: [],
     price: 3299,
     oldPrice: 4299,
     discount: "23% OFF",
@@ -145,11 +141,8 @@ export const products: CommerceProduct[] = [
     category: "Creatine",
     brand: "Muscleyn Lab",
     goal: "Strength",
-    image: "/images/products/3.jpeg",
-    gallery: [
-      "/images/products/3.jpeg",
-      "/images/products/3.jpeg",
-    ],
+    image: "",
+    gallery: [],
     price: 1499,
     oldPrice: 1999,
     discount: "25% OFF",
@@ -176,11 +169,8 @@ export const products: CommerceProduct[] = [
     category: "Pre Workout",
     brand: "Muscleyn Ignite",
     goal: "Energy",
-    image: "/images/products/4.jpeg",
-    gallery: [
-      "/images/products/4.jpeg",
-      "/images/products/4.jpeg",
-    ],
+    image: "",
+    gallery: [],
     price: 1999,
     oldPrice: 2699,
     discount: "26% OFF",
@@ -207,10 +197,8 @@ export const products: CommerceProduct[] = [
     category: "Whey Protein",
     brand: "Muscleyn Elite",
     goal: "Recovery",
-    image: "/images/products/5.jpeg",
-    gallery: [
-      "/images/products/5.jpeg",
-    ],
+    image: "",
+    gallery: [],
     price: 2799,
     oldPrice: 3599,
     discount: "22% OFF",
@@ -237,10 +225,8 @@ export const products: CommerceProduct[] = [
     category: "Fat Burner",
     brand: "Muscleyn Cut",
     goal: "Fat Loss",
-    image: "/images/products/6.jpeg",
-    gallery: [
-      "/images/products/6.jpeg",
-    ],
+    image: "",
+    gallery: [],
     price: 1199,
     oldPrice: 1699,
     discount: "29% OFF",
@@ -304,7 +290,13 @@ export const formatPrice = (price: number) =>
   }).format(price);
 
 export const getBackendImageUrl = (url?: string | null): string => {
-  if (!url) return "/images/products/1.jpeg";
+  let fallback = "/logo.png";
+  if (typeof window !== "undefined") {
+    fallback = localStorage.getItem("websiteLogo") || "/logo.png";
+  }
+  if (!url || url === "" || url === "/images/products/1.jpeg" || url.includes("unsplash.com")) {
+    return fallback;
+  }
   if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
     return url;
   }
@@ -406,6 +398,12 @@ export const mapBackendProductToCommerce = (backendProd: any): CommerceProduct =
     categoryName: backendProd.categoryName || "",
     subCategoryName: backendProd.subCategoryName || "",
     brand: backendProd.brandName || "Muscleyn Elite",
+    productReportUrl: backendProd.productReportUrl || null,
+    reportProteinPercentage: backendProd.reportProteinPercentage || "Pass",
+    reportHeavyMetal: backendProd.reportHeavyMetal || "Pass",
+    reportAminoAcidProfile: backendProd.reportAminoAcidProfile || "Pass",
+    reportMicrobialSafety: backendProd.reportMicrobialSafety || "Pass",
+    reportTestDetails: backendProd.reportTestDetails || null,
     goal: goalVal,
     image: getBackendImageUrl(galleryImages.length > 0 ? galleryImages[0] : backendProd.imageUrl),
     gallery: galleryImages.length > 0 

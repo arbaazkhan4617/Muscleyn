@@ -1,24 +1,22 @@
 import { motion } from "framer-motion";
+import { getBackendImageUrl } from "@/lib/commerce";
+
 const categories = [
   {
     title: "Whey Protein",
-    image:
-      "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?q=80&w=1200&auto=format&fit=crop",
+    image: "",
   },
   {
     title: "Mass Gainer",
-    image:
-      "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1200&auto=format&fit=crop",
+    image: "",
   },
   {
     title: "Creatine",
-    image:
-      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1200&auto=format&fit=crop",
+    image: "",
   },
   {
     title: "Pre Workout",
-    image:
-      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=1200&auto=format&fit=crop",
+    image: "",
   },
 ];
 
@@ -59,7 +57,7 @@ export default function FeaturedCategories() {
 
               {/* Image */}
               <img
-                src={item.image}
+                src={getBackendImageUrl(item.image)}
                 alt={item.title}
                 className="
                   w-full

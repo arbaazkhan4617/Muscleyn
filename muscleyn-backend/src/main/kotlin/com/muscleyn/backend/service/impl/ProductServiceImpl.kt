@@ -100,6 +100,8 @@ class ProductServiceImpl(
             isBestSeller = request.isBestSeller ?: false,
 
             isOffer = request.isOffer ?: false,
+
+            productReportUrl = request.productReportUrl,
         )
 
         return productRepository.save(
@@ -270,6 +272,8 @@ class ProductServiceImpl(
 
         product.isOffer = request.isOffer ?: false
 
+        product.productReportUrl = request.productReportUrl
+
         product.updatedAt = java.time.LocalDateTime.now()
 
         return productRepository.save(
@@ -308,7 +312,9 @@ class ProductServiceImpl(
         MultipartFile?,
 
         images:
-        List<MultipartFile>?
+        List<MultipartFile>?,
+
+        productReport: MultipartFile?
 
     ): Product {
 
@@ -402,6 +408,17 @@ class ProductServiceImpl(
                 "/uploads/products/$fileName"
         }
 
+        // PRODUCT REPORT (PDF)
+        if (productReport != null) {
+            val fileName = System.currentTimeMillis().toString() + "_" + productReport.originalFilename
+            val uploadDir = File(uploadDirPath).absoluteFile
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs()
+            }
+            val filePath = File(uploadDir, fileName)
+            productReport.transferTo(filePath)
+            product.productReportUrl = "/uploads/products/$fileName"
+        }
 
         val product1 =  productRepository
             .save(product)
@@ -459,7 +476,9 @@ class ProductServiceImpl(
 
 
         images:
-        List<MultipartFile>?
+        List<MultipartFile>?,
+
+        productReport: MultipartFile?
 
     ): Product {
 
@@ -564,6 +583,18 @@ class ProductServiceImpl(
                 "/uploads/products/$fileName"
         }
 
+        // PRODUCT REPORT UPDATE (PDF)
+        if (productReport != null) {
+            val fileName = System.currentTimeMillis().toString() + "_" + productReport.originalFilename
+            val uploadDir = File(uploadDirPath).absoluteFile
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs()
+            }
+            val filePath = File(uploadDir, fileName)
+            productReport.transferTo(filePath)
+            product.productReportUrl = "/uploads/products/$fileName"
+        }
+
         val product1 =  productRepository
             .save(product)
 
@@ -627,6 +658,44 @@ class ProductServiceImpl(
         val product = productRepository.findById(productId)
             .orElseThrow { RuntimeException("Product not found") }
         product.isOffer = !(product.isOffer ?: false)
+        product.updatedAt = java.time.LocalDateTime.now()
+        return productRepository.save(product).toResponse()
+    }
+
+    override fun updateProductReport(
+        productId: Long,
+        productReport: MultipartFile,
+        reportProteinPercentage: String?,
+        reportHeavyMetal: String?,
+        reportAminoAcidProfile: String?,
+        reportMicrobialSafety: String?,
+        reportTestDetails: String?
+    ): ProductResponse {
+        val product = productRepository.findById(productId)
+            .orElseThrow { RuntimeException("Product not found") }
+        
+        val fileName = System.currentTimeMillis().toString() + "_" + productReport.originalFilename
+        val uploadDir = File(uploadDirPath).absoluteFile
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs()
+        }
+        val filePath = File(uploadDir, fileName)
+        productReport.transferTo(filePath)
+        product.productReportUrl = "/uploads/products/$fileName"
+        if (reportProteinPercentage != null) product.reportProteinPercentage = reportProteinPercentage
+        if (reportHeavyMetal != null) product.reportHeavyMetal = reportHeavyMetal
+        if (reportAminoAcidProfile != null) product.reportAminoAcidProfile = reportAminoAcidProfile
+        if (reportMicrobialSafety != null) product.reportMicrobialSafety = reportMicrobialSafety
+        if (reportTestDetails != null) product.reportTestDetails = reportTestDetails
+        product.updatedAt = java.time.LocalDateTime.now()
+        
+        return productRepository.save(product).toResponse()
+    }
+
+    override fun deleteProductReport(productId: Long): ProductResponse {
+        val product = productRepository.findById(productId)
+            .orElseThrow { RuntimeException("Product not found") }
+        product.productReportUrl = null
         product.updatedAt = java.time.LocalDateTime.now()
         return productRepository.save(product).toResponse()
     }

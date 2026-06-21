@@ -59,7 +59,6 @@ function ShopPageContent() {
   const [selectedGoals, setSelectedGoals] = useState<string[]>(
     searchParams.get("goal") ? [searchParams.get("goal")!] : []
   );
-  const [minRating, setMinRating] = useState(0);
   const [filterBestSeller, setFilterBestSeller] = useState(searchParams.get("filter") === "best-seller");
   const [filterOffers, setFilterOffers] = useState(searchParams.get("filter") === "offers");
   const [page, setPage] = useState(1);
@@ -169,14 +168,9 @@ function ShopPageContent() {
           const items = data.data.content || [];
           const mapped = items.map(mapBackendProductToCommerce);
           
-          let finalItems = mapped;
-          if (minRating > 0) {
-            finalItems = mapped.filter((p: any) => p.rating >= minRating);
-          }
-          
-          setProducts(finalItems);
+          setProducts(mapped);
           setTotalPages(data.data.totalPages || 1);
-          setTotalProductsCount(data.data.totalElements || finalItems.length);
+          setTotalProductsCount(data.data.totalElements || mapped.length);
         }
       } catch (err) {
         console.error("Failed to load products dynamically:", err);
@@ -194,7 +188,6 @@ function ShopPageContent() {
     filterBestSeller,
     filterOffers,
     maxPrice,
-    minRating,
     page,
     sortBy,
   ]);
@@ -221,7 +214,6 @@ function ShopPageContent() {
     setSelectedCategories([]);
     setSelectedBrands([]);
     setSelectedGoals([]);
-    setMinRating(0);
     setFilterBestSeller(false);
     setFilterOffers(false);
     setPage(1);
@@ -391,28 +383,6 @@ function ShopPageContent() {
                   <div className="mt-3 flex justify-between text-sm font-bold text-zinc-400">
                     <span>₹500</span>
                     <span>{formatPrice(maxPrice)}</span>
-                  </div>
-                </div>
-
-                <div className="mt-8 border-t border-white/10 pt-8">
-                  <h3 className="mb-5 text-xl font-black">Minimum Rating</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {[0, 4, 4.5].map((rating) => (
-                      <button
-                        key={rating}
-                        type="button"
-                        onClick={() => {
-                          setMinRating(rating);
-                          setPage(1);
-                        }}
-                        className={`${filterButtonClass} ${minRating === rating
-                          ? "!border-red-600 !bg-red-600 !text-white"
-                          : ""
-                          }`}
-                      >
-                        {rating === 0 ? "All" : `${rating}+`}
-                      </button>
-                    ))}
                   </div>
                 </div>
               </div>

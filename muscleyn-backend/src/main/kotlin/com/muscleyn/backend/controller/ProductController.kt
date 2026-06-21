@@ -227,6 +227,11 @@ class ProductController(
         )
         images: List<MultipartFile>?,
 
+        @RequestPart(
+            required = false
+        )
+        productReport: MultipartFile?,
+
         @RequestParam(
             required = false
         )
@@ -288,7 +293,8 @@ class ProductController(
                     request,
 
                     image,
-                    images
+                    images,
+                    productReport
                 )
 
         return ResponseDto(
@@ -343,6 +349,11 @@ class ProductController(
             required = false
         )
         images: List<MultipartFile>?,
+
+        @RequestPart(
+            required = false
+        )
+        productReport: MultipartFile?,
 
         @RequestParam(
             required = false
@@ -408,7 +419,8 @@ class ProductController(
 
                     image,
 
-                    images
+                    images,
+                    productReport
                 )
 
         return ResponseDto(
@@ -454,6 +466,44 @@ class ProductController(
         return ResponseDto(
             status = true,
             message = "Offer status toggled successfully",
+            data = product
+        )
+    }
+
+    @PutMapping("/{productId}/report", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun updateProductReport(
+        @PathVariable productId: Long,
+        @RequestPart("productReport") productReport: MultipartFile,
+        @RequestParam(required = false, defaultValue = "Pass") reportProteinPercentage: String,
+        @RequestParam(required = false, defaultValue = "Pass") reportHeavyMetal: String,
+        @RequestParam(required = false, defaultValue = "Pass") reportAminoAcidProfile: String,
+        @RequestParam(required = false, defaultValue = "Pass") reportMicrobialSafety: String,
+        @RequestParam(required = false) reportTestDetails: String?
+    ): ResponseDto<ProductResponse> {
+        val product = productService.updateProductReport(
+            productId,
+            productReport,
+            reportProteinPercentage,
+            reportHeavyMetal,
+            reportAminoAcidProfile,
+            reportMicrobialSafety,
+            reportTestDetails
+        )
+        return ResponseDto(
+            status = true,
+            message = "Product report updated successfully",
+            data = product
+        )
+    }
+
+    @DeleteMapping("/{productId}/report")
+    fun deleteProductReport(
+        @PathVariable productId: Long
+    ): ResponseDto<ProductResponse> {
+        val product = productService.deleteProductReport(productId)
+        return ResponseDto(
+            status = true,
+            message = "Product report deleted successfully",
             data = product
         )
     }

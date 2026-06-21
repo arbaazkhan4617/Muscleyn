@@ -63,6 +63,12 @@ export default function AddProductPage() {
       null
     );
 
+  const [productReport,
+    setProductReport] =
+    useState<File | null>(
+      null
+    );
+
     const [images,
 setImages] =
 useState<File[]>([]);
@@ -429,6 +435,10 @@ useState<string[]>([]);
     );
   }
 
+        if (productReport) {
+          formData.append("productReport", productReport);
+        }
+
         const res = await api.post(
           "/products",
           formData,
@@ -617,6 +627,28 @@ useState<string[]>([]);
 
   </div>
 
+</div>
+
+<div className="border-t border-white/10 pt-8">
+  <label className="block mb-4 font-bold text-lg">Product Report (PDF)</label>
+  <label className="inline-flex items-center gap-2 px-6 py-3.5 bg-white/5 border border-white/10 hover:bg-white hover:text-zinc-950 text-white rounded-xl font-bold cursor-pointer transition-all shadow-md group">
+    <Upload className="w-5 h-5 text-zinc-400 group-hover:text-zinc-950 transition-colors" />
+    <span>{productReport ? productReport.name : "Choose PDF Report"}</span>
+    <input
+      type="file"
+      accept=".pdf,application/pdf"
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (file) setProductReport(file);
+      }}
+      className="hidden"
+    />
+  </label>
+  {productReport && (
+    <p className="mt-2.5 text-sm font-bold text-green-500">
+      Selected Report: {productReport.name}
+    </p>
+  )}
 </div>
 
         {/* NAME */}

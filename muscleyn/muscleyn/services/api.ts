@@ -13,48 +13,50 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(
-
   (config) => {
+    const adminToken = localStorage.getItem("adminToken");
+    const token = localStorage.getItem("token");
 
-    const adminToken =
-      localStorage.getItem(
-        "adminToken"
-      );
+    const url = config.url || "";
+    let cleanUrl = url;
 
-    const token =
-      localStorage.getItem(
-        "token"
-      );
+    // Parse absolute URL to get the pathname if needed
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      try {
+        cleanUrl = new URL(url).pathname;
+      } catch (e) {
+        const match = url.match(/^https?:\/\/[^\/]+(\/.*)/);
+        if (match && match[1]) {
+          cleanUrl = match[1];
+        }
+      }
+    }
+
+    // Strip "/api" prefix if present
+    if (cleanUrl.startsWith("/api")) {
+      cleanUrl = cleanUrl.substring(4);
+    } else if (cleanUrl.startsWith("api/")) {
+      cleanUrl = cleanUrl.substring(3);
+    }
+
+    // Ensure leading slash for uniform matching
+    const normalizedUrl = cleanUrl.startsWith("/") ? cleanUrl : "/" + cleanUrl;
 
     const isAdminRequest =
-      config.url?.startsWith(
-        "/admin"
-      ) ||
-      config.url?.startsWith(
-        "/dashboard"
-      ) ||
-      config.url?.startsWith(
-        "/cms"
-      ) ||
-      config.url?.startsWith(
-        "/coupons"
-      ) ||
-      config.url?.startsWith(
-        "/banners"
-      ) ||
-      config.url?.startsWith(
-        "/contact"
-      );
+      normalizedUrl.startsWith("/admin") ||
+      normalizedUrl.startsWith("/dashboard") ||
+      normalizedUrl.startsWith("/cms") ||
+      normalizedUrl.startsWith("/coupons") ||
+      normalizedUrl.startsWith("/banners") ||
+      normalizedUrl.startsWith("/contact") ||
+      normalizedUrl.startsWith("/files");
 
-    const authToken =
-      isAdminRequest
-        ? (adminToken || token)
-        : (token || adminToken);
+    const authToken = isAdminRequest
+      ? (adminToken || token)
+      : (token || adminToken);
 
     if (authToken) {
-
-      config.headers.Authorization =
-        `Bearer ${authToken}`;
+      config.headers.Authorization = `Bearer ${authToken}`;
     }
 
     return config;
@@ -64,21 +66,38 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response && error.response.status === 401) {
+    if (
+      error.response &&
+      (error.response.status === 401 || error.response.status === 403)
+    ) {
       const token = localStorage.getItem("token");
       const adminToken = localStorage.getItem("adminToken");
-      if (token || adminToken) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("adminToken");
-        
-        // Retry the request without the Authorization header to see if it's a public endpoint
-        if (error.config && !error.config._retry) {
-          error.config._retry = true;
-          if (error.config.headers) {
-            delete error.config.headers.Authorization;
+      const authHeader = error.config?.headers?.Authorization;
+      
+      let tokenRemoved = false;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        const failedToken = authHeader.substring(7);
+        if (failedToken === token) {
+          localStorage.removeItem("token");
+          tokenRemoved = true;
+        } else if (failedToken === adminToken) {
+          localStorage.removeItem("adminToken");
+          tokenRemoved = true;
+          if (typeof window !== "undefined") {
+            window.location.href = "/admin/login";
           }
-          return api(error.config);
         }
+      } else {
+        // Fallback: if no Authorization header was found, don't wipe anything arbitrarily
+      }
+
+      // Retry the request without the Authorization header to see if it's a public endpoint
+      if (error.config && !error.config._retry) {
+        error.config._retry = true;
+        if (error.config.headers) {
+          delete error.config.headers.Authorization;
+        }
+        return api(error.config);
       }
     }
     return Promise.reject(error);

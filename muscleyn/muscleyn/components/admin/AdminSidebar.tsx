@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import api from "@/services/api";
 import {
   LayoutDashboard,
   Package,
@@ -15,7 +17,6 @@ import {
   Sparkles,
   ChevronRight,
   ShieldCheck,
-  Settings,
   MessageSquare,
   Star,
   FileText,
@@ -27,6 +28,30 @@ export default function AdminSidebar() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [websiteName, setWebsiteName] = useState("PRABHA PHARMA");
+
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const res = await api.get(`/cms/website-logo?t=${Date.now()}`);
+        if (res.data && res.data.status && res.data.data && res.data.data.cmsValue) {
+          const val = res.data.data.cmsValue;
+          try {
+            const parsed = JSON.parse(val);
+            setLogoUrl(parsed.logoUrl || "");
+            setWebsiteName(parsed.websiteName || "PRABHA PHARMA");
+          } catch (e) {
+            setLogoUrl(val);
+            setWebsiteName("PRABHA PHARMA");
+          }
+        }
+      } catch (err) {
+        console.log("No custom logo found in admin panel");
+      }
+    };
+    fetchLogo();
+  }, []);
 
   // LOGOUT
   const handleLogout = () => {
@@ -92,7 +117,7 @@ export default function AdminSidebar() {
       icon: Sparkles,
     },
     {
-      name: "Authenticity Links",
+      name: "Lab Certificates",
       href: "/admin/authenticity",
       icon: ShieldCheck,
     },
@@ -128,18 +153,39 @@ export default function AdminSidebar() {
       {/* LOGO */}
       <div className="mb-8 flex flex-col gap-3 pl-1">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-red-600 shadow-lg shadow-red-900/50">
-            <Dumbbell className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black tracking-widest text-white leading-none">
-              PRABHA PHARMA
-            </h1>
-            <p className="mt-1 flex items-center gap-1.5 text-xs font-bold text-zinc-400 uppercase tracking-widest">
-              <Sparkles className="h-3 w-3 text-red-500" />
-              Admin Panel
-            </p>
-          </div>
+          {logoUrl ? (
+            <div className="flex items-center gap-3">
+              <img
+                src={logoUrl}
+                alt="Logo"
+                className="h-10 w-10 object-contain"
+              />
+              <div>
+                <h1 className="text-lg font-black tracking-widest text-white leading-none mb-1">
+                  {websiteName}
+                </h1>
+                <p className="flex items-center gap-1.5 text-[10px] font-black text-zinc-500 uppercase tracking-widest leading-none">
+                  <Sparkles className="h-3 w-3 text-red-500" />
+                  Admin Panel
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-red-600 shadow-lg shadow-red-900/50">
+                <Dumbbell className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-black tracking-widest text-white leading-none">
+                  {websiteName}
+                </h1>
+                <p className="mt-1 flex items-center gap-1.5 text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                  <Sparkles className="h-3 w-3 text-red-500" />
+                  Admin Panel
+                </p>
+              </div>
+            </>
+          )}
         </div>
         <div className="h-px bg-white/10 w-full" />
       </div>

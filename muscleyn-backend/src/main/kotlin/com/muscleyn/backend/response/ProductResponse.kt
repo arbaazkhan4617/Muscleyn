@@ -31,7 +31,13 @@ data class ProductResponse(
     val isBestSeller: Boolean?,
     val isOffer: Boolean?,
     val createdAt: java.time.LocalDateTime?,
-    val updatedAt: java.time.LocalDateTime?
+    val updatedAt: java.time.LocalDateTime?,
+    val productReportUrl: String?,
+    val reportProteinPercentage: String?,
+    val reportHeavyMetal: String?,
+    val reportAminoAcidProfile: String?,
+    val reportMicrobialSafety: String?,
+    val reportTestDetails: String?
 )
 
 data class ProductImageResponse(

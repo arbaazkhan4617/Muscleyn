@@ -73,4 +73,14 @@ class Product(
 
     @Column(columnDefinition = "TEXT")
     var benefits: String? = null,
+
+    var productReportUrl: String? = null,
+
+    var reportProteinPercentage: String? = "Pass",
+    var reportHeavyMetal: String? = "Pass",
+    var reportAminoAcidProfile: String? = "Pass",
+    var reportMicrobialSafety: String? = "Pass",
+
+    @Column(columnDefinition = "TEXT")
+    var reportTestDetails: String? = null,
 )

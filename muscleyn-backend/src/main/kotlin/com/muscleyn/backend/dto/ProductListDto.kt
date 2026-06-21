@@ -25,5 +25,13 @@ data class ProductListDto(
 
     val isBestSeller: Boolean?,
 
-    val isOffer: Boolean?
+    val isOffer: Boolean?,
+
+    val productReportUrl: String?,
+
+    val reportProteinPercentage: String?,
+    val reportHeavyMetal: String?,
+    val reportAminoAcidProfile: String?,
+    val reportMicrobialSafety: String?,
+    val reportTestDetails: String?
 )

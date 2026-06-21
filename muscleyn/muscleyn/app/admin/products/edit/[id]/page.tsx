@@ -60,6 +60,9 @@ export default function EditProductPage() {
       null
     );
 
+  const [productReport, setProductReport] = useState<File | null>(null);
+  const [existingProductReportUrl, setExistingProductReportUrl] = useState<string | null>(null);
+
   const [preview,
     setPreview] =
     useState("");
@@ -246,6 +249,8 @@ export default function EditProductPage() {
           setPreview(
             getBackendImageUrl(product.imageUrl)
           );
+
+          setExistingProductReportUrl(product.productReportUrl || null);
 
           // PRIMARY VARIANT
           const primaryVariant = product.variants?.[0];
@@ -555,6 +560,10 @@ export default function EditProductPage() {
           });
         }
 
+        if (productReport) {
+          formData.append("productReport", productReport);
+        }
+
         // Add nutrition facts
         const nutritionObj = {
           servingSize,
@@ -812,6 +821,42 @@ export default function EditProductPage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* PRODUCT REPORT (PDF) */}
+        <div className="border-t border-white/10 pt-8">
+          <label className="block mb-4 font-bold text-lg">Product Report (PDF)</label>
+          {existingProductReportUrl && (
+            <div className="mb-4 flex items-center gap-3">
+              <span className="text-sm font-semibold text-zinc-400">Current PDF report:</span>
+              <a
+                href={getBackendImageUrl(existingProductReportUrl)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-bold text-red-500 hover:underline flex items-center gap-1"
+              >
+                View Current Report
+              </a>
+            </div>
+          )}
+          <label className="inline-flex items-center gap-2 px-6 py-3.5 bg-white/5 border border-white/10 hover:bg-white hover:text-zinc-950 text-white rounded-xl font-bold cursor-pointer transition-all shadow-md group">
+            <Upload className="w-5 h-5 text-zinc-400 group-hover:text-zinc-950 transition-colors" />
+            <span>{productReport ? productReport.name : "Upload New PDF Report"}</span>
+            <input
+              type="file"
+              accept=".pdf,application/pdf"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) setProductReport(file);
+              }}
+              className="hidden"
+            />
+          </label>
+          {productReport && (
+            <p className="mt-2.5 text-sm font-bold text-green-500">
+              Selected Report: {productReport.name}
+            </p>
+          )}
         </div>
 
         {/* NAME */}

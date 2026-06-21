@@ -161,6 +161,7 @@ export default function AdminProductsPage() {
                   <th className="p-6 font-bold">Status</th>
                   <th className="p-6 font-bold">Best Seller</th>
                   <th className="p-6 font-bold">Offers</th>
+                  <th className="p-6 font-bold">Product Report</th>
                   <th className="p-6 font-bold">Inventory</th>
                   <th className="p-6 font-bold text-right">Actions</th>
                 </tr>
@@ -248,6 +249,24 @@ export default function AdminProductsPage() {
                         />
                         <div className="w-11 h-6 bg-zinc-750 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-650"></div>
                       </label>
+                    </td>
+
+                    {/* PRODUCT REPORT */}
+                    <td className="p-6">
+                      {product.productReportUrl ? (
+                        <a
+                          href={getBackendImageUrl(product.productReportUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded-full text-xs font-black uppercase tracking-wider hover:bg-green-500 hover:text-white transition-all"
+                        >
+                          Uploaded
+                        </a>
+                      ) : (
+                        <span className="px-3 py-1 bg-zinc-500/10 text-zinc-500 border border-white/5 rounded-full text-xs font-bold uppercase tracking-wider">
+                          No Report
+                        </span>
+                      )}
                     </td>
 
                     {/* INVENTORY / VARIANTS */}
