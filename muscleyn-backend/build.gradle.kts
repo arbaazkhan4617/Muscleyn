@@ -28,13 +28,14 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
-	implementation("org.springframework:spring-web")
+	implementation("org.springframework:spring-web:7.0.7")
 	implementation("org.springframework.boot:spring-boot-starter-mail")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("tools.jackson.module:jackson-module-kotlin")
 	implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
 	implementation("io.jsonwebtoken:jjwt-api:0.12.5")
 	implementation("com.razorpay:razorpay-java:1.4.7")
+	implementation("org.springframework.boot:spring-boot-starter-tomcat")
 	implementation("com.fasterxml.jackson.core:jackson-databind:2.20.0")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
 
@@ -45,9 +46,6 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("com.mysql:mysql-connector-j")
-	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat") {
-		exclude(group = "org.springframework", module = "spring-web")
-	}
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
@@ -77,5 +75,5 @@ tasks.withType<Test> {
 }
 
 tasks.named<BootRun>("bootRun") {
-	classpath = classpath + configurations.providedRuntime.get()
+	classpath = sourceSets["main"].runtimeClasspath + configurations.providedRuntime.get()
 }
