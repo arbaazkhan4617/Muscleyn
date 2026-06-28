@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DollarSign, ShoppingCart, Package, Users, TrendingUp, Activity, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { IndianRupee, ShoppingCart, Package, Users, TrendingUp, Activity, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import api from "@/services/api";
 
 import {
@@ -81,7 +81,7 @@ export default function AdminDashboardPage() {
     {
       title: "Total Revenue",
       value: `₹${dashboard?.totalRevenue?.toLocaleString() || 0}`,
-      icon: DollarSign,
+      icon: IndianRupee,
       trend: "+12.5%",
       isPositive: true
     },

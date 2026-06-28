@@ -141,6 +141,7 @@ export default function Home() {
             title: b.title || "Premium Supplement Drop",
             copy: b.subtitle || "Formulated for performance, clinically tested, and athlete approved.",
             image: getBackendImageUrl(b.imageUrl),
+            boxImage: b.boxImageUrl ? getBackendImageUrl(b.boxImageUrl) : getBackendImageUrl(b.imageUrl),
             redirectUrl: b.redirectUrl || "/shop"
           }));
           setBanners(mappedBanners);
@@ -350,7 +351,7 @@ export default function Home() {
                   <Link href={nextSlide.redirectUrl || "/shop"} className="block">
                     <div className="relative overflow-hidden rounded-[2rem] bg-zinc-950 aspect-[4/5]">
                       <Image
-                        src={nextSlide.image}
+                        src={nextSlide.boxImage}
                         alt={nextSlide.title}
                         fill
                         className="object-cover opacity-60 transition-transform duration-700 group-hover:scale-105"

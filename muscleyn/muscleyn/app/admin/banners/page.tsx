@@ -16,6 +16,7 @@ export default function AdminBannersPage() {
   // Form State
   const [title, setTitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [boxImageUrl, setBoxImageUrl] = useState("");
   const [redirectUrl, setRedirectUrl] = useState("");
   const [sortOrder, setSortOrder] = useState("");
   const [isActive, setIsActive] = useState(true);
@@ -43,6 +44,7 @@ export default function AdminBannersPage() {
     setEditingId(null);
     setTitle("");
     setImageUrl("");
+    setBoxImageUrl("");
     setRedirectUrl("");
     setSortOrder("");
     setIsActive(true);
@@ -52,6 +54,7 @@ export default function AdminBannersPage() {
     setEditingId(banner.id);
     setTitle(banner.title || "");
     setImageUrl(banner.imageUrl || "");
+    setBoxImageUrl(banner.boxImageUrl || "");
     setRedirectUrl(banner.redirectUrl || "");
     setSortOrder(banner.sortOrder?.toString() || "0");
     setIsActive(banner.isActive);
@@ -91,6 +94,28 @@ export default function AdminBannersPage() {
     }
   };
 
+  const handleUploadBoxImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await api.post("/files/upload-product-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      if (response.data && response.data.status && response.data.data.imageUrl) {
+        setBoxImageUrl(response.data.data.imageUrl);
+        toast.success("Box Image uploaded successfully!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to upload box image");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !imageUrl) {
@@ -103,6 +128,7 @@ export default function AdminBannersPage() {
       const payload = {
         title,
         imageUrl,
+        boxImageUrl,
         redirectUrl,
         sortOrder: Number(sortOrder || 0),
         isActive
@@ -164,7 +190,7 @@ export default function AdminBannersPage() {
                 />
             </div>
             <div>
-                <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Banner Image</label>
+                <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Background Image</label>
                 <div className="flex gap-3 items-center">
                     <label className="flex items-center gap-2 cursor-pointer bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">
                         {uploading ? (
@@ -185,6 +211,31 @@ export default function AdminBannersPage() {
                     </label>
                     {imageUrl && (
                       <span className="text-zinc-400 text-xs truncate max-w-xs">{imageUrl}</span>
+                    )}
+                </div>
+            </div>
+            <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Box Image (Up Next)</label>
+                <div className="flex gap-3 items-center">
+                    <label className="flex items-center gap-2 cursor-pointer bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">
+                        {uploading ? (
+                          <span className="animate-pulse">Uploading...</span>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4" />
+                            Choose Image
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleUploadBoxImage}
+                          disabled={uploading}
+                        />
+                    </label>
+                    {boxImageUrl && (
+                      <span className="text-zinc-400 text-xs truncate max-w-xs">{boxImageUrl}</span>
                     )}
                 </div>
             </div>
@@ -211,19 +262,38 @@ export default function AdminBannersPage() {
         </div>
 
         {/* IMAGE PREVIEW */}
-        {imageUrl && (
-            <div className="mt-4">
-                <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Preview</label>
-                <div className="w-full h-40 md:h-64 rounded-2xl overflow-hidden border border-white/10 relative bg-black">
-                    <img 
-                        src={imageUrl.startsWith('http') ? imageUrl : imageUrl} 
-                        alt="Banner Preview" 
-                        className="w-full h-full object-cover" 
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).src = "https://via.placeholder.com/1200x400?text=Invalid+Image+URL";
-                        }}
-                    />
-                </div>
+        {(imageUrl || boxImageUrl) && (
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                {imageUrl && (
+                    <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Background Preview</label>
+                        <div className="w-full h-40 md:h-64 rounded-2xl overflow-hidden border border-white/10 relative bg-black">
+                            <img 
+                                src={imageUrl.startsWith('http') ? imageUrl : imageUrl} 
+                                alt="Banner Background Preview" 
+                                className="w-full h-full object-cover opacity-80" 
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = "https://via.placeholder.com/1200x400?text=Invalid+Image+URL";
+                                }}
+                            />
+                        </div>
+                    </div>
+                )}
+                {boxImageUrl && (
+                    <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Box Preview</label>
+                        <div className="w-full h-40 md:h-64 rounded-2xl overflow-hidden border border-white/10 relative bg-black aspect-[4/5] max-w-[200px]">
+                            <img 
+                                src={boxImageUrl.startsWith('http') ? boxImageUrl : boxImageUrl} 
+                                alt="Banner Box Preview" 
+                                className="w-full h-full object-cover" 
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x500?text=Invalid+Image+URL";
+                                }}
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
         )}
 

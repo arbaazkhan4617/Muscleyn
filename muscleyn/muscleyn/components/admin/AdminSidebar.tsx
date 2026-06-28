@@ -21,6 +21,7 @@ import {
   Star,
   FileText,
   Zap,
+  CreditCard,
 } from "lucide-react";
 
 export default function AdminSidebar() {
@@ -145,6 +146,11 @@ export default function AdminSidebar() {
       name: "Product Reviews",
       href: "/admin/reviews",
       icon: Star,
+    },
+    {
+      name: "Payment Settings",
+      href: "/admin/payment-settings",
+      icon: CreditCard,
     },
   ];
 

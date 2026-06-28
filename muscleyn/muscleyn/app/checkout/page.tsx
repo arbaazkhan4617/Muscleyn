@@ -9,7 +9,7 @@ import Footer from "@/components/layout/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { useCartStore } from "@/store/cartStore";
 import { placeOrder } from "@/services/orderService";
-import { createPayment, verifyPayment } from "@/services/paymentService";
+import { createPayment, verifyPayment, getPublicPaymentConfig } from "@/services/paymentService";
 import { getUserAddresses } from "@/services/addressService";
 
 import {
@@ -41,9 +41,23 @@ export default function CheckoutPage() {
   // PAYMENT
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE">("COD");
   const [paymentGateway, setPaymentGateway] = useState<"RAZORPAY" | "PHONEPE">("RAZORPAY");
+  const [paymentConfig, setPaymentConfig] = useState<any>(null);
 
   // LOAD DATA
   useEffect(() => {
+    // FETCH CONFIG
+    const fetchConfig = async () => {
+      try {
+        const response = await getPublicPaymentConfig();
+        if (response?.data) {
+          setPaymentConfig(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to load payment config", error);
+      }
+    };
+    fetchConfig();
+
     // ADDRESS
     const loadAddresses = async () => {
       try {
@@ -74,6 +88,23 @@ export default function CheckoutPage() {
       0
     );
   }, [cartItems]);
+
+  const { upfrontAmount, pendingAmount } = useMemo(() => {
+    let upfront = cartTotal;
+    let pending = 0;
+
+    if (paymentConfig?.isActive) {
+      const value = paymentMethod === "COD" ? paymentConfig.codUpfrontValue : paymentConfig.onlineUpfrontValue;
+      if (paymentConfig.paymentType === "PERCENTAGE") {
+        upfront = Math.round(cartTotal * (value / 100));
+      } else if (paymentConfig.paymentType === "FLAT") {
+        upfront = value < cartTotal ? value : cartTotal;
+      }
+      pending = cartTotal - upfront;
+    }
+
+    return { upfrontAmount: upfront, pendingAmount: pending };
+  }, [cartTotal, paymentConfig, paymentMethod]);
 
   // PLACE ORDER
   const handlePlaceOrder = async () => {
@@ -115,13 +146,14 @@ export default function CheckoutPage() {
       });
 
       const orderId = orderResponse?.data?.id || "DEMO_ORDER";
+      const orderNumber = orderResponse?.data?.orderNumber || orderId;
 
       // ONLINE PAYMENT
       if (paymentMethod === "ONLINE") {
         try {
           const paymentResponse = await createPayment({
             orderId,
-            amount: cartTotal,
+            amount: upfrontAmount,
             paymentGateway,
           });
 
@@ -131,7 +163,7 @@ export default function CheckoutPage() {
           if (paymentGateway === "RAZORPAY") {
             const options = {
               key: paymentData?.key || "DEMO_KEY",
-              amount: paymentData?.amount || cartTotal * 100,
+              amount: paymentData?.amount || upfrontAmount * 100,
               currency: paymentData?.currency || "INR",
               name: "Muscleyn",
               description: "Order Payment",
@@ -154,7 +186,7 @@ export default function CheckoutPage() {
 
                   clearCart();
                   toast.success("Payment successful");
-                  router.push(`/order-success?orderId=${orderId}`);
+                  router.push(`/order-success?orderId=${orderId}&orderNumber=${orderNumber}`);
                 } catch (error) {
                   console.log(error);
                   toast.error("Payment verification failed");
@@ -201,7 +233,7 @@ export default function CheckoutPage() {
       // COD SUCCESS or Fallback
       clearCart();
       toast.success("Order placed successfully");
-      router.push(`/order-success?orderId=${orderId}`);
+      router.push(`/order-success?orderId=${orderId}&orderNumber=${orderNumber}`);
     } catch (error) {
       console.log(error);
       toast.error("Failed to place order");
@@ -454,10 +486,23 @@ export default function CheckoutPage() {
                     <span>Delivery</span>
                     <span className="text-green-500">FREE</span>
                   </div>
-                  <div className="flex justify-between text-2xl font-black pt-4 border-t border-white/10 mt-4">
-                    <span>Total</span>
-                    <span className="text-red-500">₹{cartTotal}</span>
+                  <div className="flex justify-between text-xl font-bold pt-4 border-t border-white/10 mt-4">
+                    <span>Order Total</span>
+                    <span className="text-white">₹{cartTotal}</span>
                   </div>
+                  
+                  {paymentConfig?.isActive && pendingAmount > 0 && (
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mt-4 space-y-2">
+                      <div className="flex justify-between font-black text-sm">
+                        <span className="text-white">Pay Now</span>
+                        <span className="text-red-500">₹{upfrontAmount}</span>
+                      </div>
+                      <div className="flex justify-between text-zinc-400 font-bold text-xs">
+                        <span>Pay on Delivery</span>
+                        <span>₹{pendingAmount}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* BUTTON */}

@@ -12,6 +12,7 @@ import { Suspense } from "react";
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
+  const orderNumber = searchParams.get("orderNumber");
 
   return (
     <div className="relative z-10 bg-zinc-900 border border-white/10 rounded-[2.5rem] p-10 md:p-16 shadow-2xl max-w-2xl w-full text-center">
@@ -40,7 +41,7 @@ function OrderSuccessContent() {
           Order ID
         </span>
         <span className="text-2xl font-black text-white tracking-wide">
-          {orderId ? `#${orderId}` : "N/A"}
+          {orderNumber ? orderNumber : (orderId ? `#${orderId}` : "N/A")}
         </span>
       </div>
 

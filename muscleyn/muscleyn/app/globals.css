@@ -4,6 +4,11 @@
   --color-zinc-950: #09090b;
   --font-sans: var(--font-inter);
   --font-heading: var(--font-outfit);
+  /* Increased small font sizes for better readability */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.25rem;
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.5rem;
 }
 
 :root {
@@ -19,7 +24,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading), sans-serif;
 }
 
@@ -50,6 +60,7 @@ select {
     opacity: 0;
     transform: translateY(22px) scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -57,18 +68,24 @@ select {
 }
 
 @keyframes adminFloat {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate3d(0, 0, 0) scale(1);
   }
+
   50% {
     transform: translate3d(18px, -18px, 0) scale(1.06);
   }
 }
 
 @keyframes adminPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.45;
   }
+
   50% {
     opacity: 0.9;
   }
@@ -150,7 +167,7 @@ select {
   color: #fafafa;
 }
 
-.admin-main > div {
+.admin-main>div {
   animation: adminFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -257,6 +274,7 @@ select {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -271,6 +289,7 @@ select {
   .admin-shell {
     display: block;
   }
+
   .admin-sidebar {
     position: relative;
     width: auto !important;
@@ -281,8 +300,10 @@ select {
 
 /* Custom typography styles to restore standard HTML elements within .prose */
 .prose h1 {
-  font-size: 1.875rem !important; /* text-3xl */
-  font-weight: 800 !important; /* font-extrabold */
+  font-size: 1.875rem !important;
+  /* text-3xl */
+  font-weight: 800 !important;
+  /* font-extrabold */
   color: #ffffff !important;
   margin-top: 1.5rem !important;
   margin-bottom: 0.75rem !important;
@@ -291,8 +312,10 @@ select {
 }
 
 .prose h2 {
-  font-size: 1.5rem !important; /* text-2xl */
-  font-weight: 700 !important; /* font-bold */
+  font-size: 1.5rem !important;
+  /* text-2xl */
+  font-weight: 700 !important;
+  /* font-bold */
   color: #ffffff !important;
   margin-top: 1.25rem !important;
   margin-bottom: 0.5rem !important;
@@ -301,8 +324,10 @@ select {
 }
 
 .prose h3 {
-  font-size: 1.25rem !important; /* text-xl */
-  font-weight: 600 !important; /* font-semibold */
+  font-size: 1.25rem !important;
+  /* text-xl */
+  font-weight: 600 !important;
+  /* font-semibold */
   color: #ffffff !important;
   margin-top: 1rem !important;
   margin-bottom: 0.5rem !important;
@@ -330,18 +355,19 @@ select {
   margin-bottom: 0.25rem !important;
 }
 
-.prose strong, .prose b {
+.prose strong,
+.prose b {
   font-weight: 700 !important;
   color: #ffffff !important;
 }
 
 .prose a {
-  color: #ef4444 !important; /* red-500 */
+  color: #ef4444 !important;
+  /* red-500 */
   text-decoration: underline !important;
 }
 
 .prose a:hover {
-  color: #f87171 !important; /* red-400 */
+  color: #f87171 !important;
+  /* red-400 */
 }
-
-

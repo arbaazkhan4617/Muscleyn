@@ -60,11 +60,20 @@ export default function MyOrdersPage() {
 
   const getStatusColor = (status: string) => {
       switch(status?.toUpperCase()) {
-          case 'DELIVERED': return 'bg-green-500/10 text-green-500 border-green-500/20';
-          case 'PROCESSING': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-          case 'CANCELLED': return 'bg-red-500/10 text-red-500 border-red-500/20';
-          case 'SUCCESS': return 'bg-green-500/10 text-green-500 border-green-500/20';
-          case 'PENDING': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+          case 'DELIVERED':
+          case 'PAID':
+          case 'SUCCESS':
+              return 'bg-green-500/10 text-green-500 border-green-500/20';
+          case 'PROCESSING':
+          case 'SHIPPED':
+              return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+          case 'CANCELLED':
+          case 'REFUNDED':
+          case 'FAILED':
+              return 'bg-red-500/10 text-red-500 border-red-500/20';
+          case 'PENDING':
+          case 'PLACED':
+              return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
           default: return 'bg-zinc-800 text-zinc-300 border-zinc-700';
       }
   }
@@ -127,7 +136,7 @@ export default function MyOrdersPage() {
                     <div>
                       <p className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Order ID</p>
                       <h2 className="text-xl sm:text-2xl font-black text-white group-hover:text-red-400 transition-colors">
-                        {order.id}
+                        {order.orderNumber || `#${order.id}`}
                       </h2>
                     </div>
 

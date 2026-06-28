@@ -34,17 +34,22 @@ import { useAuth } from "@/context/AuthContext";
 import { formatPrice, CommerceProduct, mapBackendProductToCommerce, getBackendImageUrl } from "@/lib/commerce";
 import api from "@/services/api";
 
-const getVariantSize = (variant: any): string =>
-  variant?.size || variant?.weight || "";
+const getVariantSize = (variant: any): string => {
+  if (variant?.size) return variant.size;
+  if (variant?.weight) return variant.weight;
+  if (variant?.variantName && variant.variantName !== "Default") return variant.variantName;
+  return "Standard Size";
+};
 
-const getVariantFlavor = (variant: any): string =>
-  variant?.flavor || "";
+const getVariantFlavor = (variant: any): string => {
+  if (variant?.flavor) return variant.flavor;
+  return "Standard Flavor";
+};
 
 const isVariantActive = (variant: any): boolean =>
   variant?.isActive !== false;
 
-const variantHasOptions = (variant: any): boolean =>
-  Boolean(getVariantSize(variant) || getVariantFlavor(variant));
+const variantHasOptions = (variant: any): boolean => true;
 
 const findMatchingVariant = (
   variants: any[],
@@ -956,6 +961,22 @@ export default function ProductDetailsPage({
                     <Zap className="w-4 h-4" /> Buy Now
                   </button>
                 )}
+                
+                {/* EXTERNAL LINKS */}
+                {(product as any).amazonUrl || (product as any).flipkartUrl ? (
+                  <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                    {(product as any).amazonUrl && (
+                      <a href={(product as any).amazonUrl} target="_blank" rel="noopener noreferrer" className="flex-1 min-h-[50px] bg-orange-500 hover:bg-orange-600 text-white rounded-full flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+                        Amazon
+                      </a>
+                    )}
+                    {(product as any).flipkartUrl && (
+                      <a href={(product as any).flipkartUrl} target="_blank" rel="noopener noreferrer" className="flex-1 min-h-[50px] bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(37,99,235,0.2)]">
+                        Flipkart
+                      </a>
+                    )}
+                  </div>
+                ) : null}
                 
                 <div className="mt-4 flex items-center justify-center gap-5 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                   <div className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-green-500" /> Secure Checkout</div>

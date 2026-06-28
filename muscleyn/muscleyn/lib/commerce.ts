@@ -47,6 +47,8 @@ export type CommerceProduct = {
   reportAminoAcidProfile?: string;
   reportMicrobialSafety?: string;
   reportTestDetails?: string | null;
+  amazonUrl?: string;
+  flipkartUrl?: string;
 };
 
 
@@ -430,6 +432,8 @@ export const mapBackendProductToCommerce = (backendProd: any): CommerceProduct =
     })() : [],
     customBenefits: parsedBenefits,
     richDetails: richDetailsObj,
-    variants: backendProd.variants || []
+    variants: backendProd.variants || [],
+    amazonUrl: backendProd.amazonUrl || null,
+    flipkartUrl: backendProd.flipkartUrl || null
   } as any;
 };

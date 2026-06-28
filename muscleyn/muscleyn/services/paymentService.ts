@@ -61,3 +61,9 @@ export const verifyPayment =
 
     return response.data;
 };
+
+// GET PUBLIC PAYMENT CONFIG
+export const getPublicPaymentConfig = async () => {
+  const response = await api.get("/payment-config");
+  return response.data;
+};

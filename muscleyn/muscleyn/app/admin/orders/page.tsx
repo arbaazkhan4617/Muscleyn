@@ -32,6 +32,27 @@ export default function AdminOrdersPage() {
           userMap[String(user.id)] = user;
       });
       
+      // Fetch any missing users (e.g. admins who placed orders and are filtered out of /admin/customers)
+      const missingUserIds = new Set<string>();
+      ordersData.forEach((order: any) => {
+         if (order.userId && !userMap[String(order.userId)]) {
+            missingUserIds.add(String(order.userId));
+         }
+      });
+      
+      if (missingUserIds.size > 0) {
+         await Promise.all(Array.from(missingUserIds).map(async (id) => {
+             try {
+                const res = await api.get(`/admin/customers/${id}`);
+                if (res.data?.data) {
+                    userMap[id] = res.data.data;
+                }
+             } catch (e) {
+                console.error(`Failed to fetch missing user ${id}`);
+             }
+         }));
+      }
+      
       setUsers(userMap);
       setOrders(ordersData);
     } catch (error) {
@@ -170,7 +191,7 @@ export default function AdminOrdersPage() {
                   <tr key={order.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
                     <td className="p-6">
                       <span className="font-black text-white bg-white/10 px-3 py-1.5 rounded-lg border border-white/10">
-                          #{order.id}
+                          {order.orderNumber || `#${order.id}`}
                       </span>
                     </td>
                     <td className="p-6">
