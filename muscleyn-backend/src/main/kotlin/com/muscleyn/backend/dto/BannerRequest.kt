@@ -10,6 +10,8 @@ data class BannerRequest(
 
     val imageUrl: String?,
 
+    val boxImageUrl: String?,
+
     val redirectUrl: String?,
 
     val sortOrder: Int?,

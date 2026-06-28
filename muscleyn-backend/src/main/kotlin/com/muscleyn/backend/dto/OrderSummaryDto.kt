@@ -9,6 +9,8 @@ import java.util.*
 data class OrderSummaryDto(
 
     val id: Long?,
+    
+    val orderNumber: String?,
 
     val finalAmount:
         BigDecimal,

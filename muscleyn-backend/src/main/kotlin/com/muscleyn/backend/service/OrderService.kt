@@ -28,6 +28,11 @@ interface OrderService {
 
     ): Orders
     
+    fun updatePaymentStatus(
+        orderId: Long,
+        paymentStatus: com.muscleyn.backend.enums.PaymentStatus
+    ): Orders
+    
     fun getAllOrders(): List<Orders>
     
     fun deleteOrder(orderId: Long)

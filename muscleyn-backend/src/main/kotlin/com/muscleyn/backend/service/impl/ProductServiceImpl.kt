@@ -371,7 +371,13 @@ class ProductServiceImpl(
 
         product.isBestSeller = request.isBestSeller ?: false
 
+        product.isBestSeller = request.isBestSeller ?: false
+
         product.isOffer = request.isOffer ?: false
+        
+        product.amazonUrl = request.amazonUrl
+        
+        product.flipkartUrl = request.flipkartUrl
 
         // IMAGE
         if (image != null) {
@@ -544,7 +550,13 @@ class ProductServiceImpl(
 
         product.isBestSeller = request.isBestSeller ?: false
 
+        product.isBestSeller = request.isBestSeller ?: false
+
         product.isOffer = request.isOffer ?: false
+        
+        product.amazonUrl = request.amazonUrl
+        
+        product.flipkartUrl = request.flipkartUrl
 
         product.updatedAt = java.time.LocalDateTime.now()
 

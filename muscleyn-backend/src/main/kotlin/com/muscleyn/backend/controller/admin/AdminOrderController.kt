@@ -3,6 +3,7 @@ package com.muscleyn.backend.controller.admin
 import com.muscleyn.backend.dto.ResponseDto
 import com.muscleyn.backend.entity.Orders
 import com.muscleyn.backend.enums.OrderStatus
+import com.muscleyn.backend.enums.PaymentStatus
 import com.muscleyn.backend.service.OrderService
 import org.springframework.web.bind.annotation.*
 
@@ -31,6 +32,19 @@ class AdminOrderController(
         return ResponseDto(
             status = true,
             message = "Order status updated successfully",
+            data = order
+        )
+    }
+
+    @PatchMapping("/payment-status/{orderId}")
+    fun updatePaymentStatus(
+        @PathVariable orderId: Long,
+        @RequestParam paymentStatus: PaymentStatus
+    ): ResponseDto<Orders> {
+        val order = orderService.updatePaymentStatus(orderId, paymentStatus)
+        return ResponseDto(
+            status = true,
+            message = "Payment status updated successfully",
             data = order
         )
     }

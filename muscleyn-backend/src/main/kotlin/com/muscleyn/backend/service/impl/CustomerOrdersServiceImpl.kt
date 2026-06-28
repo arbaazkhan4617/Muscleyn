@@ -33,6 +33,8 @@ class CustomerOrdersServiceImpl(
             OrderSummaryDto(
 
                 id = it.id,
+                
+                orderNumber = it.orderNumber,
 
                 finalAmount =
                     it.finalAmount,
@@ -79,6 +81,8 @@ class CustomerOrdersServiceImpl(
         return OrderDetailsDto(
 
             id = order.id,
+            
+            orderNumber = order.orderNumber,
 
             finalAmount =
                 order.finalAmount,
@@ -100,6 +104,12 @@ class CustomerOrdersServiceImpl(
 
             createdAt =
                 order.createdAt,
+                
+            upfrontAmount =
+                order.upfrontAmount,
+                
+            pendingAmount =
+                order.pendingAmount,
 
             items =
 

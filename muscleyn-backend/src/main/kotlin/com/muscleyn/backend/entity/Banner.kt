@@ -25,6 +25,11 @@ class Banner(
     )
     var imageUrl: String? = null,
 
+    @Column(
+        columnDefinition = "LONGTEXT"
+    )
+    var boxImageUrl: String? = null,
+
     var redirectUrl:
     String? = null,
 

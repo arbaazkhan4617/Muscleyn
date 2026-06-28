@@ -30,6 +30,9 @@ class BannerServiceImpl(
             imageUrl =
                 request.imageUrl,
 
+            boxImageUrl =
+                request.boxImageUrl,
+
             redirectUrl =
                 request.redirectUrl,
 
@@ -75,6 +78,9 @@ class BannerServiceImpl(
 
         banner.imageUrl =
             request.imageUrl
+
+        banner.boxImageUrl =
+            request.boxImageUrl
 
         banner.redirectUrl =
             request.redirectUrl

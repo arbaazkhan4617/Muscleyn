@@ -14,8 +14,10 @@ import com.muscleyn.backend.repository.OrdersRepository
 import com.muscleyn.backend.repository.ProductVariantRepository
 import com.muscleyn.backend.repository.CustomerOrdersRepository
 import com.muscleyn.backend.repository.CustomerOrderItemsRepository
+import com.muscleyn.backend.repository.PaymentConfigRepository
 import com.muscleyn.backend.service.OrderService
 import org.springframework.stereotype.Service
+import java.math.RoundingMode
 import java.math.BigDecimal
 
 @Service
@@ -37,7 +39,10 @@ class OrderServiceImpl(
     CustomerOrdersRepository,
 
     private val customerOrderItemsRepository:
-    CustomerOrderItemsRepository
+    CustomerOrderItemsRepository,
+
+    private val paymentConfigRepository:
+    PaymentConfigRepository
 
 ) : OrderService {
 
@@ -74,10 +79,29 @@ class OrderServiceImpl(
             variantsToUpdate.add(variant)
         }
 
+        // PAYMENT CONFIG CALCULATION
+        var upfrontAmount = totalAmount
+        var pendingAmount = BigDecimal.ZERO
+
+        val configs = paymentConfigRepository.findAll()
+        if (configs.isNotEmpty() && configs[0].isActive) {
+            val config = configs[0]
+            val value = if (request.paymentMethod == com.muscleyn.backend.enums.PaymentMethod.COD) config.codUpfrontValue else config.onlineUpfrontValue
+            if (config.paymentType == "PERCENTAGE") {
+                upfrontAmount = totalAmount.multiply(value).divide(BigDecimal(100), 4, RoundingMode.HALF_UP)
+            } else if (config.paymentType == "FLAT") {
+                upfrontAmount = if (value < totalAmount) value else totalAmount
+            }
+            pendingAmount = totalAmount.subtract(upfrontAmount)
+        }
+        
+        val generatedOrderNumber = "ORD-" + java.util.UUID.randomUUID().toString().substring(0, 8).uppercase()
+
         // DUAL-WRITE 1: Save CustomerOrders
         val customerOrder = CustomerOrders(
             userId = request.userId,
             addressId = request.addressId,
+            orderNumber = generatedOrderNumber,
             totalAmount = totalAmount,
             deliveryCharge = BigDecimal.ZERO,
             discountAmount = BigDecimal.ZERO,
@@ -85,7 +109,9 @@ class OrderServiceImpl(
             paymentMethod = request.paymentMethod,
             paymentStatus = PaymentStatus.PENDING,
             orderStatus = OrderStatus.PENDING,
-            paymentGateway = request.paymentGateway
+            paymentGateway = request.paymentGateway,
+            upfrontAmount = upfrontAmount,
+            pendingAmount = pendingAmount
         )
 
         val savedCustomerOrder = customerOrdersRepository.save(customerOrder)
@@ -119,13 +145,16 @@ class OrderServiceImpl(
 
         val order = Orders(
             id = savedCustomerOrder.id,
+            orderNumber = generatedOrderNumber,
             userId = request.userId,
             addressId = request.addressId,
             totalAmount = totalAmount,
             paymentMethod = request.paymentMethod,
             paymentStatus = PaymentStatus.PENDING,
             orderStatus = OrderStatus.PLACED,
-            paymentGateway = gateway
+            paymentGateway = gateway,
+            upfrontAmount = upfrontAmount,
+            pendingAmount = pendingAmount
         )
 
         val savedOrder = ordersRepository.save(order)
@@ -220,14 +249,51 @@ class OrderServiceImpl(
             }
         }
 
-        order.orderStatus =
-            orderStatus
+        order.orderStatus = orderStatus
+
+        if (orderStatus == OrderStatus.DELIVERED) {
+            order.paymentStatus = PaymentStatus.PAID
+            order.upfrontAmount = order.totalAmount ?: java.math.BigDecimal.ZERO
+            order.pendingAmount = java.math.BigDecimal.ZERO
+        } else if (orderStatus == OrderStatus.CANCELLED) {
+            order.paymentStatus = PaymentStatus.REFUNDED
+        }
 
         val savedOrder = ordersRepository.save(order)
 
         // DUAL-UPDATE: Update CustomerOrders
         customerOrdersRepository.findById(orderId).ifPresent { customerOrder ->
             customerOrder.orderStatus = orderStatus
+            if (orderStatus == OrderStatus.DELIVERED) {
+                customerOrder.paymentStatus = PaymentStatus.PAID
+                customerOrder.upfrontAmount = customerOrder.totalAmount ?: java.math.BigDecimal.ZERO
+                customerOrder.pendingAmount = java.math.BigDecimal.ZERO
+            } else if (orderStatus == OrderStatus.CANCELLED) {
+                customerOrder.paymentStatus = PaymentStatus.REFUNDED
+            }
+            customerOrdersRepository.save(customerOrder)
+        }
+
+        return savedOrder
+    }
+
+    override fun updatePaymentStatus(
+        orderId: Long,
+        paymentStatus: PaymentStatus
+    ): Orders {
+        val order = ordersRepository.findById(orderId).orElseThrow {
+            RuntimeException("Order not found")
+        }
+
+        order.paymentStatus = paymentStatus
+        val savedOrder = ordersRepository.save(order)
+
+        customerOrdersRepository.findById(orderId).ifPresent { customerOrder ->
+            customerOrder.paymentStatus = paymentStatus
+            if (paymentStatus == PaymentStatus.SUCCESS || paymentStatus == PaymentStatus.PAID) {
+                customerOrder.upfrontAmount = customerOrder.totalAmount
+                customerOrder.pendingAmount = BigDecimal.ZERO
+            }
             customerOrdersRepository.save(customerOrder)
         }
 

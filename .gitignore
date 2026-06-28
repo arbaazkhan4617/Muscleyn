@@ -4,3 +4,28 @@ __MACOSX/
 .DS_Store
 .idea/
 .vscode/
+
+# Build and Temp Files
+*.zip
+zihz*
+zisM*
+
+# Frontend (Next.js)
+muscleyn/muscleyn/node_modules/
+muscleyn/muscleyn/.next/
+muscleyn/muscleyn/out/
+muscleyn/muscleyn/build/
+muscleyn/muscleyn/.env*.local
+muscleyn/node_modules/
+muscleyn/.next/
+muscleyn/out/
+muscleyn/build/
+muscleyn/.env*.local
+
+# Backend (Spring Boot / Kotlin / Gradle)
+muscleyn-backend/build/
+muscleyn-backend/.gradle/
+muscleyn-backend/out/
+muscleyn-backend/bin/
+muscleyn-backend/uploads/
+muscleyn-backend/*.log

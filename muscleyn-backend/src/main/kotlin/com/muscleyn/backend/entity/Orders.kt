@@ -14,6 +14,9 @@ class Orders(
 
     @Id
     var id: Long? = null,
+    
+    @Column(unique = true)
+    var orderNumber: String? = null,
 
     var userId: Long? = null,
 
@@ -56,4 +59,8 @@ class Orders(
     var updatedAt:
     LocalDateTime? =
         LocalDateTime.now(),
+        
+    var upfrontAmount: BigDecimal = BigDecimal.ZERO,
+    
+    var pendingAmount: BigDecimal = BigDecimal.ZERO,
 )

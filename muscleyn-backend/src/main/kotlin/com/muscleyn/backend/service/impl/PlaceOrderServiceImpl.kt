@@ -13,6 +13,9 @@ import com.muscleyn.backend.service.PlaceOrderService
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.math.RoundingMode
+import com.muscleyn.backend.repository.PaymentConfigRepository
+import com.muscleyn.backend.enums.PaymentMethod
 
 @Service
 class PlaceOrderServiceImpl(
@@ -24,7 +27,10 @@ class PlaceOrderServiceImpl(
         CustomerOrderItemsRepository,
 
     private val productVariantRepository:
-        ProductVariantRepository
+        ProductVariantRepository,
+
+    private val paymentConfigRepository:
+        PaymentConfigRepository
 
 ) : PlaceOrderService {
 
@@ -87,6 +93,22 @@ class PlaceOrderServiceImpl(
         }
 
         // CREATE ORDER
+        // PAYMENT CONFIG CALCULATION
+        var upfrontAmount = totalAmount
+        var pendingAmount = BigDecimal.ZERO
+
+        val configs = paymentConfigRepository.findAll()
+        if (configs.isNotEmpty() && configs[0].isActive) {
+            val config = configs[0]
+            val value = if (request.paymentMethod == PaymentMethod.COD) config.codUpfrontValue else config.onlineUpfrontValue
+            if (config.paymentType == "PERCENTAGE") {
+                upfrontAmount = totalAmount.multiply(value).divide(BigDecimal(100), 4, RoundingMode.HALF_UP)
+            } else if (config.paymentType == "FLAT") {
+                upfrontAmount = if (value < totalAmount) value else totalAmount
+            }
+            pendingAmount = totalAmount.subtract(upfrontAmount)
+        }
+
         val order = CustomerOrders(
 
             userId =
@@ -117,7 +139,11 @@ class PlaceOrderServiceImpl(
                 OrderStatus.PENDING,
 
             paymentGateway =
-                request.paymentGateway
+                request.paymentGateway,
+                
+            upfrontAmount = upfrontAmount,
+            
+            pendingAmount = pendingAmount
         )
 
         val savedOrder =

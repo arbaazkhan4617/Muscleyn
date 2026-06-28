@@ -37,7 +37,9 @@ data class ProductResponse(
     val reportHeavyMetal: String?,
     val reportAminoAcidProfile: String?,
     val reportMicrobialSafety: String?,
-    val reportTestDetails: String?
+    val reportTestDetails: String?,
+    val amazonUrl: String?,
+    val flipkartUrl: String?
 )
 
 data class ProductImageResponse(

@@ -17,6 +17,9 @@ class CustomerOrders(
         strategy = GenerationType.IDENTITY
     )
     var id: Long? = null,
+    
+    @Column(unique = true)
+    var orderNumber: String? = null,
 
     var userId: Long? = null,
 
@@ -79,6 +82,22 @@ class CustomerOrders(
 
     var transactionId:
         String? = null,
+
+    @Column(
+        precision = 19,
+        scale = 4
+    )
+    var upfrontAmount:
+        BigDecimal =
+            BigDecimal.ZERO,
+
+    @Column(
+        precision = 19,
+        scale = 4
+    )
+    var pendingAmount:
+        BigDecimal =
+            BigDecimal.ZERO,
 
     @CreationTimestamp
     var createdAt: Date? = null

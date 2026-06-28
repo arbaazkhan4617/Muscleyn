@@ -9,6 +9,8 @@ import java.util.*
 data class OrderDetailsDto(
 
     val id: Long?,
+    
+    val orderNumber: String?,
 
     val finalAmount:
         BigDecimal,
@@ -30,6 +32,12 @@ data class OrderDetailsDto(
 
     val createdAt:
         Date?,
+
+    val upfrontAmount:
+        BigDecimal?,
+
+    val pendingAmount:
+        BigDecimal?,
 
     val items:
         List<OrderItemDto>

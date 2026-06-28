@@ -111,7 +111,13 @@ class AdminProductServiceImpl(
                         product.reportMicrobialSafety,
 
                     reportTestDetails =
-                        product.reportTestDetails
+                        product.reportTestDetails,
+
+                    amazonUrl =
+                        product.amazonUrl,
+
+                    flipkartUrl =
+                        product.flipkartUrl
                 )
             }
     }

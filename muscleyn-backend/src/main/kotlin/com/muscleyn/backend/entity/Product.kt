@@ -83,4 +83,8 @@ class Product(
 
     @Column(columnDefinition = "TEXT")
     var reportTestDetails: String? = null,
+
+    var amazonUrl: String? = null,
+    
+    var flipkartUrl: String? = null,
 )

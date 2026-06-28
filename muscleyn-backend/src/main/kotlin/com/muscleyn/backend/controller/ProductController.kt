@@ -250,7 +250,17 @@ class ProductController(
         @RequestParam(
             required = false
         )
-        isOffer: Boolean?
+        isOffer: Boolean?,
+
+        @RequestParam(
+            required = false
+        )
+        amazonUrl: String?,
+
+        @RequestParam(
+            required = false
+        )
+        flipkartUrl: String?
 
     ): ResponseDto<Product>{
 
@@ -282,7 +292,13 @@ class ProductController(
                     isBestSeller ?: false,
 
                 isOffer =
-                    isOffer ?: false
+                    isOffer ?: false,
+
+                amazonUrl =
+                    amazonUrl,
+
+                flipkartUrl =
+                    flipkartUrl
             )
 
         val response =
@@ -373,7 +389,17 @@ class ProductController(
         @RequestParam(
             required = false
         )
-        isOffer: Boolean?
+        isOffer: Boolean?,
+
+        @RequestParam(
+            required = false
+        )
+        amazonUrl: String?,
+
+        @RequestParam(
+            required = false
+        )
+        flipkartUrl: String?
 
     ): ResponseDto<Product> {
 
@@ -405,7 +431,10 @@ class ProductController(
                     isBestSeller ?: false,
 
                 isOffer =
-                    isOffer ?: false
+                    isOffer ?: false,
+
+                amazonUrl = amazonUrl,
+                flipkartUrl = flipkartUrl
             )
 
         val response =

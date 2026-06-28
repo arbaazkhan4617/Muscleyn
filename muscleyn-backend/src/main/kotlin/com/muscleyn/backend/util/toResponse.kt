@@ -90,6 +90,8 @@ fun Product.toResponse():
         reportHeavyMetal = reportHeavyMetal,
         reportAminoAcidProfile = reportAminoAcidProfile,
         reportMicrobialSafety = reportMicrobialSafety,
-        reportTestDetails = reportTestDetails
+        reportTestDetails = reportTestDetails,
+        amazonUrl = amazonUrl,
+        flipkartUrl = flipkartUrl
     )
 }
