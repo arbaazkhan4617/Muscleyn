@@ -112,12 +112,9 @@ class AdminProductServiceImpl(
 
                     reportTestDetails =
                         product.reportTestDetails,
-
-                    amazonUrl =
-                        product.amazonUrl,
-
-                    flipkartUrl =
-                        product.flipkartUrl
+                    
+                    showManufactureDetails =
+                        product.showManufactureDetails
                 )
             }
     }

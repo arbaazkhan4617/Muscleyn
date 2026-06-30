@@ -54,4 +54,8 @@ class ProductVariant(
     var updatedAt:
     LocalDateTime? =
         LocalDateTime.now(),
+
+    var amazonUrl: String? = null,
+
+    var flipkartUrl: String? = null,
 )

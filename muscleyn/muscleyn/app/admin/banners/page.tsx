@@ -20,6 +20,9 @@ export default function AdminBannersPage() {
   const [redirectUrl, setRedirectUrl] = useState("");
   const [sortOrder, setSortOrder] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [showBoxText, setShowBoxText] = useState(true);
+  const [boxTitle, setBoxTitle] = useState("");
+  const [boxSubtitle, setBoxSubtitle] = useState("");
 
   const loadData = async () => {
     try {
@@ -48,6 +51,9 @@ export default function AdminBannersPage() {
     setRedirectUrl("");
     setSortOrder("");
     setIsActive(true);
+    setShowBoxText(true);
+    setBoxTitle("");
+    setBoxSubtitle("");
   };
 
   const handleEdit = (banner: any) => {
@@ -58,6 +64,9 @@ export default function AdminBannersPage() {
     setRedirectUrl(banner.redirectUrl || "");
     setSortOrder(banner.sortOrder?.toString() || "0");
     setIsActive(banner.isActive);
+    setShowBoxText(banner.showBoxText !== false);
+    setBoxTitle(banner.boxTitle || "");
+    setBoxSubtitle(banner.boxSubtitle || "");
   };
 
   const handleDelete = async (id: number) => {
@@ -131,7 +140,10 @@ export default function AdminBannersPage() {
         boxImageUrl,
         redirectUrl,
         sortOrder: Number(sortOrder || 0),
-        isActive
+        isActive,
+        showBoxText,
+        boxTitle,
+        boxSubtitle
       };
 
       if (editingId) {
@@ -259,6 +271,28 @@ export default function AdminBannersPage() {
                     className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-5 py-3 outline-none text-white transition-colors"
                 />
             </div>
+            <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Box Title</label>
+                <input
+                    type="text"
+                    placeholder="e.g. Premium Quality"
+                    value={boxTitle}
+                    onChange={(e) => setBoxTitle(e.target.value)}
+                    className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-5 py-3 outline-none text-white transition-colors"
+                    disabled={!showBoxText}
+                />
+            </div>
+            <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Box Subtitle</label>
+                <input
+                    type="text"
+                    placeholder="e.g. Upgrade your performance"
+                    value={boxSubtitle}
+                    onChange={(e) => setBoxSubtitle(e.target.value)}
+                    className="w-full bg-black border border-white/10 focus:border-red-500 rounded-xl px-5 py-3 outline-none text-white transition-colors"
+                    disabled={!showBoxText}
+                />
+            </div>
         </div>
 
         {/* IMAGE PREVIEW */}
@@ -304,6 +338,14 @@ export default function AdminBannersPage() {
                 </div>
                 <input type="checkbox" className="hidden" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
                 <span className="text-sm font-bold text-zinc-300 group-hover:text-white transition-colors">Visible on Homepage</span>
+            </label>
+
+            <label className="flex items-center gap-3 cursor-pointer group">
+                <div className={`w-12 h-6 rounded-full transition-colors relative ${showBoxText ? 'bg-green-500/20 border-green-500/30' : 'bg-white/10 border-white/10'} border`}>
+                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full transition-transform ${showBoxText ? 'translate-x-6 bg-green-500' : 'bg-zinc-500'}`}></div>
+                </div>
+                <input type="checkbox" className="hidden" checked={showBoxText} onChange={(e) => setShowBoxText(e.target.checked)} />
+                <span className="text-sm font-bold text-zinc-300 group-hover:text-white transition-colors">Show Box Text</span>
             </label>
 
             <div className="flex gap-3">

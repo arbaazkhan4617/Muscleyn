@@ -34,6 +34,5 @@ data class ProductListDto(
     val reportAminoAcidProfile: String?,
     val reportMicrobialSafety: String?,
     val reportTestDetails: String?,
-    val amazonUrl: String?,
-    val flipkartUrl: String?
+    val showManufactureDetails: Boolean?
 )

@@ -142,7 +142,10 @@ export default function Home() {
             copy: b.subtitle || "Formulated for performance, clinically tested, and athlete approved.",
             image: getBackendImageUrl(b.imageUrl),
             boxImage: b.boxImageUrl ? getBackendImageUrl(b.boxImageUrl) : getBackendImageUrl(b.imageUrl),
-            redirectUrl: b.redirectUrl || "/shop"
+            redirectUrl: b.redirectUrl || "/shop",
+            showBoxText: b.showBoxText !== false,
+            boxTitle: b.boxTitle,
+            boxSubtitle: b.boxSubtitle
           }));
           setBanners(mappedBanners);
         }
@@ -348,26 +351,29 @@ export default function Home() {
                   transition={{ duration: 0.8, delay: 0.2 }}
                   className="hidden lg:block relative rounded-[2.5rem] border border-white/10 bg-white/5 p-4 shadow-2xl backdrop-blur-xl group"
                 >
-                  <Link href={nextSlide.redirectUrl || "/shop"} className="block">
+                  <Link href={currentSlide.redirectUrl || "/shop"} className="block">
                     <div className="relative overflow-hidden rounded-[2rem] bg-zinc-950 aspect-[4/5]">
                       <Image
-                        src={nextSlide.boxImage}
-                        alt={nextSlide.title}
+                        src={currentSlide.boxImage}
+                        alt={currentSlide.title}
                         fill
                         className="object-cover opacity-60 transition-transform duration-700 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                      <div className="absolute inset-x-0 bottom-0 p-10">
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-red-500 mb-3 flex items-center gap-2">
-                          <Clock className="w-4 h-4" /> Up Next
-                        </p>
-                        <h2 className="text-3xl font-black text-white leading-tight">
-                          {nextSlide.title}
-                        </h2>
-                        <p className="mt-3 text-zinc-400 font-medium line-clamp-2">
-                          {nextSlide.copy}
-                        </p>
-                      </div>
+                      {currentSlide.showBoxText && (
+                        <div className="absolute inset-x-0 bottom-0 p-10">
+                          {currentSlide.boxTitle && (
+                            <h2 className="text-3xl font-black text-white leading-tight">
+                              {currentSlide.boxTitle}
+                            </h2>
+                          )}
+                          {currentSlide.boxSubtitle && (
+                            <p className="mt-3 text-zinc-400 font-medium line-clamp-2">
+                              {currentSlide.boxSubtitle}
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </Link>
                 </motion.div>

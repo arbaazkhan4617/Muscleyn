@@ -375,9 +375,7 @@ class ProductServiceImpl(
 
         product.isOffer = request.isOffer ?: false
         
-        product.amazonUrl = request.amazonUrl
-        
-        product.flipkartUrl = request.flipkartUrl
+        product.showManufactureDetails = request.showManufactureDetails
 
         // IMAGE
         if (image != null) {
@@ -554,9 +552,7 @@ class ProductServiceImpl(
 
         product.isOffer = request.isOffer ?: false
         
-        product.amazonUrl = request.amazonUrl
-        
-        product.flipkartUrl = request.flipkartUrl
+        product.showManufactureDetails = request.showManufactureDetails
 
         product.updatedAt = java.time.LocalDateTime.now()
 

@@ -82,6 +82,14 @@ export default function ProductVariantsPage() {
     setActive] =
     useState(true);
 
+  const [amazonUrl,
+    setAmazonUrl] =
+    useState("");
+
+  const [flipkartUrl,
+    setFlipkartUrl] =
+    useState("");
+
   // IMAGE
   const [image,
     setImage] =
@@ -235,6 +243,14 @@ const handleEdit =
 
     setActive(
       variant.isActive
+    );
+
+    setAmazonUrl(
+      variant.amazonUrl || ""
+    );
+
+    setFlipkartUrl(
+      variant.flipkartUrl || ""
     );
 
     setPreview(
@@ -408,6 +424,16 @@ const handleEdit =
         formData.append(
           "active",
           String(active)
+        );
+
+        formData.append(
+          "amazonUrl",
+          amazonUrl
+        );
+
+        formData.append(
+          "flipkartUrl",
+          flipkartUrl
         );
 
         formData.append(
@@ -790,6 +816,51 @@ const handleEdit =
             value={flavor}
             onChange={(e) =>
               setFlavor(
+                e.target.value
+              )
+            }
+            className="
+              border
+              rounded-2xl
+              px-5
+              py-4
+              text-white
+            "
+          />
+
+        </div>
+
+        <div className="
+          grid
+          grid-cols-1
+          md:grid-cols-2
+          gap-6
+        ">
+
+          <input
+            type="text"
+            placeholder="Amazon URL"
+            value={amazonUrl}
+            onChange={(e) =>
+              setAmazonUrl(
+                e.target.value
+              )
+            }
+            className="
+              border
+              rounded-2xl
+              px-5
+              py-4
+              text-white
+            "
+          />
+
+          <input
+            type="text"
+            placeholder="Flipkart URL"
+            value={flipkartUrl}
+            onChange={(e) =>
+              setFlipkartUrl(
                 e.target.value
               )
             }

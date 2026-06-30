@@ -111,9 +111,8 @@ useState<string[]>([]);
   const [manufacturerAddress, setManufacturerAddress] = useState("");
   const [manufacturerContact, setManufacturerContact] = useState("");
   const [manufacturerFssai, setManufacturerFssai] = useState("");
-  
-  const [amazonUrl, setAmazonUrl] = useState("");
-  const [flipkartUrl, setFlipkartUrl] = useState("");
+  const [isOffer, setIsOffer] = useState(false);
+  const [showManufactureDetails, setShowManufactureDetails] = useState(true);
 
   // NUTRITION HELPERS
   const handleAddNutritionCard = () => {
@@ -442,8 +441,7 @@ useState<string[]>([]);
           formData.append("productReport", productReport);
         }
 
-        if (amazonUrl.trim()) formData.append("amazonUrl", amazonUrl.trim());
-        if (flipkartUrl.trim()) formData.append("flipkartUrl", flipkartUrl.trim());
+        formData.append("showManufactureDetails", showManufactureDetails.toString());
 
         const res = await api.post(
           "/products",
@@ -1438,31 +1436,18 @@ useState<string[]>([]);
           </div>
         </div>
 
-        {/* EXTERNAL LINKS */}
-        <div className="border border-white/10 p-6 rounded-2xl bg-zinc-950/40 space-y-4">
-          <h4 className="font-bold text-white text-lg">External Availability Links</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-2 text-xs font-bold uppercase tracking-wider text-zinc-400">Amazon URL</label>
-              <input
-                type="text"
-                value={amazonUrl}
-                onChange={(e) => setAmazonUrl(e.target.value)}
-                placeholder="https://www.amazon.in/dp/..."
-                className="w-full bg-black border border-white/10 focus:border-red-500 rounded-2xl px-5 py-3 outline-none text-white text-sm transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-xs font-bold uppercase tracking-wider text-zinc-400">Flipkart URL</label>
-              <input
-                type="text"
-                value={flipkartUrl}
-                onChange={(e) => setFlipkartUrl(e.target.value)}
-                placeholder="https://www.flipkart.com/..."
-                className="w-full bg-black border border-white/10 focus:border-red-500 rounded-2xl px-5 py-3 outline-none text-white text-sm transition-colors"
-              />
-            </div>
-          </div>
+        {/* SHOW MANUFACTURE DETAILS */}
+        <div className="flex items-center gap-4">
+          <input
+            type="checkbox"
+            checked={showManufactureDetails}
+            onChange={(e) => setShowManufactureDetails(e.target.checked)}
+            id="showManufactureDetails"
+            className="w-5 h-5 accent-red-600 rounded cursor-pointer"
+          />
+          <label htmlFor="showManufactureDetails" className="text-white text-sm font-bold tracking-wide cursor-pointer">
+            Show Manufacture Details on Product Page
+          </label>
         </div>
 
         {/* ACTIVE */}

@@ -4,7 +4,7 @@ const api = axios.create({
 
   baseURL:
     process.env.NEXT_PUBLIC_API_BASE_URL ||
-    "http://localhost:8081/api",
+    "https://prabhapharma.com/api",
 
   headers: {
     "Content-Type":
@@ -73,7 +73,7 @@ api.interceptors.response.use(
       const token = localStorage.getItem("token");
       const adminToken = localStorage.getItem("adminToken");
       const authHeader = error.config?.headers?.Authorization;
-      
+
       let tokenRemoved = false;
       if (authHeader && authHeader.startsWith("Bearer ")) {
         const failedToken = authHeader.substring(7);

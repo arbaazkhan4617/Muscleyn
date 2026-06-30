@@ -264,6 +264,9 @@ class ProductVariantServiceImpl(
         variant.isActive =
             request.active
 
+        variant.amazonUrl = request.amazonUrl
+        variant.flipkartUrl = request.flipkartUrl
+
         variant.product =
             product
 
@@ -396,6 +399,9 @@ class ProductVariantServiceImpl(
 
         variant.isActive =
             request.active
+
+        variant.amazonUrl = request.amazonUrl
+        variant.flipkartUrl = request.flipkartUrl
 
         variant.product =
             product

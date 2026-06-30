@@ -27,5 +27,7 @@ data class ProductVariantResponse(
     val weight: String?,
 
     val flavor: String?,
-    val isActive: Boolean?
+    val isActive: Boolean?,
+    val amazonUrl: String?,
+    val flipkartUrl: String?
 )

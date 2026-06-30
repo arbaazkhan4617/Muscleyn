@@ -511,18 +511,19 @@ export default function ProductDetailsPage({
                       <motion.div layoutId="left-tab-indicator" className="absolute bottom-[-17px] left-0 right-0 h-1 bg-red-500 rounded-full" />
                     )}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setLeftActiveTab("manufacturer")}
-                    className={`text-sm font-black uppercase tracking-widest pb-4 relative transition-colors ${
-                      leftActiveTab === "manufacturer" ? "text-white" : "text-zinc-500 hover:text-zinc-300"
-                    }`}
-                  >
-                    Manufacturer
-                    {leftActiveTab === "manufacturer" && (
-                      <motion.div layoutId="left-tab-indicator" className="absolute bottom-[-17px] left-0 right-0 h-1 bg-red-500 rounded-full" />
-                    )}
-                  </button>
+                  {(product as any).showManufactureDetails !== false && (
+                    <button
+                      onClick={() => setLeftActiveTab("manufacturer")}
+                      className={`pb-4 relative text-sm font-black uppercase tracking-widest transition-colors ${
+                        leftActiveTab === "manufacturer" ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                      }`}
+                    >
+                      Manufacturer
+                      {leftActiveTab === "manufacturer" && (
+                        <motion.div layoutId="leftTabIndicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600" />
+                      )}
+                    </button>
+                  )}
                 </div>
 
                 <AnimatePresence mode="wait">
@@ -963,15 +964,15 @@ export default function ProductDetailsPage({
                 )}
                 
                 {/* EXTERNAL LINKS */}
-                {(product as any).amazonUrl || (product as any).flipkartUrl ? (
+                {currentVariant && (currentVariant.amazonUrl || currentVariant.flipkartUrl) ? (
                   <div className="mt-4 flex flex-col sm:flex-row gap-3">
-                    {(product as any).amazonUrl && (
-                      <a href={(product as any).amazonUrl} target="_blank" rel="noopener noreferrer" className="flex-1 min-h-[50px] bg-orange-500 hover:bg-orange-600 text-white rounded-full flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+                    {currentVariant.amazonUrl && (
+                      <a href={currentVariant.amazonUrl} target="_blank" rel="noopener noreferrer" className="flex-1 min-h-[50px] bg-orange-500 hover:bg-orange-600 text-white rounded-full flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(249,115,22,0.2)]">
                         Amazon
                       </a>
                     )}
-                    {(product as any).flipkartUrl && (
-                      <a href={(product as any).flipkartUrl} target="_blank" rel="noopener noreferrer" className="flex-1 min-h-[50px] bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(37,99,235,0.2)]">
+                    {currentVariant.flipkartUrl && (
+                      <a href={currentVariant.flipkartUrl} target="_blank" rel="noopener noreferrer" className="flex-1 min-h-[50px] bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(37,99,235,0.2)]">
                         Flipkart
                       </a>
                     )}

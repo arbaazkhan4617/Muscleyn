@@ -44,4 +44,10 @@ class Banner(
     var updatedAt:
     LocalDateTime? =
         LocalDateTime.now(),
+
+    var showBoxText: Boolean? = true,
+
+    var boxTitle: String? = null,
+
+    var boxSubtitle: String? = null,
 )

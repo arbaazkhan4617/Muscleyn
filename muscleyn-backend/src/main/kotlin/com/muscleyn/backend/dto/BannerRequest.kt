@@ -17,4 +17,10 @@ data class BannerRequest(
     val sortOrder: Int?,
 
     val isActive: Boolean?,
+
+    val showBoxText: Boolean?,
+
+    val boxTitle: String?,
+
+    val boxSubtitle: String?
 )

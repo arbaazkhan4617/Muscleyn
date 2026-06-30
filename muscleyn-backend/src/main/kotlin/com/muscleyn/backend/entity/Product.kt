@@ -17,7 +17,7 @@ class Product(
     @Column(nullable = false)
     var name: String? = null,
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     var description: String? = null,
 
     @ManyToOne
@@ -84,7 +84,5 @@ class Product(
     @Column(columnDefinition = "TEXT")
     var reportTestDetails: String? = null,
 
-    var amazonUrl: String? = null,
-    
-    var flipkartUrl: String? = null,
+    var showManufactureDetails: Boolean? = true,
 )

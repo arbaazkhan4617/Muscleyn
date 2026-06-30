@@ -27,7 +27,5 @@ data class CreateProductRequest(
 
     val productReportUrl: String? = null,
 
-    val amazonUrl: String? = null,
-
-    val flipkartUrl: String? = null
+    val showManufactureDetails: Boolean? = true
 )

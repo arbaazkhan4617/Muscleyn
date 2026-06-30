@@ -38,5 +38,9 @@ data class CreateProductVariantRequest(
         Boolean,
 
     val productId:
-        Long
+        Long,
+        
+    val amazonUrl: String? = null,
+
+    val flipkartUrl: String? = null
 )

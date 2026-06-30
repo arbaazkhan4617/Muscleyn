@@ -37,7 +37,9 @@ fun ProductVariant.toResponse():
 
         flavor = flavor,
 
-        isActive=isActive
+        isActive=isActive,
+        amazonUrl = amazonUrl,
+        flipkartUrl = flipkartUrl
     )
 }
 
@@ -91,7 +93,6 @@ fun Product.toResponse():
         reportAminoAcidProfile = reportAminoAcidProfile,
         reportMicrobialSafety = reportMicrobialSafety,
         reportTestDetails = reportTestDetails,
-        amazonUrl = amazonUrl,
-        flipkartUrl = flipkartUrl
+        showManufactureDetails = showManufactureDetails
     )
 }

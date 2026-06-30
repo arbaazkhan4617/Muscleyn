@@ -40,7 +40,13 @@ class BannerServiceImpl(
                 request.sortOrder,
 
             isActive =
-                request.isActive
+                request.isActive,
+
+            showBoxText = request.showBoxText,
+
+            boxTitle = request.boxTitle,
+
+            boxSubtitle = request.boxSubtitle
         )
 
         return bannerRepository
@@ -90,6 +96,12 @@ class BannerServiceImpl(
 
         banner.isActive =
             request.isActive
+
+        banner.showBoxText = request.showBoxText
+
+        banner.boxTitle = request.boxTitle
+
+        banner.boxSubtitle = request.boxSubtitle
 
         banner.updatedAt =
             LocalDateTime.now()
